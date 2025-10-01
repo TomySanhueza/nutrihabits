@@ -6,10 +6,14 @@ class User < ApplicationRecord
 
   enum role: { patient: "patient", nutritionist: "nutritionist" }
 
+  scope :patients, -> { where(role: "patient") }
+  scope :nutritionists, -> { where(role: "nutritionist") }
+
   has_one_attached :user_photo
 
   # Perfil (datos básicos, objetivos, condiciones, etc.)
   has_one :profile, dependent: :destroy
+  accepts_nested_attributes_for :profile
 
   # Si es paciente
   has_many :nutrition_plans, foreign_key: "user_id", dependent: :destroy
