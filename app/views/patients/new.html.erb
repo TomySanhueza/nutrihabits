@@ -1,5 +1,8 @@
-<div class="patient-form">
-  <h1>Nuevo Paciente</h1>
-
-  <%= render "form" %>
-</div>
+<%= simple_form_for @patient do |f| %>
+  <%= f.input :first_name %>
+  <%= f.input :last_name %>
+  <%= f.input :email %>
+  <%= f.input :password %>
+  <%= f.input :phone %>
+  <%= f.submit %>
+<% end %>

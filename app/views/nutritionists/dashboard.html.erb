@@ -1,0 +1,10 @@
+<h1>Nutritionists#dashboard</h1>
+<p>Find me in app/views/nutritionists/dashboard.html.erb</p>
+<% @patients.each do |patient| %>
+  <div>
+    <h2><%= patient.first_name %> <%= patient.last_name %></h2>
+    <p>Email: <%= patient.email %></p>
+    <p>Phone: <%= patient.phone %></p>
+  </div>
+<% end %>
+<%= link_to 'Add New Patient', new_patient_path %>

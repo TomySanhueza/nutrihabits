@@ -3,4 +3,5 @@ class Patient < ApplicationRecord
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, 
          :recoverable, :rememberable, :validatable
+  belongs_to :nutritionist
 end
