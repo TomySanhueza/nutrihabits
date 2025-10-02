@@ -54,34 +54,51 @@ class NutritionPlansController < ApplicationController
     end
   end
 
-  # Acción AJAX para generar sugerencia con IA
-  # No persiste nada, solo devuelve JSON para prellenar el formulario
+  # Generar sugerencia con IA
+  # Soporta dos modos:
+  # 1. AJAX (JSON) - devuelve JSON para prellenar dinámicamente
+  # 2. Server-side - redirige a new con valores prellenados
   def generate_with_ai
     service = NutritionPlanGeneratorService.new(@patient)
     result = service.generate
 
     if result[:error]
-      render json: { error: result[:error] }, status: :unprocessable_entity
+      respond_to do |format|
+        format.json { render json: { error: result[:error] }, status: :unprocessable_entity }
+        format.html do
+          redirect_to new_patient_nutrition_plan_path(@patient),
+                      alert: "Error al generar sugerencia: #{result[:error]}"
+        end
+      end
     else
-      # Devolver la sugerencia como JSON para que el front prellene el form
-      render json: result, status: :ok
+      respond_to do |format|
+        format.json { render json: result, status: :ok }
+        format.html do
+          # Prellenar @nutrition_plan con los valores sugeridos
+          @nutrition_plan = @patient.nutrition_plans.build(
+            objective: result[:objective],
+            calories: result[:calories],
+            protein: result[:protein],
+            fat: result[:fat],
+            carbs: result[:carbs],
+            meal_distribution: result[:meal_distribution],
+            notes: result[:notes]
+          )
+          flash.now[:notice] = "Sugerencia generada con IA. Revisa y ajusta antes de guardar."
+          render :new
+        end
+      end
     end
   end
 
   private
 
   def set_patient
-    @patient = User.patients.find_by(id: params[:patient_id])
-    unless @patient
-      redirect_to patients_path, alert: "Paciente no encontrado."
-    end
+    @patient = User.patients.find(params[:patient_id])
   end
 
   def set_nutrition_plan
-    @nutrition_plan = @patient.nutrition_plans.find_by(id: params[:id])
-    unless @nutrition_plan
-      redirect_to patient_nutrition_plans_path(@patient), alert: "Plan nutricional no encontrado."
-    end
+    @nutrition_plan = @patient.nutrition_plans.find(params[:id])
   end
 
   def ensure_nutritionist
@@ -97,9 +114,9 @@ class NutritionPlansController < ApplicationController
       :protein,
       :fat,
       :carbs,
-      :meal_distribution,
       :notes,
-      :status
+      :status,
+      meal_distribution: {}
     )
   end
 end

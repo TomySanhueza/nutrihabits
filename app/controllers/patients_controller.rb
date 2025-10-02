@@ -68,8 +68,7 @@ class PatientsController < ApplicationController
   private
 
   def set_patient
-    @patient = User.patients.find_by(id: params[:id])
-    redirect_to patients_path, alert: "Paciente no encontrado." unless @patient
+    @patient = User.patients.find(params[:id])
   end
 
   def ensure_nutritionist
