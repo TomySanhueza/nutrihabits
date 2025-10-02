@@ -1,2 +1,98 @@
-<h1>NutritionPlans#show</h1>
-<p>Find me in app/views/nutrition_plans/show.html.erb</p>
+<div class="nutrition-plan-show">
+  <div class="header">
+    <h1>Plan Nutricional - <%= @patient.first_name %> <%= @patient.last_name %></h1>
+    <div class="actions">
+      <%= link_to "Editar", edit_patient_nutrition_plan_path(@patient, @nutrition_plan) %>
+      <%= link_to "Volver", patient_nutrition_plans_path(@patient) %>
+    </div>
+  </div>
+
+  <section class="plan-info">
+    <h2>Información General</h2>
+    <table>
+      <tr>
+        <th>Objetivo:</th>
+        <td><%= @nutrition_plan.objective %></td>
+      </tr>
+      <tr>
+        <th>Estado:</th>
+        <td><%= @nutrition_plan.status || "Activo" %></td>
+      </tr>
+      <tr>
+        <th>Nutricionista:</th>
+        <td><%= @nutrition_plan.nutritionist&.first_name %> <%= @nutrition_plan.nutritionist&.last_name %></td>
+      </tr>
+      <tr>
+        <th>Fecha de creación:</th>
+        <td><%= @nutrition_plan.created_at.strftime("%d/%m/%Y %H:%M") %></td>
+      </tr>
+    </table>
+  </section>
+
+  <section class="macros">
+    <h2>Macronutrientes Diarios</h2>
+    <table>
+      <tr>
+        <th>Calorías:</th>
+        <td><%= @nutrition_plan.calories ? "#{@nutrition_plan.calories.round} kcal" : "-" %></td>
+      </tr>
+      <tr>
+        <th>Proteína:</th>
+        <td><%= @nutrition_plan.protein ? "#{@nutrition_plan.protein.round}g" : "-" %></td>
+      </tr>
+      <tr>
+        <th>Grasas:</th>
+        <td><%= @nutrition_plan.fat ? "#{@nutrition_plan.fat.round}g" : "-" %></td>
+      </tr>
+      <tr>
+        <th>Carbohidratos:</th>
+        <td><%= @nutrition_plan.carbs ? "#{@nutrition_plan.carbs.round}g" : "-" %></td>
+      </tr>
+    </table>
+  </section>
+
+  <% if @nutrition_plan.meal_distribution.present? %>
+    <section class="meal-distribution">
+      <h2>Distribución de Comidas</h2>
+
+      <% if @nutrition_plan.meal_distribution["breakfast"] %>
+        <div class="meal">
+          <h3>Desayuno</h3>
+          <p><strong>Calorías:</strong> <%= @nutrition_plan.meal_distribution["breakfast"]["calories"] %> kcal</p>
+          <p><%= @nutrition_plan.meal_distribution["breakfast"]["description"] %></p>
+        </div>
+      <% end %>
+
+      <% if @nutrition_plan.meal_distribution["lunch"] %>
+        <div class="meal">
+          <h3>Almuerzo</h3>
+          <p><strong>Calorías:</strong> <%= @nutrition_plan.meal_distribution["lunch"]["calories"] %> kcal</p>
+          <p><%= @nutrition_plan.meal_distribution["lunch"]["description"] %></p>
+        </div>
+      <% end %>
+
+      <% if @nutrition_plan.meal_distribution["dinner"] %>
+        <div class="meal">
+          <h3>Cena</h3>
+          <p><strong>Calorías:</strong> <%= @nutrition_plan.meal_distribution["dinner"]["calories"] %> kcal</p>
+          <p><%= @nutrition_plan.meal_distribution["dinner"]["description"] %></p>
+        </div>
+      <% end %>
+
+      <% if @nutrition_plan.meal_distribution["snacks"] %>
+        <div class="meal">
+          <h3>Snacks</h3>
+          <p><strong>Calorías:</strong> <%= @nutrition_plan.meal_distribution["snacks"]["calories"] %> kcal</p>
+          <p><%= @nutrition_plan.meal_distribution["snacks"]["description"] %></p>
+        </div>
+      <% end %>
+    </section>
+  <% end %>
+
+  <% if @nutrition_plan.notes.present? %>
+    <section class="notes">
+      <h2>Notas y Recomendaciones</h2>
+      <p><%= simple_format(@nutrition_plan.notes) %></p>
+    </section>
+  <% end %>
+</div>
