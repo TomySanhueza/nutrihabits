@@ -75,3 +75,6 @@ group :test do
 end
 
 gem "cloudinary", "~> 2.4"
+
+# OpenAI API for Ruby
+gem "ruby-openai"

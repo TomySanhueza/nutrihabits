@@ -1,2 +1,47 @@
-<h1>NutritionPlans#index</h1>
-<p>Find me in app/views/nutrition_plans/index.html.erb</p>
+<div class="nutrition-plans-index">
+  <div class="header">
+    <h1>Planes Nutricionales - <%= @patient.first_name %> <%= @patient.last_name %></h1>
+    <%= link_to "Volver al paciente", patient_path(@patient) %>
+    <%= link_to "Nuevo Plan", new_patient_nutrition_plan_path(@patient), class: "btn-new" %>
+  </div>
+
+  <% if @nutrition_plans.any? %>
+    <table class="plans-table">
+      <thead>
+        <tr>
+          <th>Objetivo</th>
+          <th>Calorías</th>
+          <th>Proteína</th>
+          <th>Grasas</th>
+          <th>Carbohidratos</th>
+          <th>Estado</th>
+          <th>Creado</th>
+          <th>Nutricionista</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @nutrition_plans.each do |plan| %>
+          <tr>
+            <td><%= plan.objective %></td>
+            <td><%= plan.calories ? "#{plan.calories.round} kcal" : "-" %></td>
+            <td><%= plan.protein ? "#{plan.protein.round}g" : "-" %></td>
+            <td><%= plan.fat ? "#{plan.fat.round}g" : "-" %></td>
+            <td><%= plan.carbs ? "#{plan.carbs.round}g" : "-" %></td>
+            <td><%= plan.status || "Activo" %></td>
+            <td><%= plan.created_at.strftime("%d/%m/%Y") %></td>
+            <td><%= plan.nutritionist&.first_name %> <%= plan.nutritionist&.last_name %></td>
+            <td class="actions">
+              <%= link_to "Ver", patient_nutrition_plan_path(@patient, plan) %>
+              <%= link_to "Editar", edit_patient_nutrition_plan_path(@patient, plan) %>
+              <%= link_to "Eliminar", patient_nutrition_plan_path(@patient, plan),
+                    data: { turbo_method: :delete, turbo_confirm: "¿Seguro de eliminar este plan?" } %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p class="no-plans">No hay planes nutricionales creados. <%= link_to "Crear el primero", new_patient_nutrition_plan_path(@patient) %>.</p>
+  <% end %>
+</div>
