@@ -5,7 +5,11 @@ Rails.application.routes.draw do
   # Rutas de pacientes (solo nutricionistas)
   resources :patients do
     # Recursos anidados del paciente
-    resources :nutrition_plans
+    resources :nutrition_plans do
+      collection do
+        post :generate_with_ai
+      end
+    end
     resources :meal_logs, only: [:index, :new, :create, :destroy]
     resources :daily_check_ins, only: [:index, :new, :create]
   end
