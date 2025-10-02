@@ -40,6 +40,3 @@
 *.swp
 .DS_Store
 
-# Ignore local dev DB (SQLite)
-db/*.sqlite3
-db/*.sqlite3-journal

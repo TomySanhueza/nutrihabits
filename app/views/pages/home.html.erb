@@ -12,11 +12,11 @@
           personalizado de tu alimentación con inteligencia artificial.
         </p>
         <div class="hero-buttons">
-          <% if user_signed_in? %>
+          <% if nutritionist_signed_in? %>
             <%= link_to "Mi Dashboard", "#", class: "btn btn-primary btn-lg me-3" %>
           <% else %>
-            <%= link_to "Comenzar gratis", new_user_registration_path, class: "btn btn-primary btn-lg me-3" %>
-            <%= link_to "Iniciar sesión", new_user_session_path, class: "btn btn-outline-primary btn-lg" %>
+            <%= link_to "Comenzar gratis", new_nutritionist_registration_path, class: "btn btn-primary btn-lg me-3" %>
+            <%= link_to "Iniciar sesión", new_nutritionist_session_path, class: "btn btn-outline-primary btn-lg" %>
           <% end %>
         </div>
       </div>

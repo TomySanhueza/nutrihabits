@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
-  devise_for :users
+  devise_for :patients
+  devise_for :nutritionists
   root to: "pages#home"
 
   # Rutas de pacientes (solo nutricionistas)
