@@ -1,2 +1,64 @@
-<h1>Pages#home</h1>
-<p>Find me in app/views/pages/home.html.erb</p>
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <h1 class="hero-title">
+          Transforma tu nutrición
+          <br>con ayuda profesional
+        </h1>
+        <p class="hero-subtitle">
+          Conecta con nutricionistas expertos y lleva un seguimiento 
+          personalizado de tu alimentación con inteligencia artificial.
+        </p>
+        <div class="hero-buttons">
+          <% if user_signed_in? %>
+            <%= link_to "Mi Dashboard", "#", class: "btn btn-primary btn-lg me-3" %>
+          <% else %>
+            <%= link_to "Comenzar gratis", new_user_registration_path, class: "btn btn-primary btn-lg me-3" %>
+            <%= link_to "Iniciar sesión", new_user_session_path, class: "btn btn-outline-primary btn-lg" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer-section py-4 bg-dark text-light">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-6">
+        <h5 class="footer-brand mb-3">NutriHabits</h5>
+        <p class="footer-description">
+          La plataforma que conecta nutricionistas con pacientes, 
+          potenciada por inteligencia artificial.
+        </p>
+      </div>
+      <div class="col-lg-3">
+        <h6 class="footer-title">Enlaces</h6>
+        <ul class="footer-links">
+          <li><a href="#" class="footer-link">Acerca de</a></li>
+          <li><a href="#" class="footer-link">Contacto</a></li>
+          <li><a href="#" class="footer-link">Privacidad</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-3">
+        <h6 class="footer-title">Síguenos</h6>
+        <div class="footer-social">
+          <a href="#" class="social-link me-3"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-link me-3"><i class="fab fa-facebook"></i></a>
+          <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+    </div>
+    <hr class="my-4">
+    <div class="row">
+      <div class="col-12 text-center">
+        <p class="footer-copyright mb-0">
+          &copy; 2025 NutriHabits. Todos los derechos reservados.
+        </p>
+      </div>
+    </div>
+  </div>
+</footer>

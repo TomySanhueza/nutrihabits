@@ -1,1 +1,365 @@
 // Specific CSS for your home-page
+
+// Hero Section
+.hero-section {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)), 
+                    url('https://i.postimg.cc/J7bxywcv/fondooo-1.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  padding: 120px 0 80px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  
+  // Content positioning
+  .container {
+    position: relative;
+    z-index: 3;
+  }
+}
+
+
+
+.hero-title {
+  font-family: $hero-font;
+  font-size: 4rem;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 2rem;
+  color: #333333;
+  
+  @media (max-width: 768px) {
+    font-size: 2.8rem;
+  }
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: #6c757d;
+  margin-bottom: 3rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-buttons {
+  margin-bottom: 3rem;
+  
+  .btn-primary {
+    background: #8B5CF6;
+    border-color: #8B5CF6;
+    color: #ffffff;
+    font-family: $headers-font;
+    font-weight: 600;
+    padding: 16px 40px;
+    border-radius: 30px;
+    border: none;
+    font-size: 16px;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+    
+    &:hover {
+      background: #7C3AED;
+      border-color: #7C3AED;
+      color: #ffffff;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    }
+    
+    &:active {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 10px rgba(139, 92, 246, 0.3);
+    }
+  }
+  
+  .btn-outline-primary {
+    background: transparent;
+    border: 2px solid #8B5CF6;
+    color: #8B5CF6;
+    padding: 14px 38px;
+    border-radius: 30px;
+    font-family: $headers-font;
+    font-weight: 600;
+    font-size: 16px;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: #8B5CF6;
+      border-color: #8B5CF6;
+      color: #ffffff;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);
+    }
+    
+    &:active {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 10px rgba(139, 92, 246, 0.2);
+    }
+  }
+}
+
+
+
+// Features Section
+.features-section {
+  padding: 100px 0;
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #212529;
+}
+
+.section-subtitle {
+  font-size: 1.1rem;
+  color: #6c757d;
+  line-height: 1.6;
+}
+
+.feature-card {
+  padding: 2rem;
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+  height: 100%;
+  
+  &:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.feature-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #0d6efd, #6610f2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  
+  i {
+    font-size: 2rem;
+    color: white;
+  }
+}
+
+.feature-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #212529;
+}
+
+.feature-description {
+  color: #6c757d;
+  line-height: 1.6;
+}
+
+// Benefits Section
+.benefits-section {
+  padding: 100px 0;
+}
+
+.benefit-item {
+  margin-bottom: 1.5rem;
+  
+  .benefit-icon {
+    width: 24px;
+    
+    i {
+      font-size: 1.5rem;
+    }
+  }
+}
+
+// Testimonials Section
+.testimonials-section {
+  padding: 100px 0;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.testimonial-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  height: 100%;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.testimonial-content {
+  margin-bottom: 1.5rem;
+  
+  i {
+    font-size: 2rem;
+    opacity: 0.3;
+  }
+}
+
+.testimonial-text {
+  font-style: italic;
+  line-height: 1.6;
+  color: #495057;
+  margin-bottom: 0;
+}
+
+.author-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.author-name {
+  font-weight: 600;
+  color: #212529;
+}
+
+.author-role {
+  font-size: 0.85rem;
+}
+
+
+
+// Footer
+.footer-section {
+  padding: 60px 0 30px;
+}
+
+.footer-brand {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.footer-description {
+  color: #adb5bd;
+  line-height: 1.6;
+}
+
+.footer-title {
+  color: #ffffff;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  
+  li {
+    margin-bottom: 0.5rem;
+  }
+}
+
+.footer-link {
+  color: #adb5bd;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  
+  &:hover {
+    color: #ffffff;
+  }
+}
+
+.footer-social {
+  .social-link {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    background: #495057;
+    color: #ffffff;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 40px;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: #0d6efd;
+      transform: translateY(-3px);
+    }
+  }
+}
+
+.footer-copyright {
+  color: #adb5bd;
+  font-size: 0.9rem;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 80px 0 60px;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+  
+  .feature-card,
+  .testimonial-card {
+    margin-bottom: 2rem;
+  }
+}
+
+// Animations
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-title,
+.hero-subtitle,
+.section-title {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+// Scroll animations
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+.feature-card,
+.testimonial-card,
+.benefit-item {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s ease-out;
+}
+
+// Navbar scroll effect
+.navbar-lewagon {
+  transition: all 0.3s ease;
+}
