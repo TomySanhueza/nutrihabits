@@ -1,0 +1,104 @@
+/* Container principal del perfil */
+.profile-card {
+  max-width: 520px;
+  margin: 3rem auto;
+  padding: 2.5rem 2rem;
+  background-color: #f9f9f9;  /* fondo muy suave */
+  border-radius: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); /* sombra ligera y elegante */
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #333333;
+  transition: transform 0.2s;
+}
+
+.profile-card:hover {
+  transform: translateY(-3px);
+}
+
+/* Título (email o nombre) */
+.profile-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #111111;
+}
+
+/* Contenedor de los detalles */
+.profile-details {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+/* Cada campo del perfil */
+.profile-field {
+  background-color: #ffffff; /* fondo blanco para los datos */
+  padding: 0.8rem 1rem;
+  border-radius: 0.6rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #555555;
+  transition: background-color 0.2s;
+}
+
+.profile-field:hover {
+  background-color: #f0f0f0;
+}
+
+/* Contenedor de acciones (botones) */
+.profile-actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+/* Botones de acción */
+.profile-btn {
+  display: inline-block;
+  padding: 0.6rem 1.5rem;
+  background-color: #2563eb; /* azul moderno */
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 0.6rem;
+  text-decoration: none;
+  font-size: 0.95rem;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  transition: all 0.2s;
+}
+
+.profile-btn:hover {
+  background-color: #1d4ed8; /* azul más intenso al hover */
+  transform: translateY(-2px);
+  box-shadow: 0 5px 12px rgba(0,0,0,0.15);
+}
+
+/* Inputs y textareas en edit */
+.form-control {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid #d1d5db; /* gris suave */
+  background-color: #ffffff;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
+  outline: none;
+}
+
+/* Labels */
+.form-label {
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  display: block;
+  color: #374151;
+  font-size: 0.9rem;
+}
