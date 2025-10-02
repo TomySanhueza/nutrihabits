@@ -1,3 +1,4 @@
+/*
 .navbar-lewagon {
   justify-content: space-between;
   background: white;
@@ -37,3 +38,97 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   border-radius: 0.5rem;
 }
+*/
+.navbar-lewagon {
+   /* Fondo tipo vidrio flotante pero más opaco */
+  background: rgba(255, 255, 255, 0.85); /* Blanco con opacidad */
+  backdrop-filter: blur(12px);           /* Desenfoque de fondo */
+  -webkit-backdrop-filter: blur(12px);   /* Compatibilidad Safari */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08); /* Borde sutil */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);   /* Sombra ligera para flotante */
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  padding: 0.8rem 1.2rem;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+
+  .navbar-collapse {
+    flex-grow: 0;
+  }
+
+  .navbar-brand {
+    .navbar-logo {
+      height: 40px;
+      width: auto;
+      object-fit: contain;
+      transition: transform 0.2s ease;
+
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  .nav-link {
+    color: #333;
+    margin-right: 1rem;
+    font-weight: 500;
+    transition: color 0.2s;
+
+    &.active {
+      color: #000;
+      border-bottom: 2px solid #000;
+    }
+
+    &:hover {
+      color: #000;
+    }
+  }
+
+  .btn {
+    border-radius: 12px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+
+  .navbar-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  /* 🔽 Estilo para dropdowns (Log in as / Sign Up) */
+  .dropdown-menu {
+    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 0.4rem 0;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    background: rgba(255, 255, 255, 0.9); /* Más opaco */
+    box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease-in-out;
+
+    .dropdown-item {
+      font-weight: 500;
+      padding: 0.6rem 1rem;
+      color: #333;
+      transition: background 0.2s, color 0.2s;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.05);
+        color: #000;
+      }
+    }
+
+    .dropdown-divider {
+      margin: 0.4rem 0;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+

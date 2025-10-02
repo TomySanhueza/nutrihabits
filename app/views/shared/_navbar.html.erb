@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-sm navbar-light navbar-lewagon">
+<!--<nav class="navbar navbar-expand-sm navbar-light navbar-lewagon">
   <div class="container-fluid">
     <%= link_to root_path, class: "navbar-brand" do %>
       <%= image_tag "https://i.postimg.cc/9FXdszwG/nutrihabits-logo.png", class: "navbar-logo", alt: "NutriHabits" %>
@@ -38,4 +38,101 @@
       </ul>
     </div>
   </div>
+</nav>-->
+
+<nav class="navbar navbar-lewagon navbar-expand-lg">
+  <div class="container-fluid">
+
+    <!-- Brand -->
+    <%= link_to root_path, class: "navbar-brand d-flex align-items-center" do %>
+      <%= image_tag "https://i.postimg.cc/9FXdszwG/nutrihabits-logo.png",
+          alt: "Nutrihabits Logo",
+          class: "navbar-logo" %>
+    <% end %>
+
+    <!-- Mobile toggler -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+      aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Navbar links -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+      <ul class="navbar-nav me-auto">
+        <% if user_signed_in? %>
+          <li class="nav-item">
+            <%= link_to "Chats", chats_path, class: "nav-link #{'active' if current_page?(chats_path)}" %>
+          </li>
+          <li class="nav-item">
+            <%= link_to "Patients", patients_path, class: "nav-link #{'active' if current_page?(patients_path)}" %>
+          </li>
+        <% end %>
+      </ul>
+
+      <!-- Right side -->
+      <ul class="navbar-nav ms-auto">
+        <% if user_signed_in? %>
+
+          <!-- Dropdown con avatar -->
+          <li class="nav-item dropdown">
+            <a href="#" class="nav-link d-flex align-items-center" id="navbarDropdown"
+               role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <% if current_user.user_photo.attached? %>
+                <%= image_tag current_user.user_photo.variant(resize_to_fill: [40, 40]).processed,
+                              class: "navbar-avatar me-2",
+                              alt: "Profile photo" %>
+              <% else %>
+                <%= image_tag "https://kitt.lewagon.com/placeholder/users/ssaunier",
+                              class: "navbar-avatar me-2",
+                              alt: "Default avatar" %>
+              <% end %>
+              <span><%= current_user.email %></span>
+            </a>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="navbarDropdown">
+              <li><%= link_to "Profile", profile_path, class: "dropdown-item" %></li>
+              <li><%= link_to "Edit Profile", edit_profile_path, class: "dropdown-item" %></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <%= link_to "Logout", destroy_user_session_path,
+                  data: { turbo_method: :delete },
+                  class: "dropdown-item text-danger" %>
+              </li>
+            </ul>
+
+          </li>
+
+        <% else %>
+
+          <!-- Login -->
+          <li class="nav-item dropdown">
+            <a class="btn btn-outline-dark dropdown-toggle me-2 px-3 fw-semibold" href="#" id="loginDropdown"
+               role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Log in as
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="loginDropdown">
+              <li><%= link_to "Patient", new_user_session_path(role: :patient), class: "dropdown-item" %></li>
+              <li><%= link_to "Nutritionist", new_user_session_path(role: :nutritionist), class: "dropdown-item" %></li>
+            </ul>
+          </li>
+
+          <!-- Sign up -->
+          <li class="nav-item dropdown">
+            <a class="btn btn-dark dropdown-toggle px-3 fw-semibold" href="#" id="signupDropdown"
+               role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Sign Up
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="signupDropdown">
+              <li><%= link_to "Patient", new_user_registration_path(role: :patient), class: "dropdown-item" %></li>
+              <li><%= link_to "Nutritionist", new_user_registration_path(role: :nutritionist), class: "dropdown-item" %></li>
+            </ul>
+          </li>
+
+        <% end %>
+      </ul>
+
+    </div>
+  </div>
 </nav>
+
