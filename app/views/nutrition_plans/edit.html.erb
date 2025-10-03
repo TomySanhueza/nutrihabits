@@ -1,0 +1,5 @@
+<h1>Editar Plan Nutricional - <%= @patient.first_name %> <%= @patient.last_name %></h1>
+
+<%= render 'form' %>
+
+<%= link_to "Volver", patient_nutrition_plan_path(@patient, @nutrition_plan) %>

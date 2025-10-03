@@ -1,0 +1,18 @@
+<h1>Planes Nutricionales de <%= @patient.first_name %> <%= @patient.last_name %></h1>
+
+<%= link_to "Crear Nuevo Plan", new_patient_nutrition_plan_path(@patient) %>
+
+<% if @nutrition_plans.any? %>
+  <ul>
+    <% @nutrition_plans.each do |plan| %>
+      <li>
+        <strong>Objetivo:</strong> <%= plan.objective&.truncate(20) %>
+        <strong>Estado:</strong> <%= plan.status %>
+        <strong>Período:</strong> <%= plan.start_date %> - <%= plan.end_date %>
+        <%= link_to "Ver detalle", patient_nutrition_plan_path(@patient, plan) %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>No hay planes nutricionales creados para este paciente.</p>
+<% end %>

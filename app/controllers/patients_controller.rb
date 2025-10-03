@@ -18,6 +18,10 @@ class PatientsController < ApplicationController
     end
   end
 
+  def show 
+    
+  end
+
   private
 
   def patient_params

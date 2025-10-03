@@ -6,4 +6,6 @@ class Nutritionist < ApplicationRecord
   
   # has_one_attached :user_photo
   has_many :patients
+  has_many :profiles
+  has_many :nutrition_plans
 end

@@ -10,9 +10,29 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_10_02_215142) do
+ActiveRecord::Schema[7.1].define(version: 2025_10_03_150553) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "nutrition_plans", force: :cascade do |t|
+    t.bigint "patient_id", null: false
+    t.bigint "nutritionist_id", null: false
+    t.string "objective"
+    t.float "calories"
+    t.float "protein"
+    t.float "fat"
+    t.float "carbs"
+    t.jsonb "meal_distribution"
+    t.text "notes"
+    t.text "ai_rationale"
+    t.string "status"
+    t.date "start_date"
+    t.date "end_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["nutritionist_id"], name: "index_nutrition_plans_on_nutritionist_id"
+    t.index ["patient_id"], name: "index_nutrition_plans_on_patient_id"
+  end
 
   create_table "nutritionists", force: :cascade do |t|
     t.string "email", default: "", null: false
@@ -46,5 +66,24 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_02_215142) do
     t.index ["reset_password_token"], name: "index_patients_on_reset_password_token", unique: true
   end
 
+  create_table "profiles", force: :cascade do |t|
+    t.float "weight"
+    t.float "height"
+    t.text "goals"
+    t.text "conditions"
+    t.text "lifestyle"
+    t.text "diagnosis"
+    t.bigint "nutritionist_id", null: false
+    t.bigint "patient_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["nutritionist_id"], name: "index_profiles_on_nutritionist_id"
+    t.index ["patient_id"], name: "index_profiles_on_patient_id"
+  end
+
+  add_foreign_key "nutrition_plans", "nutritionists"
+  add_foreign_key "nutrition_plans", "patients"
   add_foreign_key "patients", "nutritionists"
+  add_foreign_key "profiles", "nutritionists"
+  add_foreign_key "profiles", "patients"
 end

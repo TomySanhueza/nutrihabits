@@ -1,0 +1,22 @@
+<h1>Plan Nutricional - <%= @patient.first_name %> <%= @patient.last_name %></h1>
+
+<div>
+  <p><strong>Objetivo:</strong> <%= @nutrition_plan.objective %></p>
+  <p><strong>Estado:</strong> <%= @nutrition_plan.status %></p>
+  <p><strong>Período:</strong> <%= @nutrition_plan.start_date %> - <%= @nutrition_plan.end_date %></p>
+</div>
+
+<div>
+  <h2>Macronutrientes</h2>
+  <p><strong>Calorías:</strong> <%= @nutrition_plan.calories %> kcal</p>
+  <p><strong>Proteínas:</strong> <%= @nutrition_plan.protein %> g</p>
+  <p><strong>Grasas:</strong> <%= @nutrition_plan.fat %> g</p>
+  <p><strong>Carbohidratos:</strong> <%= @nutrition_plan.carbs %> g</p>
+</div>
+
+<div>
+  <h2>Notas</h2>
+  <p><%= @nutrition_plan.notes %></p>
+</div>
+
+<%= link_to "Volver a planes", patient_nutrition_plans_path(@patient) %>

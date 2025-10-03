@@ -1,10 +1,26 @@
-<h1>Nutritionists#dashboard</h1>
-<p>Find me in app/views/nutritionists/dashboard.html.erb</p>
-<% @patients.each do |patient| %>
-  <div>
-    <h2><%= patient.first_name %> <%= patient.last_name %></h2>
-    <p>Email: <%= patient.email %></p>
-    <p>Phone: <%= patient.phone %></p>
+<div class="d-flex">
+  <div class="d-flex flex-column">
+    <div class="d-flex flex-column">
+      <%= link_to "Dashboard", "#" %>
+      <%= link_to "Patientes", "#" %>
+      <%= link_to "Planes nutricionales", "#" %>
+      <%= link_to "Asistente IA", "#" %>
+      <%= link_to "Configuraciones", "#" %>
+    </div>
+    <div>
+      <%#= image_tag current_nutritionist.photo %>
+      <%= image_tag "https://kitt.lewagon.com/placeholder/users/ssaunier",
+                                class: "navbar-avatar me-2",
+                                alt: "Default avatar" %>
+    </div>
   </div>
-<% end %>
-<%= link_to 'Add New Patient', new_patient_path %>
+  <div>
+    <h1>Bienvenido <%= current_nutritionist.first_name %> </h1>
+    <%= link_to 'Add New Patient', new_patient_path %>
+    <%= render @patients %>
+  </div>
+</div>
+
+
+
+
