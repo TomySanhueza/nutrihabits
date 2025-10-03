@@ -4,5 +4,8 @@ class Nutritionist < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
   
-  has_one_attached :user_photo
+  # has_one_attached :user_photo
+  has_many :patients
+  has_many :profiles, through: :patients
+  has_many :nutrition_plans, through: :patients
 end

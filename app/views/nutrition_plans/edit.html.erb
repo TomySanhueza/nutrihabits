@@ -1,5 +1,5 @@
-<div class="nutrition-plan-form">
-  <h1>Editar Plan Nutricional - <%= @patient.first_name %> <%= @patient.last_name %></h1>
+<h1>Editar Plan Nutricional - <%= @patient.first_name %> <%= @patient.last_name %></h1>
 
-  <%= render "form" %>
-</div>
+<%= render 'form' %>
+
+<%= link_to "Volver", patient_nutrition_plan_path(@patient, @nutrition_plan) %>

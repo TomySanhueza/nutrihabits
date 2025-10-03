@@ -20,10 +20,10 @@
       <ul class="navbar-nav me-auto">
         <% if nutritionist_signed_in? %>
           <li class="nav-item">
-            <%= link_to "Chats", chats_path, class: "nav-link #{'active' if current_page?(chats_path)}" %>
+            <%#= link_to "Chats", chats_path, class: "nav-link #{'active' if current_page?(chats_path)}" %>
           </li>
           <li class="nav-item">
-            <%= link_to "Patients", patients_path, class: "nav-link #{'active' if current_page?(patients_path)}" %>
+            <%#= link_to "Patients", patients_path, class: "nav-link #{'active' if current_page?(patients_path)}" %>
           </li>
         <% end %>
       </ul>
@@ -36,21 +36,21 @@
           <li class="nav-item dropdown">
             <a href="#" class="nav-link d-flex align-items-center" id="navbarDropdown"
                role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <% if current_nutritionist.user_photo.attached? %>
-                <%= image_tag current_nutritionist.user_photo.variant(resize_to_fill: [40, 40]).processed,
+              <%# if current_nutritionist.user_photo.attached? %>
+                <%#= image_tag current_nutritionist.user_photo.variant(resize_to_fill: [40, 40]).processed,
                               class: "navbar-avatar me-2",
                               alt: "Profile photo" %>
-              <% else %>
+              <%# else %>
                 <%= image_tag "https://kitt.lewagon.com/placeholder/users/ssaunier",
                               class: "navbar-avatar me-2",
                               alt: "Default avatar" %>
-              <% end %>
+              <%# end %>
               <span><%= current_nutritionist.email %></span>
             </a>
 
             <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="navbarDropdown">
-              <li><%= link_to "Profile", profile_path, class: "dropdown-item" %></li>
-              <li><%= link_to "Edit Profile", edit_profile_path, class: "dropdown-item" %></li>
+              <li><%#= link_to "Profile", profile_path, class: "dropdown-item" %></li>
+              <li><%#= link_to "Edit Profile", edit_profile_path, class: "dropdown-item" %></li>
               <li><hr class="dropdown-divider"></li>
               <li>
                 <%= link_to "Logout", destroy_nutritionist_session_path,
