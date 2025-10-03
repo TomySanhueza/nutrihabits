@@ -19,6 +19,7 @@ class NutritionPlansController < ApplicationController
     response = NutritionPlanGeneratorService.new(@patient.profile).call
     # Hacer un nutricional plan.create (objective: params["plan"], y pasarle response con su columna
     #Rediseccionar al nutritional plan show 
+    raise
   end
 
   def edit

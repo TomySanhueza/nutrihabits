@@ -31,10 +31,10 @@ class NutritionPlanGeneratorService
           "fat": "float (en gramos/día, ej: 60)",
           "carbs": "float (en gramos/día, ej: 200)",
           "meal_distribution": {
-            "breakfast": "ejemplo de comida breve y práctica",
-            "lunch": "ejemplo de comida breve y práctica",
-            "dinner": "ejemplo de comida breve y práctica",
-            "snacks": ["snack 1", "snack 2"]
+            "breakfast": ["variedad de desayunos completos prácticos para 7 días, cada uno con porciones sencillas e identificados por día"],
+            "lunch": ["variedad de almuerzos completos prácticos para 7 días, cada uno con porciones sencillas e identificados por día"],
+            "dinner": ["variedad de cenas completas prácticas para 7 días, cada una con porciones sencillas e identificados por día"],
+            "snacks": ["variedad de snacks saludables para 7 días e identificados por día"]
           },
           "notes": "Recomendaciones generales adaptadas al estilo de vida y condiciones del paciente, en lenguaje sencillo."
         }
