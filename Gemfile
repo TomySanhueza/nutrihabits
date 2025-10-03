@@ -76,5 +76,5 @@ end
 
 gem "cloudinary", "~> 2.4"
 
-# OpenAI API for Ruby
-gem "ruby-openai"
+# Gem for interacting with LLMs
+gem "ruby_llm", "~> 1.8"

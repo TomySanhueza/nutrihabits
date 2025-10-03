@@ -1,144 +1,66 @@
 class NutritionPlanGeneratorService
-  def initialize(patient)
-    @patient = patient
-    @profile = patient.profile
-    @patient_histories = patient.patient_histories.order(visit_date: :desc).limit(3)
+  require "json"
+
+  def initialize(profile)
+    @profile = profile
+    @chat = RubyLLM.chat
   end
-
-  def generate
-    return { error: "No se encontró perfil del paciente" } unless @profile
-
-    client = OpenAI::Client.new(access_token: ENV['OPENAI_API_KEY'])
-
-    response = client.chat(
-      parameters: {
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: system_prompt },
-          { role: "user", content: user_prompt }
-        ],
-        temperature: 0.7,
-        response_format: { type: "json_object" }
-      }
-    )
-
-    parse_response(response)
-  rescue StandardError => e
-    Rails.logger.error("NutritionPlanGeneratorService error: #{e.full_message}")
-    { error: "Error al generar plan: #{e.message}" }
-  end
-
-  private
-
-  def system_prompt
-    <<~PROMPT
-      Actúa como un Nutricionista Clínico Certificado, con experiencia en nutrición basada en evidencia científica (incluyendo guías de la OMS, ADA, ESPEN y consensos internacionales actualizados). Tu especialidad es la alimentación saludable, el manejo de la obesidad, el control de enfermedades crónicas y la prevención a través de planes nutricionales personalizados.
-      Recibirás la información de un paciente (datos de perfil e historial registrado por su nutricionista tratante).
-      A partir de estos datos deberás generar un plan nutricional seguro, realista y adaptado a las necesidades del paciente.
-      Debes responder exclusivamente con un objeto JSON válido con esta estructura exacta:
-
-      {
-        "objective": "descripción del objetivo nutricional",
-        "calories": número de calorías diarias recomendadas,
-        "protein": gramos de proteína diarios,
-        "fat": gramos de grasas diarias,
-        "carbs": gramos de carbohidratos diarios,
-        "meal_distribution": {
-          "breakfast": { "calories": número, "description": "descripción" },
-          "lunch": { "calories": número, "description": "descripción" },
-          "dinner": { "calories": número, "description": "descripción" },
-          "snacks": { "calories": número, "description": "descripción" }
-        },
-        "notes": "recomendaciones adicionales y consideraciones especiales"
-      }
-    PROMPT
-  end
-
-  def user_prompt
-    prompt = <<~PROMPT
-      Con la información proporcionada a continuación, genera un plan nutricional personalizado, seguro y basado en evidencia científica actualizada.
-      El plan debe priorizar la prevención y el manejo de riesgos clínicos relevantes (obesidad, sobrepeso, diabetes, hipertensión u otras condiciones registradas).
-      Considera también el estilo de vida y los objetivos declarados por el paciente.
-
-      DATOS PERSONALES:
-      - Nombre: #{@patient.first_name} #{@patient.last_name}
-      - Peso: #{@profile.weight} kg
-      - Altura: #{@profile.height} cm
-      - IMC: #{calculate_bmi}
+  
+  def call
+    system_prompt = <<-PROMPT
+        Actúas como un Nutricionista Clínico Certificado, con experiencia en nutrición basada en evidencia científica
+        (incluyendo guías de la OMS, ADA, ESPEN y consensos internacionales actualizados). 
+        Tu especialidad es la alimentación saludable, el manejo de la obesidad, el control de enfermedades crónicas
+        y la prevención a través de planes nutricionales personalizados.
+      
+        Recibirás información estructurada desde la base de datos del sistema, proveniente de estas fuentes:
+        - Profile: datos básicos del paciente (#{@profile.weight},#{@profile.height},#{@profile.goals},#{@profile.conditions},#{@profile.lifestyle},#{@profile.diagnosis}).
+        - Nutrition Plans (historial): planes nutricionales previos, incluyendo calorías, macros, objetivos, fechas y nivel de adherencia.
+        - Patient Histories: registros de evolución en visitas anteriores (notas, métricas, peso, progresión clínica).
+      
+        Tu tarea:
+          1. Generar un plan nutricional seguro y realista si el paciente es nuevo (sin planes previos).
+          2. Ajustar o actualizar el plan si existen registros previos, considerando evolución y adherencia.
+          3. Siempre entregar **dos outputs diferenciados**:
+            - Un **plan estructurado en formato JSON válido** con la siguiente plantilla exacta:  
+      
+        {
+          "objective": "string (ej: Pérdida de peso, Control glucémico, Ganancia muscular)",
+          "calories": "integer (ej: 1800)",
+          "protein": "float (en gramos/día, ej: 130)",
+          "fat": "float (en gramos/día, ej: 60)",
+          "carbs": "float (en gramos/día, ej: 200)",
+          "meal_distribution": {
+            "breakfast": "ejemplo de comida breve y práctica",
+            "lunch": "ejemplo de comida breve y práctica",
+            "dinner": "ejemplo de comida breve y práctica",
+            "snacks": ["snack 1", "snack 2"]
+          },
+          "notes": "Recomendaciones generales adaptadas al estilo de vida y condiciones del paciente, en lenguaje sencillo."
+        }
+      
+          - Un **texto explicativo separado** en formato string, llamado `criteria_explanation`, que detalle los criterios profesionales y científicos aplicados al plan, incluyendo:
+            - Por qué se eligieron esas calorías y macronutrientes.
+            - Cómo el plan responde a las condiciones clínicas del paciente.
+            - Ajustes hechos respecto a planes anteriores.
+            - Evidencia científica o guías clínicas consideradas.
+      
+        El output final debe ser con esta estructura:
+      
+        {
+          "plan": { ...estructura anterior... },
+          "criteria_explanation": "texto explicativo con la lógica profesional y científica del plan"
+        }
+      
+        Reglas:
+        - Usa cantidades claras y realistas en calorías y macros.
+        - Prioriza prevención y control de riesgos clínicos.
+        - El plan debe ser comprensible para el paciente.
+        - El campo `criteria_explanation` está dirigido al nutricionista, debe ser breve pero profesional.
+        
+        Crea el plan personalizado para este paciente.
     PROMPT
 
-    if @profile.goals.present?
-      prompt += "\nOBJETIVOS:\n#{@profile.goals}\n"
-    end
-
-    if @profile.conditions.present?
-      prompt += "\nCONDICIONES MÉDICAS:\n#{@profile.conditions}\n"
-    end
-
-    if @profile.lifestyle.present?
-      prompt += "\nESTILO DE VIDA:\n#{@profile.lifestyle}\n"
-    end
-
-    if @patient_histories.any?
-      prompt += "\nHISTORIAL RECIENTE:\n"
-      @patient_histories.each do |history|
-        prompt += "- #{history.visit_date}: Peso #{history.weight}kg. #{history.notes}\n"
-      end
-    end
-
-    prompt += <<~PROMPT
-      Genera un plan nutricional estructurado según la plantilla solicitada en el system prompt.
-      - Usa cantidades numéricas claras en calorías y macronutrientes.
-      - Ajusta las recomendaciones a las condiciones clínicas y estilo de vida del paciente.
-      - El lenguaje de las descripciones debe ser claro, breve y práctico (pensado para que un paciente pueda entenderlo).
-    PROMPT
-
-    prompt
-  end
-
-  def calculate_bmi
-    return "N/A" unless @profile.weight && @profile.height
-
-    height_m = @profile.height / 100.0
-    bmi = @profile.weight / (height_m ** 2)
-    bmi.round(1)
-  end
-
-  def parse_response(response)
-    content = response.dig("choices", 0, "message", "content")
-    return { error: "No se recibió respuesta de la IA" } unless content
-
-    parsed = JSON.parse(content)
-
-    # Normalizar valores numéricos
-    calories = normalize_number(parsed["calories"])
-    protein = normalize_number(parsed["protein"])
-    fat = normalize_number(parsed["fat"])
-    carbs = normalize_number(parsed["carbs"])
-
-    {
-      objective: parsed["objective"]&.to_s,
-      calories: calories,
-      protein: protein,
-      fat: fat,
-      carbs: carbs,
-      meal_distribution: parsed["meal_distribution"] || {},
-      notes: parsed["notes"]&.to_s
-    }
-  rescue JSON::ParserError => e
-    { error: "Error al parsear respuesta: #{e.message}" }
-  end
-
-  def normalize_number(value)
-    return nil if value.nil?
-
-    # Si es string, extraer el número
-    if value.is_a?(String)
-      # Extraer primer número encontrado en el string
-      match = value.match(/\d+\.?\d*/)
-      return match ? match[0].to_f : nil
-    end
-
-    value.to_f
+    JSON.parse((@chat.ask(system_prompt)).content)
   end
 end

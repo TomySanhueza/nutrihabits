@@ -14,13 +14,38 @@
                                 alt: "Default avatar" %>
     </div>
   </div>
+
   <div>
-    <h1>Bienvenido <%= current_nutritionist.first_name %> </h1>
-    <%= link_to 'Add New Patient', new_patient_path %>
-    <%= render @patients %>
+    <div class="d-flex">
+      <h1>Bienvenido <%= current_nutritionist.first_name %> </h1>
+      <%= link_to 'Add New Patient', new_patient_path %>
+    </div>
+
+    <div class="d-flex">
+      <div>
+        <h4>Pacientes activos</h4>
+        <%= current_nutritionist.patients.count %>
+      </div>
+      <div>
+        <h4>Promedio de cumplimiento</h4>
+        <h1>82%</h1>
+      </div>
+      <div>
+        <h4>Gráfico de cumplimiento</h4>
+        <%= image_tag "grafico", size: "60X80" %>
+      </div>
+
+    </div>
+
+    <!-- inicio de pacientes activos -->
+    <table class="table">
+      <%= render @patients %>
+    </table>
+    <!-- fin pacientes activos -->
+
+    <div>
+      <h4>Planes nutricionales</h4>
+      <%= render @nutritions %>
+    </div>
   </div>
 </div>
-
-
-
-

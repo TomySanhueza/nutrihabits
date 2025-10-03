@@ -16,15 +16,9 @@ class NutritionPlansController < ApplicationController
 
   def create
     @patient = Patient.find(params[:patient_id])
-    @nutrition_plan = NutritionPlan.new(nutrition_plan_params)
-    @nutrition_plan.patient_id = @patient.id
-    @nutrition_plan.nutritionist_id = current_nutritionist.id
-    @nutrition_plan.status = "active"
-    if @nutrition_plan.save
-      redirect_to patient_nutrition_plan_path(@patient, @nutrition_plan), notice: 'Plan nutricional creado exitosamente.'
-    else
-      render :new
-    end
+    response = NutritionPlanGeneratorService.new(@patient.profile).call
+    # Hacer un nutricional plan.create (objective: params["plan"], y pasarle response con su columna
+    #Rediseccionar al nutritional plan show 
   end
 
   def edit
