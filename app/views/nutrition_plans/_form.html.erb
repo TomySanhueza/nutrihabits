@@ -1,86 +1,11 @@
-<%= form_with(model: [@patient, @nutrition_plan], local: true) do |f| %>
-  <% if @nutrition_plan.errors.any? %>
-    <div class="errors">
-      <h3><%= pluralize(@nutrition_plan.errors.count, "error") %> impidieron guardar:</h3>
-      <ul>
-        <% @nutrition_plan.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
-
-  <% unless @nutrition_plan.persisted? %>
-    <div class="ai-generate-section">
-      <h3>Generar Sugerencia con IA</h3>
-      <p>Genera un plan nutricional personalizado basado en el perfil y historial del paciente.</p>
-      <%= button_to "Generar con IA",
-          generate_with_ai_patient_nutrition_plans_path(@patient),
-          method: :post,
-          class: "btn-generate-ai",
-          form: { data: { turbo: false } } %>
-      <small>La IA generará una sugerencia que podrás revisar y ajustar antes de guardar.</small>
-    </div>
-    <hr>
-  <% end %>
-
-  <h3>Información del Plan</h3>
-
-  <div class="field">
-    <%= f.label :objective, "Objetivo" %>
-    <%= f.text_field :objective, required: true, placeholder: "Ej: Pérdida de peso saludable" %>
-  </div>
-
-  <div class="field">
-    <%= f.label :status, "Estado" %>
-    <%= f.select :status,
-        options_for_select([["Activo", "active"], ["Inactivo", "inactive"], ["Pausado", "paused"]], @nutrition_plan.status),
-        { include_blank: "Seleccionar estado" } %>
-  </div>
-
-  <h3>Macronutrientes Diarios</h3>
-
-  <div class="field">
-    <%= f.label :calories, "Calorías (kcal)" %>
-    <%= f.number_field :calories, step: 0.1, placeholder: "2000" %>
-  </div>
-
-  <div class="field">
-    <%= f.label :protein, "Proteína (g)" %>
-    <%= f.number_field :protein, step: 0.1, placeholder: "150" %>
-  </div>
-
-  <div class="field">
-    <%= f.label :fat, "Grasas (g)" %>
-    <%= f.number_field :fat, step: 0.1, placeholder: "60" %>
-  </div>
-
-  <div class="field">
-    <%= f.label :carbs, "Carbohidratos (g)" %>
-    <%= f.number_field :carbs, step: 0.1, placeholder: "200" %>
-  </div>
-
-  <h3>Distribución de Comidas (Opcional)</h3>
-  <p><small>La distribución se puede generar automáticamente con la IA o completar manualmente en formato JSON.</small></p>
-
-  <div class="field">
-    <%= f.label :meal_distribution, "Distribución de comidas (JSON)" %>
-    <%= f.text_area :meal_distribution,
-        value: @nutrition_plan.meal_distribution.present? ? JSON.pretty_generate(@nutrition_plan.meal_distribution) : "",
-        rows: 10,
-        placeholder: '{"breakfast": {"calories": 500, "description": "..."}, "lunch": {...}}' %>
-    <small>Formato JSON con breakfast, lunch, dinner, snacks</small>
-  </div>
-
-  <h3>Notas y Recomendaciones</h3>
-
-  <div class="field">
-    <%= f.label :notes, "Notas adicionales" %>
-    <%= f.text_area :notes, rows: 5, placeholder: "Recomendaciones especiales, restricciones, etc." %>
-  </div>
-
-  <div class="actions">
-    <%= f.submit @nutrition_plan.persisted? ? "Actualizar Plan" : "Crear Plan" %>
-    <%= link_to "Cancelar", @nutrition_plan.persisted? ? patient_nutrition_plan_path(@patient, @nutrition_plan) : patient_nutrition_plans_path(@patient) %>
-  </div>
+<%= simple_form_for [@patient, @nutrition_plan] do |f| %>
+  <%= f.input :objective, label: "Objetivo" %>
+  <%= f.input :calories, label: "Calorías (kcal)" %>
+  <%= f.input :protein, label: "Proteínas (g)" %>
+  <%= f.input :fat, label: "Grasas (g)" %>
+  <%= f.input :carbs, label: "Carbohidratos (g)" %>
+  <%= f.input :start_date, label: "Fecha de inicio", as: :date %>
+  <%= f.input :end_date, label: "Fecha de término", as: :date %>
+  <%= f.input :notes, label: "Notas", as: :text %>
+  <%= f.submit %>
 <% end %>

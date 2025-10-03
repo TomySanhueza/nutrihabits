@@ -1,0 +1,135 @@
+.form-container {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  padding: 1.5rem; // más compacto
+  max-width: 480px; // más ancho
+  margin: 2rem auto; // menos margen superior/inferior
+  font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", Arial, sans-serif;
+  transition: all 0.3s ease;
+
+  h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin-bottom: 1rem;
+    text-align: center;
+    letter-spacing: -0.5px;
+  }
+}
+
+.form-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #1d1d1f;
+  margin-bottom: 0.4rem;
+}
+
+.form-control {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid #d2d2d7;
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  outline: none;
+  transition: all 0.2s ease;
+
+  &:focus {
+    border-color: #8B5CF6;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+  }
+}
+
+.btn-primary {
+  display: block;
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 30px;
+  border: none;
+  font-weight: 600;
+  font-size: 1rem;
+  background: #8B5CF6;
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.1s ease;
+
+  &:hover {
+    background: #7C3AED;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.btn-outline-primary {
+  display: block;
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  background: #fff;
+  color: #8B5CF6;
+  border: 2px solid #8B5CF6;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  &:hover {
+    background: #8B5CF6;
+    color: #fff;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Acciones rápidas (login & registro unificados) */
+.devise-links {
+  margin: 1.5rem auto 0 auto;
+  max-width: 480px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+  padding: 1rem;
+  text-align: center;
+
+  .link-secondary {
+    color: #8B5CF6;
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: color 0.2s;
+
+    &:hover {
+      color: #7C3AED;
+      text-decoration: underline;
+    }
+  }
+
+  .btn {
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.25s ease;
+
+    &:hover {
+      background: #8B5CF6;
+      color: #fff;
+    }
+  }
+}
+
+/* Card del contenedor general */
+.card {
+  border-radius: 20px;
+  max-width: 480px; // mismo ancho que el form-container
+  width: 100%;
+}
+
