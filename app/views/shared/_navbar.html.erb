@@ -36,15 +36,15 @@
           <li class="nav-item dropdown">
             <a href="#" class="nav-link d-flex align-items-center" id="navbarDropdown"
                role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <% if current_nutritionist.user_photo.attached? %>
-                <%= image_tag current_nutritionist.user_photo.variant(resize_to_fill: [40, 40]).processed,
+              <% # if current_nutritionist.user_photo.attached? %>
+                <%#= image_tag current_nutritionist.user_photo.variant(resize_to_fill: [40, 40]).processed,
                               class: "navbar-avatar me-2",
                               alt: "Profile photo" %>
-              <% else %>
+              <% #else %>
                 <%= image_tag "https://kitt.lewagon.com/placeholder/users/ssaunier",
                               class: "navbar-avatar me-2",
                               alt: "Default avatar" %>
-              <% end %>
+              <%# end %>
               <span><%= current_nutritionist.email %></span>
             </a>
 
