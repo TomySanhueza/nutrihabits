@@ -6,4 +6,8 @@ class Patient < ApplicationRecord
   belongs_to :nutritionist
   has_one :profile, dependent: :destroy
   has_many :nutrition_plans, dependent: :destroy
+  has_many :patient_histories
+  has_many :meal_logs
+  has_many :chats
+  has_many :patient_ai_chats
 end
