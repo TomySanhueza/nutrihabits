@@ -16,10 +16,23 @@ class NutritionPlansController < ApplicationController
 
   def create
     @patient = Patient.find(params[:patient_id])
-    response = NutritionPlanGeneratorService.new(@patient.profile).call
-    # Hacer un nutricional plan.create (objective: params["plan"], y pasarle response con su columna
-    #Rediseccionar al nutritional plan show 
-    raise
+    response = NutritionPlanGeneratorService.new(@patient.profile, Date.today, Date.today + 6).call
+
+    @nutrition_plan = @patient.nutrition_plans.create(
+      objective: response["plan"]["objective"],
+      calories: response["plan"]["calories"],
+      protein: response["plan"]["protein"],
+      fat: response["plan"]["fat"],
+      carbs: response["plan"]["carbs"],
+      meal_distribution: response["plan"]["meal_distribution"],
+      notes: response["plan"]["notes"],
+      ai_rationale: response["criteria_explanation"],
+      nutritionist: current_nutritionist,
+      status: 'active',
+      start_date: Date.today
+    )
+
+    redirect_to patient_nutrition_plan_path(@patient, @nutrition_plan)
   end
 
   def edit

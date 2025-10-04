@@ -78,3 +78,7 @@ gem "cloudinary", "~> 2.4"
 
 # Gem for interacting with LLMs
 gem "ruby_llm", "~> 1.8"
+
+gem "kramdown"
+gem "rouge"
+gem "kramdown-parser-gfm"
