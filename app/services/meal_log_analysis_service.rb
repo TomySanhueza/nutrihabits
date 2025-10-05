@@ -1,10 +1,11 @@
 class MealLogAnalysisService
   require "json"
 
-  def initialize(image_data, nutrition_plan)
-    # @patient = patient
+  def initialize(image_data, meal)
     @image_data = image_data
-    @nutrition_plan = nutrition_plan
+    @meal = meal # El meal específico para ese día y tipo de comida
+    @plan = meal.plan # El plan del día
+    @nutrition_plan = meal.plan.nutrition_plan # El plan nutricional general
     @chat = RubyLLM.chat
   end
 
@@ -18,33 +19,45 @@ class MealLogAnalysisService
         Recibirás una **imagen de una comida registrada por un paciente** en la aplicación Nutrihabits.
         Tu tarea es analizar visualmente la foto y generar un registro nutricional completo y coherente con el plan actual del paciente, considerando:
 
-        - **El plan nutricional activo** asignado por su nutricionista (niveles de calorías, macros y objetivos clínicos, si están disponibles).
+        - **El plan nutricional activo** asignado por su nutricionista (niveles de calorías, macros y objetivos clínicos).
+        - **La comida específica planificada** para ese día y tipo de comida (breakfast/lunch/dinner/snack).
         - **El contenido visual de la imagen** (tipo y proporción de alimentos, métodos de cocción y equilibrio general del plato).
 
         #{plan_context}
+        #{meal_context}
 
         Debes entregar **una respuesta estructurada en formato JSON válido**, con los siguientes campos exactos:
-
         {
           "ai_calories": "float — calorías totales estimadas de la comida (ej: 520)",
           "ai_protein": "float — gramos de proteína estimados",
           "ai_carbs": "float — gramos de carbohidratos estimados",
           "ai_fat": "float — gramos de grasa estimados",
-          "ai_health_score": "float — puntuación de salud de la comida en escala 1 al 10, considerando el plan nutricional, balance de macronutrientes, calidad alimentaria y coherencia con los objetivos del paciente",
-          "ai_feedback": "string — comentario breve, empático y motivador (<280 caracteres). Refuerza los aciertos, señala oportunidades de mejora de forma amable y ofrece una recomendación práctica que impulse la adherencia sin generar culpa."
+          "ai_health_score": "float — puntuación de salud de la comida en escala 1 al 10, considerando el plan nutricional, balance de macronutrientes, calidad alimentaria, coherencia con los objetivos del paciente Y comparación con la comida específica planificada para este momento del día",
+          "ai_feedback": "string — comentario breve, empático y motivador (<280 caracteres). Refuerza los aciertos, señala oportunidades de mejora de forma amable y ofrece una recomendación práctica que impulse la adherencia sin generar culpa.",
+          "ai_comparison": {
+            "macronutrient_comparison": "string — Comparación detallada de macronutrientes vs. la comida planificada (ej: 'Calorías: +120 kcal sobre el plan, Proteínas: -10 g, Carbohidratos: +25 g, Grasas: dentro del rango.')",
+            "ingredient_analysis": "string — Análisis cualitativo de ingredientes utilizados vs. los planificados, destacando el equilibrio y calidad (ej: 'Buen equilibrio entre fuentes naturales 🌿. Usaste ingredientes frescos y simples, aunque podrías sumar algo de color con vegetales o legumbres 💚.')",
+            "improvement_suggestion": "string — Sugerencia práctica y constructiva para mejorar en la próxima comida (ej: 'Vas muy bien 🙌. Para el próximo plato, intenta incluir una porción de proteína magra o verduras al vapor — pequeños ajustes que suman mucho 💪.')"
+          }
         }
 
         ---
 
         ### 📊 Criterios profesionales para calcular `ai_health_score` (escala 1 al 10):
 
+        **Debes evaluar combinando estos aspectos:**
+        1. **Calidad nutricional general** (proteínas magras, carbohidratos complejos, grasas saludables, vegetales/frutas, métodos de cocción)
+        2. **Alineación con objetivos del plan nutricional** (objetivos clínicos, notas del nutricionista)
+        3. **Coherencia con totales diarios** (calorías, proteínas, carbos, grasas del día completo)
+        4. **Precisión vs. comida planificada** (qué tan cerca está de la comida específica propuesta para este momento)
+
         | Rango | Interpretación | Criterios |
         |-------|----------------|-----------|
-        | **9–10 (Excelente)** | Comida equilibrada y de alta calidad nutricional. | Incluye proteínas magras, carbohidratos complejos, grasas saludables, vegetales o frutas, porciones adecuadas y métodos de cocción saludables (vapor, horno, plancha). Dentro del rango calórico del plan. |
-        | **7–8 (Buena)** | Saludable y cercana al objetivo del plan. | Pequeños desajustes calóricos o leve falta de variedad, pero mantiene equilibrio general. |
-        | **5–6 (Moderada)** | Plato funcional pero parcialmente desbalanceado. | Exceso o déficit de un macronutriente (por ejemplo, alto en carbohidratos refinados o bajo en proteína/fibra). Requiere pequeños ajustes. |
-        | **3–4 (Baja adherencia)** | Bajo equilibrio nutricional o cocción poco saludable. | Alto en grasas saturadas, azúcares o ultraprocesados. Baja presencia de vegetales o proteínas. |
-        | **1–2 (Crítica)** | Valor nutricional muy bajo. | Comida ultraprocesada, alta en sodio, azúcar o grasas saturadas. No alineada al plan y con baja densidad nutricional. |
+        | **9–10 (Excelente)** | Comida equilibrada y de alta calidad nutricional, perfectamente alineada al plan. | Incluye proteínas magras, carbohidratos complejos, grasas saludables, vegetales o frutas, porciones adecuadas y métodos de cocción saludables. Dentro del rango calórico y de macros del meal planificado (±10%). |
+        | **7–8 (Buena)** | Saludable y cercana al objetivo del plan. | Pequeños desajustes calóricos o de macros (±20%), o leve falta de variedad, pero mantiene equilibrio general y sigue la esencia del meal planificado. |
+        | **5–6 (Moderada)** | Plato funcional pero parcialmente desbalanceado. | Exceso o déficit de un macronutriente (±30-40%), o desviación moderada de ingredientes planificados. Requiere ajustes. |
+        | **3–4 (Baja adherencia)** | Bajo equilibrio nutricional o cocción poco saludable. | Alto en grasas saturadas, azúcares o ultraprocesados. Baja presencia de vegetales o proteínas. Muy diferente al meal planificado. |
+        | **1–2 (Crítica)** | Valor nutricional muy bajo. | Comida ultraprocesada, alta en sodio, azúcar o grasas saturadas. No alineada al plan y con baja densidad nutricional. Completamente opuesta al meal planificado. |
 
         ---
 
@@ -64,7 +77,12 @@ class MealLogAnalysisService
           "ai_carbs": 85.0,
           "ai_fat": 16.0,
           "ai_health_score": 7.8,
-          "ai_feedback": "Buena fuente de energía 👌 y porción equilibrada de carbohidratos. Agregar una proteína magra o vegetales le daría más saciedad y balance 🌿. Vas muy bien, ¡cada elección cuenta! 💪"
+          "ai_feedback": "Buena fuente de energía 👌 y porción equilibrada de carbohidratos. Agregar una proteína magra o vegetales le daría más saciedad y balance 🌿. Vas muy bien, ¡cada elección cuenta! 💪",
+          "ai_comparison": {
+            "macronutrient_comparison": "Calorías: +120 kcal sobre el plan, Proteínas: -10 g, Carbohidratos: +25 g, Grasas: dentro del rango.",
+            "ingredient_analysis": "Buen equilibrio entre fuentes naturales 🌿. Usaste ingredientes frescos y simples, aunque podrías sumar algo de color con vegetales o legumbres 💚.",
+            "improvement_suggestion": "Vas muy bien 🙌. Para el próximo plato, intenta incluir una porción de proteína magra o verduras al vapor — pequeños ajustes que suman mucho 💪."
+          }
         }
     PROMPT
 
@@ -76,15 +94,51 @@ class MealLogAnalysisService
   def plan_context
     return "El paciente no tiene un plan nutricional activo en este momento." unless @nutrition_plan
 
-      <<-CONTEXT
-          **Información del plan nutricional activo:**
-          - Objetivo: #{@nutrition_plan.objective}
-          - Calorías diarias: #{@nutrition_plan.calories} kcal
-          - Proteína: #{@nutrition_plan.protein}g
-          - Carbohidratos: #{@nutrition_plan.carbs}g
-          - Grasas: #{@nutrition_plan.fat}g
-          - Distribución de comidas: #{@nutrition_plan.meal_distribution}
-          - Notas adicionales: #{@nutrition_plan.notes}
-      CONTEXT
+    <<-CONTEXT
+      **Información del plan nutricional activo:**
+      - Objetivo: #{@nutrition_plan.objective}
+      - Calorías diarias: #{@nutrition_plan.calories} kcal
+      - Proteína diaria total: #{@nutrition_plan.protein}g
+      - Carbohidratos diarios totales: #{@nutrition_plan.carbs}g
+      - Grasas diarias totales: #{@nutrition_plan.fat}g
+      - Notas adicionales del nutricionista: #{@nutrition_plan.notes}
+
+      **Información del plan del día (#{@plan.date}):**
+      - Estado de ánimo: #{@plan.mood}
+      - Nivel de energía: #{@plan.energy_level}
+      - Actividad física: #{@plan.activity}
+      - Notas del día: #{@plan.notes}
+    CONTEXT
+  end
+
+  def meal_context
+    return "No hay información de la comida planificada para este momento." unless @meal
+
+    <<-CONTEXT
+
+      ---
+
+      **Comida específica planificada para este momento:**
+      - Tipo de comida: #{meal_type_spanish(@meal.meal_type)}
+      - Fecha: #{@plan.date}
+      - Calorías planificadas: #{@meal.calories} kcal
+      - Proteína planificada: #{@meal.protein}g
+      - Carbohidratos planificados: #{@meal.carbs}g
+      - Grasas planificadas: #{@meal.fat}g
+      - Ingredientes propuestos: #{@meal.ingredients}
+      - Receta sugerida: #{@meal.recipe}
+      - Estado: #{@meal.status}
+
+      **IMPORTANTE:** Debes comparar la comida de la foto con esta comida planificada específica para generar el campo `ai_comparison`.
+    CONTEXT
+  end
+
+  def meal_type_spanish(meal_type)
+    {
+      "breakfast" => "Desayuno",
+      "lunch" => "Almuerzo",
+      "dinner" => "Cena",
+      "snack" => "Colación"
+    }[meal_type] || meal_type
   end
 end

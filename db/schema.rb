@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_10_05_162856) do
+ActiveRecord::Schema[7.1].define(version: 2025_10_05_180705) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -66,6 +66,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_05_162856) do
     t.float "ai_protein"
     t.float "ai_carbs"
     t.float "ai_fat"
+    t.jsonb "ai_comparison"
     t.index ["meal_id"], name: "index_meal_logs_on_meal_id"
   end
 
