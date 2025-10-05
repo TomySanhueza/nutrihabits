@@ -1,11 +1,65 @@
-<%= simple_form_for [@patient, @nutrition_plan] do |f| %>
-  <%= f.input :objective, label: "Objetivo" %>
-  <%= f.input :calories, label: "Calorías (kcal)" %>
-  <%= f.input :protein, label: "Proteínas (g)" %>
-  <%= f.input :fat, label: "Grasas (g)" %>
-  <%= f.input :carbs, label: "Carbohidratos (g)" %>
-  <%= f.input :start_date, label: "Fecha de inicio", as: :date %>
-  <%= f.input :end_date, label: "Fecha de término", as: :date %>
-  <%= f.input :notes, label: "Notas", as: :text %>
-  <%= f.submit %>
-<% end %>
+<div data-controller="nested-form">
+  <%= simple_form_for [@patient, @nutrition_plan] do |f| %>
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5>Información General del Plan</h5>
+      </div>
+      <div class="card-body">
+        <%= f.input :objective, label: "Objetivo" %>
+        <div class="row">
+          <div class="col-md-6">
+            <%= f.input :calories, label: "Calorías (kcal)" %>
+          </div>
+          <div class="col-md-6">
+            <%= f.input :protein, label: "Proteínas (g)" %>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <%= f.input :fat, label: "Grasas (g)" %>
+          </div>
+          <div class="col-md-6">
+            <%= f.input :carbs, label: "Carbohidratos (g)" %>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">
+            <%= f.input :start_date, label: "Fecha de inicio", as: :date %>
+          </div>
+          <div class="col-md-6">
+            <%= f.input :end_date, label: "Fecha de término", as: :date %>
+          </div>
+        </div>
+        <%= f.input :meal_distribution, label: "Distribución de comidas" %>
+        <%= f.input :notes, label: "Notas", as: :text %>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5>Planes Diarios</h5>
+      </div>
+      <div class="card-body">
+        <div id="plans">
+          <%= f.simple_fields_for :plans do |plan_form| %>
+            <%= render 'plan_fields', f: plan_form %>
+          <% end %>
+        </div>
+
+        <template data-nested-form-target="template">
+          <%= f.simple_fields_for :plans, Plan.new, child_index: 'TEMPLATE_RECORD' do |plan_form| %>
+            <%= render 'plan_fields', f: plan_form %>
+          <% end %>
+        </template>
+
+        <div class="links mt-3">
+          <button type="button" class="btn btn-secondary btn-sm" data-action="click->nested-form#add_association" data-association-insertion-node="#plans" data-association-insertion-method="append">
+            Agregar Día
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <%= f.submit "Guardar Plan", class: "btn btn-primary" %>
+  <% end %>
+</div>

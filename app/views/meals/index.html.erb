@@ -1,0 +1,52 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Comidas</h1>
+    <%= link_to 'Nueva Comida', new_meal_path, class: 'btn btn-primary' %>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Tipo de Comida</th>
+          <th>Calorías</th>
+          <th>Proteínas (g)</th>
+          <th>Carbohidratos (g)</th>
+          <th>Grasas (g)</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @meals.each do |meal| %>
+          <tr>
+            <td><%= meal.plan.date.strftime('%d/%m/%Y') %></td>
+            <td><%= meal.meal_type&.titleize %></td>
+            <td><%= meal.calories %></td>
+            <td><%= meal.protein %></td>
+            <td><%= meal.carbs %></td>
+            <td><%= meal.fat %></td>
+            <td>
+              <% case meal.status %>
+              <% when 'completed' %>
+                <span class="badge bg-success">Completada</span>
+              <% when 'pending' %>
+                <span class="badge bg-warning">Pendiente</span>
+              <% when 'skipped' %>
+                <span class="badge bg-secondary">Omitida</span>
+              <% else %>
+                <span class="badge bg-info"><%= meal.status %></span>
+              <% end %>
+            </td>
+            <td>
+              <%= link_to 'Ver', meal, class: 'btn btn-sm btn-info' %>
+              <%= link_to 'Editar', edit_meal_path(meal), class: 'btn btn-sm btn-warning' %>
+              <%= link_to 'Eliminar', meal, method: :delete, data: { confirm: '¿Está seguro?' }, class: 'btn btn-sm btn-danger' %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

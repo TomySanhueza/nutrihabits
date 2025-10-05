@@ -1,0 +1,45 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Mis Comidas Registradas</h1>
+        <%= link_to "Registrar Nueva Comida", new_meal_log_path, class: "btn btn-primary" %>
+      </div>
+
+      <% if @meal_logs.any? %>
+        <div class="row">
+          <% @meal_logs.each do |meal_log| %>
+            <div class="col-md-6 col-lg-4 mb-4">
+              <div class="card h-100">
+                <% if meal_log.photo.attached? %>
+                  <%= image_tag meal_log.photo, class: "card-img-top", style: "height: 200px; object-fit: cover;" %>
+                <% end %>
+                <div class="card-body">
+                  <h5 class="card-title"><%= meal_log.meal_type&.titleize || "Comida" %></h5>
+                  <p class="card-text">
+                    <small class="text-muted"><%= meal_log.logged_at&.strftime("%d/%m/%Y %H:%M") %></small>
+                  </p>
+                  <ul class="list-unstyled">
+                    <li><strong>Calorías:</strong> <%= meal_log.ai_calories&.round || "N/A" %> kcal</li>
+                    <li><strong>Proteína:</strong> <%= meal_log.ai_protein&.round(1) || "N/A" %>g</li>
+                    <li><strong>Carbohidratos:</strong> <%= meal_log.ai_carbs&.round(1) || "N/A" %>g</li>
+                    <li><strong>Grasas:</strong> <%= meal_log.ai_fat&.round(1) || "N/A" %>g</li>
+                    <li><strong>Puntaje:</strong> <%= meal_log.ai_health_score&.round(1) || "N/A" %>/10</li>
+                  </ul>
+                </div>
+                <div class="card-footer">
+                  <%= link_to "Ver Detalle", meal_log, class: "btn btn-sm btn-outline-primary" %>
+                  <%= link_to "Eliminar", meal_log, method: :delete, data: { confirm: "¿Estás seguro?" }, class: "btn btn-sm btn-outline-danger" %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="alert alert-info">
+          <p class="mb-0">Aún no has registrado ninguna comida. <%= link_to "¡Registra tu primera comida aquí!", new_meal_log_path %></p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

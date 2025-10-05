@@ -1,0 +1,59 @@
+<div class="nested-fields border rounded p-3 mb-3" data-controller="nested-form">
+  <%= f.hidden_field :_destroy %>
+
+  <div class="row align-items-center mb-3">
+    <div class="col">
+      <h6 class="mb-0">Plan Diario</h6>
+    </div>
+    <div class="col-auto">
+      <button type="button" class="btn btn-danger btn-sm" data-action="click->nested-form#remove_association">
+        Eliminar
+      </button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <%= f.input :date, label: "Fecha", as: :date, html5: true %>
+    </div>
+    <div class="col-md-6">
+      <%= f.input :mood, label: "Estado de ánimo", collection: ['Excelente', 'Bueno', 'Normal', 'Bajo', 'Muy bajo'], include_blank: 'Seleccionar' %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <%= f.input :energy_level, label: "Nivel de energía", collection: ['Muy alto', 'Alto', 'Medio', 'Bajo', 'Muy bajo'], include_blank: 'Seleccionar' %>
+    </div>
+    <div class="col-md-6">
+      <%= f.input :activity, label: "Actividad física", collection: ['Sedentario', 'Ligero', 'Moderado', 'Activo', 'Muy activo'], include_blank: 'Seleccionar' %>
+    </div>
+  </div>
+
+  <%= f.input :notes, label: "Notas del día", as: :text, input_html: { rows: 2 } %>
+
+  <div class="card mt-3">
+    <div class="card-header bg-light">
+      <h6 class="mb-0">Comidas del Día</h6>
+    </div>
+    <div class="card-body">
+      <div class="meals-<%= f.object.object_id %>">
+        <%= f.simple_fields_for :meals do |meal_form| %>
+          <%= render 'meal_fields', f: meal_form %>
+        <% end %>
+      </div>
+
+      <template data-nested-form-target="template">
+        <%= f.simple_fields_for :meals, Meal.new, child_index: 'TEMPLATE_RECORD' do |meal_form| %>
+          <%= render 'meal_fields', f: meal_form %>
+        <% end %>
+      </template>
+
+      <div class="links mt-2">
+        <button type="button" class="btn btn-secondary btn-sm" data-action="click->nested-form#add_association" data-association-insertion-node=".meals-<%= f.object.object_id %>" data-association-insertion-method="append">
+          Agregar Comida
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

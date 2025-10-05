@@ -8,6 +8,13 @@ Rails.application.routes.draw do
     resources :patients do
       resources :profiles, only: [:new, :create]
       resources :nutrition_plans
+      resources :patient_histories
+    end
+  end
+
+  authenticate :patient do
+    resources :meals do
+      resources :meal_logs, except: [:edit, :update]
     end
   end
 end
