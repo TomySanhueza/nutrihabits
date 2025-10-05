@@ -25,9 +25,9 @@ class NutritionPlanGeneratorService
           2. Ajustar o actualizar el plan si existen registros previos, considerando evolución y adherencia.
           3. Desarrolla un plan con alcance desde la fecha inicial **#{@start_date}** hasta la fecha final **#{@end_date}**, incluyéndolas ambas.
           4. Siempre entregar **dos outputs diferenciados**:
-            - Un **plan estructurado en formato JSON válido** con la siguiente plantilla exacta:  
-              plan: {
-                {
+            - Un **plan estructurado en formato JSON válido** con la siguiente plantilla exacta:
+            "plan": {
+              {
                   "objective": "string (ej: Pérdida de peso, Control glucémico, Ganancia muscular)",
                   "calories": "integer (ej: 1800)",
                   "protein": "float (en gramos/día, ej: 130)",
@@ -72,10 +72,10 @@ class NutritionPlanGeneratorService
                       "YYYY-MM-DD": { ... repetir la misma estructura ... }
                   },
                   "notes": "Recomendaciones generales adaptadas al estilo de vida y condiciones del paciente, en lenguaje sencillo."
-                }
               }
+            } 
 
-        ⚠️ Instrucción clave: Debes **generar automáticamente un bloque de `meal_distribution` para cada día del rango de fechas** entre `#{@start_date}` y `#{@end_date}`, sin omitir días. Cada fecha debe estar en formato `YYYY-MM-DD` y contener desayuno, almuerzo, cena y snack.
+        ATENCIÓN: Instrucción clave: Debes **generar automáticamente un bloque de `meal_distribution` para cada día del rango de fechas** entre `#{@start_date}` y `#{@end_date}`, sin omitir días. Cada fecha debe estar en formato `YYYY-MM-DD` y contener desayuno, almuerzo, cena y snack.
 
         - Un **texto explicativo separado** en formato string, llamado `criteria_explanation`, que detalle los criterios profesionales y científicos aplicados al plan, incluyendo:
           - Por qué se eligieron esas calorías y macronutrientes.

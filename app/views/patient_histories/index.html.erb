@@ -1,0 +1,45 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Historial de Controles - <%= @patient.first_name %> <%= @patient.last_name %></h1>
+    <%= link_to "Nuevo Control", new_patient_patient_history_path(@patient), class: "btn btn-primary" %>
+  </div>
+
+  <% if @patient_histories.any? %>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Fecha de Visita</th>
+            <th>Peso (kg)</th>
+            <th>Plan Nutricional</th>
+            <th>Nutricionista</th>
+            <th>Notas</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @patient_histories.each do |history| %>
+            <tr>
+              <td><%= history.visit_date.strftime("%d/%m/%Y") %></td>
+              <td><%= history.weight || "N/A" %></td>
+              <td><%= history.nutrition_plan&.objective&.truncate(30) || "Sin plan asociado" %></td>
+              <td><%= history.nutritionist.first_name %> <%= history.nutritionist.last_name %></td>
+              <td><%= history.notes&.truncate(50) || "Sin notas" %></td>
+              <td>
+                <%= link_to "Ver", patient_patient_history_path(@patient, history), class: "btn btn-sm btn-info" %>
+                <%= link_to "Editar", edit_patient_patient_history_path(@patient, history), class: "btn btn-sm btn-warning" %>
+                <%= link_to "Eliminar", patient_patient_history_path(@patient, history), method: :delete, data: { confirm: "¿Estás seguro?" }, class: "btn btn-sm btn-danger" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="alert alert-info">
+      No hay registros de control para este paciente.
+    </div>
+  <% end %>
+
+  <%= link_to "Volver al paciente", nutritionist_dashboard_path, class: "btn btn-secondary mt-3" %>
+</div>

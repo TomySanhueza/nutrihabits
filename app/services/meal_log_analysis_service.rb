@@ -102,12 +102,6 @@ class MealLogAnalysisService
       - Carbohidratos diarios totales: #{@nutrition_plan.carbs}g
       - Grasas diarias totales: #{@nutrition_plan.fat}g
       - Notas adicionales del nutricionista: #{@nutrition_plan.notes}
-
-      **Información del plan del día (#{@plan.date}):**
-      - Estado de ánimo: #{@plan.mood}
-      - Nivel de energía: #{@plan.energy_level}
-      - Actividad física: #{@plan.activity}
-      - Notas del día: #{@plan.notes}
     CONTEXT
   end
 
@@ -116,12 +110,10 @@ class MealLogAnalysisService
 
     <<-CONTEXT
 
-      ---
-
       **Comida específica planificada para este momento:**
       - Tipo de comida: #{meal_type_spanish(@meal.meal_type)}
       - Fecha: #{@plan.date}
-      - Calorías planificadas: #{@meal.calories} kcal
+      - Calorías planificadas: #{@meal.calories}kcal
       - Proteína planificada: #{@meal.protein}g
       - Carbohidratos planificados: #{@meal.carbs}g
       - Grasas planificadas: #{@meal.fat}g

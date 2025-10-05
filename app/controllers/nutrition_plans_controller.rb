@@ -17,7 +17,6 @@ class NutritionPlansController < ApplicationController
   def create
     @patient = Patient.find(params[:patient_id])
     response = NutritionPlanGeneratorService.new(@patient.profile, Date.today, Date.today + 6).call
-    raise
     @nutrition_plan = @patient.nutrition_plans.create(
       objective: response["plan"]["objective"],
       calories: response["plan"]["calories"],
@@ -32,7 +31,7 @@ class NutritionPlansController < ApplicationController
       start_date: Date.today
     )
 
-    redirect_to patient_nutrition_plan_path(@patient, @nutrition_plan)
+    redirect_to edit_patient_nutrition_plan_path(@patient, @nutrition_plan)
   end
 
   def edit

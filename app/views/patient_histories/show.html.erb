@@ -1,0 +1,71 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Control de <%= @patient.first_name %> <%= @patient.last_name %></h1>
+    <div>
+      <%= link_to "Editar", edit_patient_patient_history_path(@patient, @patient_history), class: "btn btn-warning" %>
+      <%= link_to "Eliminar", patient_patient_history_path(@patient, @patient_history), method: :delete, data: { confirm: "¿Estás seguro?" }, class: "btn btn-danger" %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card mb-3">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Información General</h5>
+        </div>
+        <div class="card-body">
+          <p><strong>Fecha de Visita:</strong> <%= @patient_history.visit_date.strftime("%d/%m/%Y") %></p>
+          <p><strong>Nutricionista:</strong> <%= @patient_history.nutritionist.first_name %> <%= @patient_history.nutritionist.last_name %></p>
+          <p><strong>Peso Registrado:</strong> <%= @patient_history.weight ? "#{@patient_history.weight} kg" : "No registrado" %></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card mb-3">
+        <div class="card-header bg-info text-white">
+          <h5 class="mb-0">Plan Nutricional Asociado</h5>
+        </div>
+        <div class="card-body">
+          <% if @patient_history.nutrition_plan %>
+            <p><strong>Objetivo:</strong> <%= @patient_history.nutrition_plan.objective %></p>
+            <p><strong>Período:</strong> <%= @patient_history.nutrition_plan.start_date %> - <%= @patient_history.nutrition_plan.end_date %></p>
+            <p><strong>Calorías:</strong> <%= @patient_history.nutrition_plan.calories %> kcal</p>
+            <%= link_to "Ver plan completo", patient_nutrition_plan_path(@patient, @patient_history.nutrition_plan), class: "btn btn-sm btn-outline-info" %>
+          <% else %>
+            <p class="text-muted">No hay plan nutricional asociado a este control.</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if @patient_history.metrics.present? %>
+    <div class="card mb-3">
+      <div class="card-header bg-success text-white">
+        <h5 class="mb-0">Métricas Adicionales</h5>
+      </div>
+      <div class="card-body">
+        <pre class="mb-0"><%= JSON.pretty_generate(@patient_history.metrics) %></pre>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="card mb-3">
+    <div class="card-header bg-secondary text-white">
+      <h5 class="mb-0">Notas del Control</h5>
+    </div>
+    <div class="card-body">
+      <% if @patient_history.notes.present? %>
+        <%= simple_format(@patient_history.notes) %>
+      <% else %>
+        <p class="text-muted">No hay notas para este control.</p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <%= link_to "Volver al historial", patient_patient_histories_path(@patient), class: "btn btn-secondary" %>
+    <%= link_to "Volver al paciente", nutritionist_dashboard_path, class: "btn btn-outline-secondary" %>
+  </div>
+</div>
