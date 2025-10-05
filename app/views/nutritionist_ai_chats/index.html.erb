@@ -1,0 +1,36 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Asistente IA - Copilot Nutricional</h1>
+    <%= button_to 'Nuevo Chat', nutritionist_ai_chats_path, method: :post, class: 'btn btn-primary' %>
+  </div>
+
+  <% if @chats.any? %>
+    <div class="list-group">
+      <% @chats.each do |chat| %>
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+          <%= link_to nutritionist_ai_chat_path(chat), class: 'flex-grow-1 text-decoration-none' do %>
+            <div>
+              <h5 class="mb-1">
+                Chat <%= chat.id %>
+                <small class="text-muted">- <%= chat.updated_at.strftime('%d/%m/%Y %H:%M') %></small>
+              </h5>
+              <% first_message = chat.nutritionist_ai_messages.where(role: 'user').first %>
+              <% if first_message %>
+                <p class="mb-0 text-muted"><%= truncate(first_message.content, length: 100) %></p>
+              <% else %>
+                <p class="mb-0 text-muted">Chat vacío</p>
+              <% end %>
+            </div>
+          <% end %>
+          <%= button_to 'Eliminar', nutritionist_ai_chat_path(chat), method: :delete,
+                        data: { confirm: '¿Estás seguro de eliminar este chat?' },
+                        class: 'btn btn-sm btn-danger ms-3' %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="alert alert-info">
+      <p class="mb-0">No tienes chats aún. Crea uno para comenzar a usar tu asistente IA.</p>
+    </div>
+  <% end %>
+</div>

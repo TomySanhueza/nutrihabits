@@ -1,0 +1,66 @@
+<div class="container-fluid mt-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <%= link_to '← Volver a chats', nutritionist_ai_chats_path, class: 'btn btn-sm btn-outline-secondary' %>
+          <h3 class="d-inline ms-3">Asistente IA - Copilot Nutricional</h3>
+        </div>
+        <%= button_to 'Eliminar chat', nutritionist_ai_chat_path(@chat), method: :delete,
+                      data: { confirm: '¿Eliminar este chat?' },
+                      class: 'btn btn-sm btn-danger' %>
+      </div>
+
+      <div class="card">
+        <div class="card-body" style="height: 70vh; display: flex; flex-direction: column;">
+          <!-- Área de mensajes -->
+          <div id="messages" class="flex-grow-1 overflow-auto mb-3" style="max-height: calc(100% - 80px);">
+            <% @messages.each do |message| %>
+              <%= render 'message', message: message, streaming: false %>
+            <% end %>
+          </div>
+
+          <!-- Formulario de entrada -->
+          <%= form_with url: ask_nutritionist_ai_chat_path(@chat), method: :post,
+                        data: { turbo_stream: true }, class: 'd-flex gap-2' do |f| %>
+            <div class="flex-grow-1">
+              <%= f.text_area :message, id: 'message_input', rows: 2, class: 'form-control',
+                              placeholder: 'Pregunta al asistente sobre tus pacientes, planes nutricionales, métricas...',
+                              required: true %>
+            </div>
+            <%= f.submit 'Enviar', class: 'btn btn-primary align-self-end' %>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Información de ayuda -->
+      <div class="mt-3">
+        <small class="text-muted">
+          <strong>Ejemplos de preguntas:</strong>
+          "¿Cuál es el IMC de Juan Pérez?",
+          "¿Cómo ha evolucionado el peso de María en el último mes?",
+          "¿Qué adherencia tiene el paciente 5 a su plan actual?",
+          "Calcula las necesidades calóricas de mi paciente con ID 3"
+        </small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= turbo_stream_from @chat %>
+
+<script>
+  // Auto-scroll al final cuando hay nuevos mensajes
+  const messagesContainer = document.getElementById('messages');
+  const observer = new MutationObserver(() => {
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  });
+  observer.observe(messagesContainer, { childList: true, subtree: true });
+
+  // Limpiar input después de enviar
+  document.querySelector('form').addEventListener('turbo:submit-end', (event) => {
+    if (event.detail.success) {
+      event.target.reset();
+    }
+  });
+</script>

@@ -89,12 +89,16 @@ Located in `app/services/`:
    - Returns structured JSON with daily meal distributions
    - Considers patient history, previous plans, and clinical data
    - Output includes: objective, calories, macros, daily meals (breakfast/lunch/dinner/snacks) with ingredients, recipes, and nutritional breakdown
+   - Automatically populates `plans` and `meals` tables from `meal_distribution` JSON in controller
 
 2. **`MealLogAnalysisService`**
-   - Analyzes meal photos using vision-capable LLM
-   - Takes patient, image_data, optional nutrition_plan
-   - Returns JSON with: ai_calories, ai_macros, ai_health_score (1-10), ai_feedback
-   - Compares meals against active nutrition plan when available
+   - Analyzes meal photos using GPT-4o vision model (`RubyLLM.chat(model: 'gpt-4o')`)
+   - Takes Active Storage photo attachment and meal object
+   - Uses Cloudinary URL (`@photo.blob.url`) for image access
+   - Returns JSON with: ai_calories, ai_protein, ai_carbs, ai_fat, ai_health_score (1-10), ai_feedback, ai_comparison
+   - **Important:** Must save `meal_log` first to get `signed_id` before analyzing
+   - Handles markdown-wrapped JSON responses by extracting content between triple backticks
+   - System prompts are in Spanish to match UI language
 
 ### Authentication & Authorization
 
@@ -128,12 +132,30 @@ bin/rails db:migrate
 
 ### Working with AI Services
 
-AI services use `RubyLLM.chat` and expect structured JSON responses. Key patterns:
+AI services use `ruby_llm` gem with specific patterns:
 
-1. Initialize with `@chat = RubyLLM.chat`
-2. Define detailed system prompts with expected JSON structure
-3. Parse responses with `JSON.parse(response)`
-4. Handle both text rationale and structured data outputs
+**NutritionPlanGeneratorService:**
+1. Initialize with `@chat = RubyLLM.chat` (uses default model)
+2. Define detailed Spanish system prompts with expected JSON structure
+3. Call with `@chat.ask(system_prompt)`
+4. Parse with `JSON.parse(response.content)`
+
+**MealLogAnalysisService:**
+1. Initialize with `@chat = RubyLLM.chat(model: 'gpt-4o')` for vision support
+2. Separate instructions: `@chat.with_instructions(system_prompt)`
+3. Send image with message: `@chat.ask("prompt text", with: image_url)`
+4. Clean markdown from response before parsing:
+   ```ruby
+   if content.include?('```json')
+     content = content.split('```json')[1].split('```')[0].strip
+   end
+   JSON.parse(content)
+   ```
+
+**Image Handling with ruby_llm:**
+- Use Cloudinary blob URL: `photo.blob.url`
+- Avoid passing raw binary data or Active Storage objects directly
+- Ensure record is saved before getting signed URLs
 
 ### Model Relationships
 
@@ -156,7 +178,36 @@ end
 ## Important Considerations
 
 - The app uses both English (code) and Spanish (UI/AI prompts) - AI prompts and user-facing content are in Spanish
-- Cloudinary integration requires proper ENV configuration
-- LLM responses are parsed as JSON - always validate structure before persisting
+- Cloudinary credentials are stored in Rails encrypted credentials, not ENV variables
+- Active Storage is configured to use Cloudinary service in development
+- LLM responses may come wrapped in markdown code blocks - must be cleaned before JSON parsing
 - Weight tracking uses dedicated `weight_patients` table for historical data points
 - Meal nutritional data is stored at meal level, not just plan level
+- `meal_logs` are nested under `meals` in routes: `/meals/:meal_id/meal_logs`
+
+## Configuration Management
+
+### Cloudinary Setup
+Credentials are stored in `config/credentials.yml.enc`:
+```bash
+EDITOR="nano" bin/rails credentials:edit
+```
+
+Required structure:
+```yaml
+cloudinary:
+  cloud_name: your_cloud_name
+  api_key: your_api_key
+  api_secret: your_api_secret
+```
+
+Active Storage service is set in `config/environments/development.rb`:
+```ruby
+config.active_storage.service = :cloudinary
+```
+
+### OpenAI API Key
+Required for `ruby_llm` gem. Set in `.env` file:
+```
+OPENAI_API_KEY=sk-proj-...
+```

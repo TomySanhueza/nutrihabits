@@ -9,6 +9,8 @@ class NutritionPlanGeneratorService
   end
   
   def call
+    start_time = Time.current
+
     system_prompt = <<-PROMPT
         Actúas como un Nutricionista Clínico Certificado, con experiencia en nutrición basada en evidencia científica
         (incluyendo guías de la OMS, ADA, ESPEN y consensos internacionales actualizados). 
@@ -98,6 +100,91 @@ class NutritionPlanGeneratorService
 
     PROMPT
 
-    JSON.parse((@chat.ask(system_prompt)).content)
+    response = @chat.ask(system_prompt)
+    end_time = Time.current
+    response_time_ms = ((end_time - start_time) * 1000).round(2)
+
+    # Parsear respuesta
+    content = response.content
+
+    # Limpiar JSON si viene envuelto en markdown
+    if content.include?('```json')
+      content = content.split('```json')[1].split('```')[0].strip
+    elsif content.include?('```')
+      content = content.split('```')[1].split('```')[0].strip
+    end
+
+    parsed_result = JSON.parse(content)
+
+    # Agregar metadata al resultado
+    parsed_result["ai_metadata"] = {
+      model: 'gpt-4o-mini',
+      response_time_ms: response_time_ms,
+      timestamp: end_time.iso8601,
+      profile_id: @profile.id,
+      patient_id: @profile.patient_id,
+      start_date: @start_date,
+      end_date: @end_date,
+      days_generated: calculate_days_count,
+      prompt_version: "v1.0_clinical",
+      safety_flags: calculate_safety_flags(parsed_result)
+    }
+
+    parsed_result
+  end
+
+  private
+
+  def calculate_days_count
+    (Date.parse(@end_date.to_s) - Date.parse(@start_date.to_s)).to_i + 1
+  end
+
+  def calculate_safety_flags(result)
+    {
+      very_low_calories: detect_very_low_calories(result),
+      extreme_macro_distribution: detect_extreme_macros(result),
+      missing_meal_distribution: detect_missing_meals(result),
+      incomplete_plan_data: detect_incomplete_data(result)
+    }
+  end
+
+  def detect_very_low_calories(result)
+    calories = result.dig("plan", "calories").to_i
+    calories > 0 && calories < 1000
+  end
+
+  def detect_extreme_macros(result)
+    plan = result["plan"] || {}
+    protein = plan["protein"].to_f
+    carbs = plan["carbs"].to_f
+    fat = plan["fat"].to_f
+    total_calories = plan["calories"].to_f
+
+    return false if total_calories.zero?
+
+    protein_cal = protein * 4
+    carbs_cal = carbs * 4
+    fat_cal = fat * 9
+    calculated_total = protein_cal + carbs_cal + fat_cal
+
+    # Verificar si hay desviación mayor al 20% en el cálculo de calorías
+    deviation = ((calculated_total - total_calories).abs / total_calories * 100)
+    deviation > 20
+  end
+
+  def detect_missing_meals(result)
+    meal_distribution = result.dig("plan", "meal_distribution")
+    return true unless meal_distribution.is_a?(Hash)
+
+    expected_days = calculate_days_count
+    actual_days = meal_distribution.keys.count
+
+    actual_days < expected_days
+  end
+
+  def detect_incomplete_data(result)
+    required_fields = ["objective", "calories", "protein", "carbs", "fat", "meal_distribution"]
+    plan = result["plan"] || {}
+    required_fields.any? { |field| plan[field].nil? || plan[field].to_s.strip.empty? }
   end
 end

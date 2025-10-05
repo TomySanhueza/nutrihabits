@@ -34,7 +34,8 @@ class MealLogsController < ApplicationController
           ai_fat: analysis_result["ai_fat"],
           ai_health_score: analysis_result["ai_health_score"],
           ai_feedback: analysis_result["ai_feedback"],
-          ai_comparison: analysis_result["ai_comparison"]
+          ai_comparison: analysis_result["ai_comparison"],
+          ai_metadata: analysis_result["ai_metadata"]
         )
 
         redirect_to meal_meal_log_path(@meal, @meal_log), notice: 'Tu comida fue registrada y analizada exitosamente.'

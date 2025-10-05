@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_10_05_180705) do
+ActiveRecord::Schema[7.1].define(version: 2025_10_05_232710) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -67,6 +67,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_05_180705) do
     t.float "ai_carbs"
     t.float "ai_fat"
     t.jsonb "ai_comparison"
+    t.jsonb "ai_metadata", default: {}, null: false
     t.index ["meal_id"], name: "index_meal_logs_on_meal_id"
   end
 
@@ -110,6 +111,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_05_180705) do
     t.date "end_date"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "ai_metadata", default: {}, null: false
+    t.text "ai_criteria_explanation"
     t.index ["nutritionist_id"], name: "index_nutrition_plans_on_nutritionist_id"
     t.index ["patient_id"], name: "index_nutrition_plans_on_patient_id"
   end

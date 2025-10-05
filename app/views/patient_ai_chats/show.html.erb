@@ -1,0 +1,89 @@
+<div class="container-fluid vh-100 d-flex flex-column">
+  <div class="row bg-light border-bottom py-3">
+    <div class="col">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <%= link_to "← Volver", patient_ai_chats_path, class: "btn btn-sm btn-outline-secondary me-3" %>
+          <span class="fw-bold">Mi Asistente Nutricional</span>
+        </div>
+        <%= button_to "Eliminar chat", patient_ai_chat_path(@chat), method: :delete,
+            data: { confirm: "¿Estás seguro?" }, class: "btn btn-sm btn-outline-danger" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="row flex-grow-1 overflow-hidden">
+    <div class="col">
+      <div id="messages" class="p-4 overflow-auto" style="height: calc(100vh - 200px);">
+        <%= turbo_stream_from "chat_#{@chat.id}" %>
+        <% @messages.each do |message| %>
+          <%= render "patient_ai_chats/message", message: message %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="row bg-light border-top py-3">
+    <div class="col-md-8 mx-auto">
+      <%= form_with url: ask_patient_ai_chat_path(@chat), method: :post, data: { turbo_stream: true } do |f| %>
+        <div class="input-group">
+          <%= f.text_field :message, class: "form-control", placeholder: "Escribe tu pregunta...", autocomplete: "off" %>
+          <%= f.submit "Enviar", class: "btn btn-primary" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<style>
+  .message {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+
+  .message.user-message {
+    background-color: #e3f2fd;
+    margin-left: 20%;
+  }
+
+  .message.assistant-message {
+    background-color: #f5f5f5;
+    margin-right: 20%;
+  }
+
+  .message-role {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    color: #666;
+  }
+
+  .message-content {
+    line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  .message-metadata {
+    font-size: 0.75rem;
+    color: #999;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .safety-flag {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    margin-right: 0.5rem;
+    background-color: #fff3cd;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+  }
+
+  .safety-flag.warning {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+</style>

@@ -1,0 +1,41 @@
+<div class="message <%= message.role %>-message">
+  <div class="message-role">
+    <%= message.user? ? "Tú" : "Asistente" %>
+  </div>
+  <div class="message-content">
+    <%= simple_format(message.content) %>
+  </div>
+
+  <% if message.assistant? && message.metadata.present? %>
+    <div class="message-metadata">
+      <div>
+        <small>
+          Tiempo de respuesta: <%= message.metadata["response_time_ms"] %>ms
+          <% if message.metadata["tools_called"]&.any? %>
+            | Herramientas: <%= message.metadata["tools_called"].join(", ") %>
+          <% end %>
+        </small>
+      </div>
+
+      <% if message.metadata["safety_flags"].present? %>
+        <% safety_flags = message.metadata["safety_flags"] %>
+        <% if safety_flags.values.any? %>
+          <div class="mt-2">
+            <% if safety_flags["off_topic"] %>
+              <span class="safety-flag warning">⚠️ Tema fuera de nutrición</span>
+            <% end %>
+            <% if safety_flags["medical_advice_detected"] %>
+              <span class="safety-flag warning">⚠️ Consulta médica detectada</span>
+            <% end %>
+            <% if safety_flags["plan_deviation_suggested"] %>
+              <span class="safety-flag warning">⚠️ Posible desviación del plan</span>
+            <% end %>
+            <% if safety_flags["negative_sentiment"] %>
+              <span class="safety-flag">💭 Apoyo emocional</span>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

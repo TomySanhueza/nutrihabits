@@ -10,6 +10,8 @@ class MealLogAnalysisService
   end
 
   def call
+    start_time = Time.current
+
     system_prompt = <<-PROMPT
         Actúas como un **Nutricionista Clínico Certificado**, con experiencia en nutrición basada en evidencia científica
         (incluyendo guías de la OMS, ADA, ESPEN y consensos internacionales actualizados).
@@ -96,6 +98,10 @@ class MealLogAnalysisService
     # Enviar la URL de la imagen al modelo
     response = @chat.ask("Analiza esta imagen de comida según las instrucciones y retorna el JSON con el análisis nutricional.", with: image_url)
 
+    # Calcular tiempo de respuesta
+    end_time = Time.current
+    response_time_ms = ((end_time - start_time) * 1000).round(2)
+
     # Limpiar la respuesta para extraer solo el JSON
     content = response.content
 
@@ -106,7 +112,22 @@ class MealLogAnalysisService
       content = content.split('```')[1].split('```')[0].strip
     end
 
-    JSON.parse(content)
+    parsed_result = JSON.parse(content)
+
+    # Agregar metadata al resultado
+    parsed_result["ai_metadata"] = {
+      model: 'gpt-4o',
+      response_time_ms: response_time_ms,
+      timestamp: end_time.iso8601,
+      image_url: @photo.blob.url,
+      nutrition_plan_id: @nutrition_plan&.id,
+      meal_id: @meal.id,
+      plan_id: @plan.id,
+      prompt_version: "v2.0_clinical",
+      safety_flags: calculate_safety_flags(parsed_result)
+    }
+
+    parsed_result
   end
 
   private
@@ -152,5 +173,43 @@ class MealLogAnalysisService
       "dinner" => "Cena",
       "snack" => "Colación"
     }[meal_type] || meal_type
+  end
+
+  def calculate_safety_flags(parsed_result)
+    {
+      very_low_health_score: parsed_result["ai_health_score"].to_f < 3.0,
+      extreme_calorie_deviation: detect_extreme_calorie_deviation(parsed_result),
+      potentially_harmful_pattern: detect_harmful_pattern(parsed_result),
+      missing_essential_data: detect_missing_data(parsed_result)
+    }
+  end
+
+  def detect_extreme_calorie_deviation(result)
+    return false unless @meal && result["ai_calories"]
+
+    planned_calories = @meal.calories.to_f
+    actual_calories = result["ai_calories"].to_f
+
+    return false if planned_calories.zero?
+
+    deviation_percentage = ((actual_calories - planned_calories).abs / planned_calories * 100)
+    deviation_percentage > 100 # Más del 100% de desviación
+  end
+
+  def detect_harmful_pattern(result)
+    feedback = result["ai_feedback"].to_s.downcase
+    harmful_patterns = [
+      /muy bajo/i,
+      /preocupante/i,
+      /cr[ií]tico/i,
+      /no cumple/i,
+      /evitar completamente/i
+    ]
+    harmful_patterns.any? { |pattern| feedback.match?(pattern) }
+  end
+
+  def detect_missing_data(result)
+    required_fields = ["ai_calories", "ai_protein", "ai_carbs", "ai_fat", "ai_health_score", "ai_feedback"]
+    required_fields.any? { |field| result[field].nil? || result[field].to_s.strip.empty? }
   end
 end

@@ -27,6 +27,8 @@ class NutritionPlansController < ApplicationController
       meal_distribution: response["plan"]["meal_distribution"],
       notes: response["plan"]["notes"],
       ai_rationale: response["criteria_explanation"],
+      ai_criteria_explanation: response["criteria_explanation"],
+      ai_metadata: response["ai_metadata"],
       nutritionist: current_nutritionist,
       status: 'active',
       start_date: Date.today
