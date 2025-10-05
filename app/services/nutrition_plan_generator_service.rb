@@ -36,20 +36,36 @@ class NutritionPlanGeneratorService
                   "meal_distribution": {
                       "YYYY-MM-DD": {
                           "breakfast": { 
-                              "detalle": "descripción práctica de un desayuno con porciones en medidas sencillas (ej: palma de la mano, puño, taza)", 
-                              "calorias": "integer proporcional a calories"
+                                "ingredients": "Lista clara de los distintos ingredientes del desayuno, separados por comas, indicando sus porciones en medidas sencillas y cotidianas (ej: 200 g, 1 palma de pollo, 1 taza de quinoa, ½ plátano).",
+                                "recipe": "Breve receta con pasos enumerados y separados por coma, describiendo cómo preparar o cocinar el desayuno. Cada paso debe incluir un número al inicio (ej: 1. Cocina el pollo, 2. Corta las verduras, 3. Mezcla los ingredientes).",
+                                "calorias": "float que representa las calorías totales del desayuno, proporcional a las calorías diarias del plan.",
+                                "protein": "float que indica los gramos de proteína presentes en la receta.",
+                                "carbs": "float que indica los gramos de carbohidratos presentes en la receta.",
+                                "fat": "float que indica los gramos de grasa presentes en la receta."
                           },
                           "lunch": { 
-                              "detalle": "descripción práctica de un almuerzo con porciones sencillas", 
-                              "calorias": "integer proporcional a calories"
+                                "ingredients": "Lista clara de los distintos ingredientes del almuerzo, separados por comas, indicando sus porciones en medidas sencillas y cotidianas (ej: 150 g de pollo, 1 taza de arroz integral, ½ palta, 1 taza de vegetales salteados).",
+                                "recipe": "Breve receta con pasos numerados y separados por coma, explicando cómo preparar o cocinar el almuerzo. Cada paso debe comenzar con un número (ej: 1. Cocina el arroz, 2. Saltea los vegetales, 3. Mezcla todo y sirve).",
+                                "calorias": "float que representa las calorías totales del almuerzo, proporcional a las calorías diarias del plan.",
+                                "protein": "float que indica los gramos de proteína presentes en la receta.",
+                                "carbs": "float que indica los gramos de carbohidratos presentes en la receta.",
+                                "fat": "float que indica los gramos de grasa presentes en la receta."
                           },
                           "dinner": { 
-                              "detalle": "descripción práctica de una cena con porciones sencillas", 
-                              "calorias": "integer proporcional a calories"
+                                "ingredients": "Lista de los distintos ingredientes de la cena, separados por comas, con sus porciones expresadas en medidas sencillas y visuales (ej: 120 g de pescado, 1 taza de puré de calabaza, 1 taza de brócoli al vapor, 1 cucharadita de aceite de oliva).",
+                                "recipe": "Breve receta con pasos numerados y separados por coma, explicando la preparación o cocción de la cena. Cada paso debe comenzar con un número (ej: 1. Cocina el pescado al horno, 2. Prepara el puré de calabaza, 3. Cocina el brócoli al vapor, 4. Sirve y agrega aceite de oliva).",
+                                "calorias": "float que representa las calorías totales de la cena, proporcional a las calorías diarias del plan.",
+                                "protein": "float que indica los gramos de proteína contenidos en la receta.",
+                                "carbs": "float que indica los gramos de carbohidratos contenidos en la receta.",
+                                "fat": "float que indica los gramos de grasa contenidos en la receta."
                           },
                           "snacks": { 
-                              "detalle": "descripción práctica de un snack saludable con porciones sencillas", 
-                              "calorias": "integer proporcional a calories"
+                                "ingredients": "Lista de los distintos ingredientes o alimentos que componen el snack, separados por comas, con porciones expresadas en medidas sencillas y visuales (ej: 1 yogur natural, 10 almendras, ½ manzana, 1 cucharadita de semillas de lino).",
+                                "recipe": "Breve descripción numerada con los pasos simples para preparar o combinar el snack si aplica. Cada paso debe comenzar con un número (ej: 1. Coloca el yogur en un bol, 2. Agrega las almendras y la manzana en trozos, 3. Espolvorea las semillas de lino por encima).",
+                                "calorias": "float que representa las calorías totales del snack, proporcional a las calorías diarias del plan.",
+                                "protein": "float que indica los gramos de proteína contenidos en el snack.",
+                                "carbs": "float que indica los gramos de carbohidratos contenidos en el snack.",
+                                "fat": "float que indica los gramos de grasa contenidos en el snack."
                           }
                       },
                       "YYYY-MM-DD": { ... repetir la misma estructura ... },

@@ -10,4 +10,8 @@ Rails.application.routes.draw do
       resources :nutrition_plans
     end
   end
+
+  authenticate :patient do
+    resources :meal_logs, except: [:edit, :update]
+  end
 end

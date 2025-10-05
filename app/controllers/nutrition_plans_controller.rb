@@ -17,7 +17,7 @@ class NutritionPlansController < ApplicationController
   def create
     @patient = Patient.find(params[:patient_id])
     response = NutritionPlanGeneratorService.new(@patient.profile, Date.today, Date.today + 6).call
-
+    raise
     @nutrition_plan = @patient.nutrition_plans.create(
       objective: response["plan"]["objective"],
       calories: response["plan"]["calories"],

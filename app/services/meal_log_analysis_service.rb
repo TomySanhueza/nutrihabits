@@ -1,8 +1,8 @@
 class MealLogAnalysisService
   require "json"
 
-  def initialize(patient, image_data, nutrition_plan = nil)
-    @patient = patient
+  def initialize(image_data, nutrition_plan)
+    # @patient = patient
     @image_data = image_data
     @nutrition_plan = nutrition_plan
     @chat = RubyLLM.chat
@@ -26,12 +26,10 @@ class MealLogAnalysisService
         Debes entregar **una respuesta estructurada en formato JSON válido**, con los siguientes campos exactos:
 
         {
-          "ai_calories": "integer — calorías totales estimadas de la comida (ej: 520)",
-          "ai_macros": {
-            "protein_g": "float — gramos de proteína estimados",
-            "carbs_g": "float — gramos de carbohidratos estimados",
-            "fat_g": "float — gramos de grasa estimados"
-          },
+          "ai_calories": "float — calorías totales estimadas de la comida (ej: 520)",
+          "ai_protein": "float — gramos de proteína estimados",
+          "ai_carbs": "float — gramos de carbohidratos estimados",
+          "ai_fat": "float — gramos de grasa estimados",
           "ai_health_score": "float — puntuación de salud de la comida en escala 1 al 10, considerando el plan nutricional, balance de macronutrientes, calidad alimentaria y coherencia con los objetivos del paciente",
           "ai_feedback": "string — comentario breve, empático y motivador (<280 caracteres). Refuerza los aciertos, señala oportunidades de mejora de forma amable y ofrece una recomendación práctica que impulse la adherencia sin generar culpa."
         }
@@ -60,14 +58,11 @@ class MealLogAnalysisService
         ---
 
         ### 📘 Ejemplo de salida esperada:
-        analysis:
         {
-          "ai_calories": 610,
-          "ai_macros": {
-            "protein_g": 22,
-            "carbs_g": 85,
-            "fat_g": 16
-          },
+          "ai_calories": 610.0,
+          "ai_protein": 22.0,
+          "ai_carbs": 85.0,
+          "ai_fat": 16.0,
           "ai_health_score": 7.8,
           "ai_feedback": "Buena fuente de energía 👌 y porción equilibrada de carbohidratos. Agregar una proteína magra o vegetales le daría más saciedad y balance 🌿. Vas muy bien, ¡cada elección cuenta! 💪"
         }

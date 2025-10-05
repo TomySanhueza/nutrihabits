@@ -1,0 +1,32 @@
+<%= simple_form_for meal_log do |f| %>
+  <%= f.error_notification %>
+
+  <div class="form-inputs">
+    <% if @meals.any? %>
+      <%= f.input :meal_id,
+                  collection: @meals,
+                  label_method: ->(meal) { "#{meal.meal_type.titleize} - #{meal.plan.date}" },
+                  value_method: :id,
+                  label: "Selecciona la comida que consumiste",
+                  include_blank: "Elige una opción",
+                  input_html: { class: 'form-select' } %>
+
+      <%= f.input :photo,
+                  as: :file,
+                  label: "Sube una foto de tu comida",
+                  hint: "La IA analizará tu foto para calcular calorías y macronutrientes",
+                  input_html: { accept: 'image/*' } %>
+    <% else %>
+      <div class="alert alert-warning">
+        <p class="mb-0">No tienes comidas disponibles para registrar. Tu nutricionista debe crear un plan nutricional primero.</p>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="form-actions mt-3">
+    <% if @meals.any? %>
+      <%= f.button :submit, "Registrar y Analizar", class: "btn btn-primary" %>
+    <% end %>
+    <%= link_to "Cancelar", meal_logs_path, class: "btn btn-secondary" %>
+  </div>
+<% end %>

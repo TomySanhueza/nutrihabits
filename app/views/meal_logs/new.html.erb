@@ -1,0 +1,15 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <%= link_to "← Volver", meal_logs_path, class: "btn btn-outline-secondary mb-3" %>
+
+      <div class="card">
+        <div class="card-body">
+          <h3 class="card-title mb-4">Registrar Nueva Comida</h3>
+
+          <%= render 'form', meal_log: @meal_log %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
