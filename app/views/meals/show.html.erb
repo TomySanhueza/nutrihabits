@@ -1,0 +1,73 @@
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h2>Detalle de Comida</h2>
+      <div>
+        <%= link_to 'Editar', edit_meal_path(@meal), class: 'btn btn-warning' %>
+        <%= link_to 'Volver', meals_path, class: 'btn btn-secondary' %>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <p><strong>Fecha:</strong> <%= @meal.plan.date.strftime('%d/%m/%Y') %></p>
+          <p><strong>Tipo de Comida:</strong> <%= @meal.meal_type&.titleize %></p>
+          <p><strong>Estado:</strong>
+            <% case @meal.status %>
+            <% when 'completed' %>
+              <span class="badge bg-success">Completada</span>
+            <% when 'pending' %>
+              <span class="badge bg-warning">Pendiente</span>
+            <% when 'skipped' %>
+              <span class="badge bg-secondary">Omitida</span>
+            <% else %>
+              <span class="badge bg-info"><%= @meal.status %></span>
+            <% end %>
+          </p>
+        </div>
+        <div class="col-md-6">
+          <h5>Información Nutricional</h5>
+          <p><strong>Calorías:</strong> <%= @meal.calories %> kcal</p>
+          <p><strong>Proteínas:</strong> <%= @meal.protein %> g</p>
+          <p><strong>Carbohidratos:</strong> <%= @meal.carbs %> g</p>
+          <p><strong>Grasas:</strong> <%= @meal.fat %> g</p>
+        </div>
+      </div>
+
+      <div class="row mb-3">
+        <div class="col-12">
+          <h5>Ingredientes</h5>
+          <p><%= @meal.ingredients %></p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12">
+          <h5>Receta</h5>
+          <p><%= simple_format(@meal.recipe) %></p>
+        </div>
+      </div>
+
+      <div class="row mt-4">
+        <div class="col-12">
+          <h5>Registro de Comida</h5>
+          <% if @meal.meal_log.present? %>
+            <div class="card">
+              <div class="card-body">
+                <p><strong>Fecha:</strong> <%= @meal.meal_log.logged_at.strftime('%d/%m/%Y %H:%M') %></p>
+                <p><strong>Calorías estimadas:</strong> <%= @meal.meal_log.ai_calories %> kcal</p>
+                <p><strong>Puntuación de salud:</strong> <%= @meal.meal_log.ai_health_score %>/10</p>
+                <%= link_to 'Ver detalle', meal_meal_log_path(@meal, @meal.meal_log), class: 'btn btn-sm btn-info' %>
+              </div>
+            </div>
+          <% else %>
+            <div class="alert alert-light">
+              <p class="mb-2">Aún no has registrado esta comida.</p>
+              <%= link_to 'Registrar Comida con Foto', new_meal_meal_log_path(@meal), class: 'btn btn-primary' %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -13,6 +13,8 @@ Rails.application.routes.draw do
   end
 
   authenticate :patient do
-    resources :meal_logs, except: [:edit, :update]
+    resources :meals do
+      resources :meal_logs, except: [:edit, :update]
+    end
   end
 end

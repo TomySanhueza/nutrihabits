@@ -1,0 +1,42 @@
+<div class="nested-fields border-start border-3 border-info ps-3 mb-3">
+  <%= f.hidden_field :_destroy %>
+
+  <div class="row align-items-center mb-2">
+    <div class="col">
+      <strong>Comida</strong>
+    </div>
+    <div class="col-auto">
+      <button type="button" class="btn btn-danger btn-sm" data-action="click->nested-form#remove_association">
+        Eliminar
+      </button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <%= f.input :meal_type, label: "Tipo de comida", collection: ['Desayuno', 'Colación AM', 'Almuerzo', 'Colación PM', 'Cena', 'Colación noche'], include_blank: 'Seleccionar' %>
+    </div>
+    <div class="col-md-6">
+      <%= f.input :status, label: "Estado", collection: ['Pendiente', 'Completado', 'Parcial', 'Omitido'], include_blank: 'Seleccionar' %>
+    </div>
+  </div>
+
+  <%= f.input :ingredients, label: "Ingredientes", as: :text, input_html: { rows: 2 }, placeholder: "Ej: 2 huevos, 50g avena, 1 plátano..." %>
+
+  <%= f.input :recipe, label: "Preparación/Receta", as: :text, input_html: { rows: 2 }, placeholder: "Instrucciones de preparación..." %>
+
+  <div class="row">
+    <div class="col-md-3">
+      <%= f.input :calories, label: "Calorías (kcal)" %>
+    </div>
+    <div class="col-md-3">
+      <%= f.input :protein, label: "Proteínas (g)" %>
+    </div>
+    <div class="col-md-3">
+      <%= f.input :carbs, label: "Carbohidratos (g)" %>
+    </div>
+    <div class="col-md-3">
+      <%= f.input :fat, label: "Grasas (g)" %>
+    </div>
+  </div>
+</div>

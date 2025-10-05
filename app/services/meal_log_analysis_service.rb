@@ -1,12 +1,12 @@
 class MealLogAnalysisService
   require "json"
 
-  def initialize(image_data, meal)
-    @image_data = image_data
+  def initialize(photo_attachment, meal)
+    @photo = photo_attachment
     @meal = meal # El meal específico para ese día y tipo de comida
     @plan = meal.plan # El plan del día
     @nutrition_plan = meal.plan.nutrition_plan # El plan nutricional general
-    @chat = RubyLLM.chat
+    @chat = RubyLLM.chat(model: 'gpt-4o')
   end
 
   def call
@@ -36,14 +36,14 @@ class MealLogAnalysisService
           "ai_feedback": "string — comentario breve, empático y motivador (<280 caracteres). Refuerza los aciertos, señala oportunidades de mejora de forma amable y ofrece una recomendación práctica que impulse la adherencia sin generar culpa.",
           "ai_comparison": {
             "macronutrient_comparison": "string — Comparación detallada de macronutrientes vs. la comida planificada (ej: 'Calorías: +120 kcal sobre el plan, Proteínas: -10 g, Carbohidratos: +25 g, Grasas: dentro del rango.')",
-            "ingredient_analysis": "string — Análisis cualitativo de ingredientes utilizados vs. los planificados, destacando el equilibrio y calidad (ej: 'Buen equilibrio entre fuentes naturales 🌿. Usaste ingredientes frescos y simples, aunque podrías sumar algo de color con vegetales o legumbres 💚.')",
-            "improvement_suggestion": "string — Sugerencia práctica y constructiva para mejorar en la próxima comida (ej: 'Vas muy bien 🙌. Para el próximo plato, intenta incluir una porción de proteína magra o verduras al vapor — pequeños ajustes que suman mucho 💪.')"
+            "ingredient_analysis": "string — Análisis cualitativo de ingredientes utilizados vs. los planificados, destacando el equilibrio y calidad (ej: 'Buen equilibrio entre fuentes naturales. Usaste ingredientes frescos y simples, aunque podrías sumar algo de color con vegetales o legumbres.'). NO incluyas caracter extraño o adicionales qu epuedan afectar al parsing del json",
+            "improvement_suggestion": "string — Sugerencia práctica y constructiva para mejorar en la próxima comida (ej: 'Vas muy bien. Para el próximo plato, intenta incluir una porción de proteína magra o verduras al vapor — pequeños ajustes que suman mucho.').NO incluyas caracter extraño o adicionales qu epuedan afectar al parsing del json"
           }
         }
 
         ---
 
-        ### 📊 Criterios profesionales para calcular `ai_health_score` (escala 1 al 10):
+        ### Criterios profesionales para calcular `ai_health_score` (escala 1 al 10):
 
         **Debes evaluar combinando estos aspectos:**
         1. **Calidad nutricional general** (proteínas magras, carbohidratos complejos, grasas saludables, vegetales/frutas, métodos de cocción)
@@ -61,32 +61,52 @@ class MealLogAnalysisService
 
         ---
 
-        ### 💬 Guía para el tono del campo `ai_feedback`:
+        ### Guía para el tono del campo `ai_feedback`:
         - Empático, cercano y sin juicios ("vas por buen camino", "esto también cuenta").
-        - Refuerza lo positivo primero ("Buena fuente de energía 👏").
-        - Luego sugiere mejoras simples ("Podrías sumar algo de proteína o color vegetal 🌿").
-        - Cierra con una frase motivadora o de apoyo ("Recuerda que el equilibrio se construye paso a paso 💪").
+        - Refuerza lo positivo primero ("Buena fuente de energía").
+        - Luego sugiere mejoras simples ("Podrías sumar algo de proteína o color vegetal").
+        - Cierra con una frase motivadora o de apoyo ("Recuerda que el equilibrio se construye paso a paso").
         - Evita lenguaje de culpa o perfeccionismo.
+        - Puedes incluir emojis en tus respuestas, pero que no afecten al json. 
 
         ---
 
-        ### 📘 Ejemplo de salida esperada:
+        ### Ejemplo de salida esperada. NO incluyas caracter extraño o adicionales qu epuedan afectar al parsing del json:
         {
           "ai_calories": 610.0,
           "ai_protein": 22.0,
           "ai_carbs": 85.0,
           "ai_fat": 16.0,
           "ai_health_score": 7.8,
-          "ai_feedback": "Buena fuente de energía 👌 y porción equilibrada de carbohidratos. Agregar una proteína magra o vegetales le daría más saciedad y balance 🌿. Vas muy bien, ¡cada elección cuenta! 💪",
+          "ai_feedback": "Buena fuente de energía y porción equilibrada de carbohidratos. Agregar una proteína magra o vegetales le daría más saciedad y balance . Vas muy bien, ¡cada elección cuenta! ",
           "ai_comparison": {
             "macronutrient_comparison": "Calorías: +120 kcal sobre el plan, Proteínas: -10 g, Carbohidratos: +25 g, Grasas: dentro del rango.",
-            "ingredient_analysis": "Buen equilibrio entre fuentes naturales 🌿. Usaste ingredientes frescos y simples, aunque podrías sumar algo de color con vegetales o legumbres 💚.",
-            "improvement_suggestion": "Vas muy bien 🙌. Para el próximo plato, intenta incluir una porción de proteína magra o verduras al vapor — pequeños ajustes que suman mucho 💪."
+            "ingredient_analysis": "Buen equilibrio entre fuentes naturales . Usaste ingredientes frescos y simples, aunque podrías sumar algo de color con vegetales o legumbres.",
+            "improvement_suggestion": "Vas muy bien. Para el próximo plato, intenta incluir una porción de proteína magra o verduras al vapor — pequeños ajustes que suman mucho."
           }
         }
     PROMPT
 
-    JSON.parse((@chat.ask(system_prompt, image: @image_data)).content)
+    # Configurar instrucciones del sistema
+    @chat.with_instructions(system_prompt)
+
+    # Obtener la URL pública de Cloudinary directamente del blob
+    image_url = @photo.blob.url
+
+    # Enviar la URL de la imagen al modelo
+    response = @chat.ask("Analiza esta imagen de comida según las instrucciones y retorna el JSON con el análisis nutricional.", with: image_url)
+
+    # Limpiar la respuesta para extraer solo el JSON
+    content = response.content
+
+    # Extraer JSON si viene envuelto en bloques de código markdown
+    if content.include?('```json')
+      content = content.split('```json')[1].split('```')[0].strip
+    elsif content.include?('```')
+      content = content.split('```')[1].split('```')[0].strip
+    end
+
+    JSON.parse(content)
   end
 
   private

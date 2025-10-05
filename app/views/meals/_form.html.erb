@@ -1,0 +1,79 @@
+<%= form_with(model: meal, local: true) do |form| %>
+  <% if meal.errors.any? %>
+    <div class="alert alert-danger">
+      <h4><%= pluralize(meal.errors.count, "error") %> impidieron guardar esta comida:</h4>
+      <ul>
+        <% meal.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="mb-3">
+    <%= form.label :plan_id, 'Plan del Día', class: 'form-label' %>
+    <%= form.collection_select :plan_id, @plans, :id, :date, { prompt: 'Seleccione un plan' }, class: 'form-select' %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :meal_type, 'Tipo de Comida', class: 'form-label' %>
+    <%= form.select :meal_type,
+        options_for_select([
+          ['Desayuno', 'breakfast'],
+          ['Almuerzo', 'lunch'],
+          ['Cena', 'dinner'],
+          ['Snack', 'snacks']
+        ], meal.meal_type),
+        { prompt: 'Seleccione tipo de comida' },
+        class: 'form-select' %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :ingredients, 'Ingredientes', class: 'form-label' %>
+    <%= form.text_area :ingredients, rows: 3, class: 'form-control', placeholder: 'Ej: 200g de pollo, 1 taza de arroz integral, 1/2 palta' %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :recipe, 'Receta', class: 'form-label' %>
+    <%= form.text_area :recipe, rows: 5, class: 'form-control', placeholder: '1. Cocina el pollo, 2. Prepara el arroz, 3. Mezcla todo' %>
+  </div>
+
+  <div class="row">
+    <div class="col-md-3 mb-3">
+      <%= form.label :calories, 'Calorías (kcal)', class: 'form-label' %>
+      <%= form.number_field :calories, step: 0.1, class: 'form-control' %>
+    </div>
+
+    <div class="col-md-3 mb-3">
+      <%= form.label :protein, 'Proteínas (g)', class: 'form-label' %>
+      <%= form.number_field :protein, step: 0.1, class: 'form-control' %>
+    </div>
+
+    <div class="col-md-3 mb-3">
+      <%= form.label :carbs, 'Carbohidratos (g)', class: 'form-label' %>
+      <%= form.number_field :carbs, step: 0.1, class: 'form-control' %>
+    </div>
+
+    <div class="col-md-3 mb-3">
+      <%= form.label :fat, 'Grasas (g)', class: 'form-label' %>
+      <%= form.number_field :fat, step: 0.1, class: 'form-control' %>
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :status, 'Estado', class: 'form-label' %>
+    <%= form.select :status,
+        options_for_select([
+          ['Pendiente', 'pending'],
+          ['Completada', 'completed'],
+          ['Omitida', 'skipped']
+        ], meal.status),
+        { prompt: 'Seleccione estado' },
+        class: 'form-select' %>
+  </div>
+
+  <div class="d-flex justify-content-between">
+    <%= form.submit 'Guardar', class: 'btn btn-primary' %>
+    <%= link_to 'Cancelar', meals_path, class: 'btn btn-secondary' %>
+  </div>
+<% end %>
