@@ -1,51 +1,962 @@
-<div class="d-flex">
-  <div class="d-flex flex-column">
-    <div class="d-flex flex-column">
-      <%= link_to "Dashboard", "#" %>
-      <%= link_to "Patientes", "#" %>
-      <%= link_to "Planes nutricionales", "#" %>
-      <%= link_to "Asistente IA", "#" %>
-      <%= link_to "Configuraciones", "#" %>
-    </div>
-    <div>
-      <%#= image_tag current_nutritionist.photo %>
-      <%= image_tag "https://kitt.lewagon.com/placeholder/users/ssaunier",
-                                class: "navbar-avatar me-2",
-                                alt: "Default avatar" %>
-    </div>
-  </div>
+<div class="dashboard-layout">
+  <!-- Left Sidebar -->
+  <aside class="left-sidebar">
+    <nav class="sidebar-nav">
+      <%= link_to nutritionist_dashboard_path, class: "nav-item active" do %>
+        <span class="nav-icon">📊</span>
+        <span>Panel de Control</span>
+      <% end %>
+      <%= link_to patients_path, class: "nav-item" do %>
+        <span class="nav-icon">👥</span>
+        <span>Pacientes</span>
+      <% end %>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">🍎</span>
+        <span>Planes Nutricionales</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">🤖</span>
+        <span>Copiloto IA</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">⚙️</span>
+        <span>Configuraciones</span>
+      </a>
+    </nav>
 
-  <div>
-    <div class="d-flex">
-      <h1>Bienvenido <%= current_nutritionist.first_name %> </h1>
-      <%= link_to 'Add New Patient', new_patient_path %>
-    </div>
-
-    <div class="d-flex">
-      <div>
-        <h4>Pacientes activos</h4>
-        <%= current_nutritionist.patients.count %>
+    <div class="sidebar-footer">
+      <%= image_tag "https://kitt.lewagon.com/placeholder/users/ssaunier", 
+                    class: "user-avatar", 
+                    alt: "Dr. Amelia Harper" %>
+      <div class="user-info">
+        <div class="user-name">Dr. Amelia Harper</div>
+        <div class="user-role">Nutritionist</div>
       </div>
-      <div>
-        <h4>Promedio de cumplimiento</h4>
-        <h1>82%</h1>
-      </div>
-      <div>
-        <h4>Gráfico de cumplimiento</h4>
-        <%= image_tag "grafico", size: "60X80" %>
-      </div>
+    </div>
+  </aside>
 
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <div class="content-header">
+      <div class="header-content">
+        <h1 class="page-title">Bienvenido, Dr. Harper</h1>
+        <p class="page-subtitle">Gestiona tus pacientes y sus planes nutricionales.</p>
+      </div>
+      <div class="header-actions">
+        <%= link_to new_patient_path, class: "btn btn-outline" do %>
+          <span class="btn-icon">👤</span>
+          Crear Paciente
+        <% end %>
+        <button class="btn-ai btn-ai-primary">
+          <span class="btn-ai-icon">✨</span>
+          Generar Plan con IA
+        </button>
+      </div>
     </div>
 
-    <!-- inicio de pacientes activos -->
-    <table class="table">
-      <%= render @patients %>
-    </table>
-    <!-- fin pacientes activos -->
-
-    <div>
-      <h4>Planes nutricionales</h4>
-      <%= render @nutritions %>
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3 class="stat-label">Pacientes Activos</h3>
+        <div class="stat-value"><%= @patients.count %></div>
+      </div>
+      <div class="stat-card">
+        <h3 class="stat-label">Adherencia Promedio</h3>
+        <div class="stat-value stat-green">82%</div>
+      </div>
+      <div class="stat-card">
+        <h3 class="stat-label">Peso Prom. Mensual</h3>
+        <div class="stat-value">-1.2 kg</div>
+      </div>
+      <div class="stat-card">
+        <h3 class="stat-label">Tendencia Adherencia</h3>
+        <div class="stat-chart">
+          <svg width="100" height="50" viewBox="0 0 100 50">
+            <path d="M10,40 Q25,15 40,25 T70,10 L90,20" stroke="#10b981" stroke-width="2.5" fill="none"/>
+          </svg>
+        </div>
+      </div>
     </div>
-  </div>
+
+    <!-- Active Patients Section -->
+    <div class="section-card">
+      <h2 class="section-title">Pacientes Activos</h2>
+      <div class="patients-container">
+        <% if @patients.any? %>
+          <% @patients.limit(3).each_with_index do |patient, index| %>
+            <div class="patient-row">
+              <div class="patient-info">
+                <div class="patient-avatar">
+                  <%= (patient.first_name&.first || "P").upcase %><%= (patient.last_name&.first || "A").upcase %>
+                </div>
+                <div class="patient-details">
+                  <div class="patient-name"><%= patient.first_name %> <%= patient.last_name %></div>
+                  <div class="patient-meta">Última interacción: <%= ['hace 2h', 'hace 1 día', 'hace 3 días'][index] %></div>
+                </div>
+              </div>
+              <div class="adherence-badge <%= ['high', 'medium', 'low'][index] %>">
+                <%= ['95%', '72%', '45%'][index] %>
+              </div>
+              <div class="patient-actions">
+                <%= link_to "Ver Perfil", patient_path(patient), class: "action-link" %>
+                <a href="#" class="action-link">Ver Evolución</a>
+                <a href="#" class="action-link primary">Generar Plan con IA</a>
+              </div>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="patient-row">
+            <div class="patient-info">
+              <div class="patient-avatar">LA</div>
+              <div class="patient-details">
+                <div class="patient-name">Leslie Alexander</div>
+                <div class="patient-meta">Última interacción: hace 2h</div>
+              </div>
+            </div>
+            <div class="adherence-badge high">95%</div>
+            <div class="patient-actions">
+              <a href="#" class="action-link">Ver Perfil</a>
+              <a href="#" class="action-link">Ver Evolución</a>
+              <a href="#" class="action-link primary">Generar Plan con IA</a>
+            </div>
+          </div>
+          <div class="patient-row">
+            <div class="patient-info">
+              <div class="patient-avatar">MF</div>
+              <div class="patient-details">
+                <div class="patient-name">Michael Foster</div>
+                <div class="patient-meta">Última interacción: hace 1 día</div>
+              </div>
+            </div>
+            <div class="adherence-badge medium">72%</div>
+            <div class="patient-actions">
+              <a href="#" class="action-link">Ver Perfil</a>
+              <a href="#" class="action-link">Ver Evolución</a>
+              <a href="#" class="action-link primary">Generar Plan con IA</a>
+            </div>
+          </div>
+          <div class="patient-row">
+            <div class="patient-info">
+              <div class="patient-avatar">DV</div>
+              <div class="patient-details">
+                <div class="patient-name">Dries Vincent</div>
+                <div class="patient-meta">Última interacción: hace 3 días</div>
+              </div>
+            </div>
+            <div class="adherence-badge low">45%</div>
+            <div class="patient-actions">
+              <a href="#" class="action-link">Ver Perfil</a>
+              <a href="#" class="action-link">Ver Evolución</a>
+              <a href="#" class="action-link primary">Generar Plan con IA</a>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Nutritional Plans Section -->
+    <div class="section-card">
+      <h2 class="section-title">Planes Nutricionales</h2>
+      <div class="table-container">
+        <div class="table-header">
+          <div class="header-cell">Paciente</div>
+          <div class="header-cell">Rango de Fechas</div>
+          <div class="header-cell">Estado</div>
+          <div class="header-cell">Acciones</div>
+        </div>
+        <% if @nutritions.any? %>
+          <% @nutritions.each do |nutrition| %>
+            <div class="table-row">
+              <div class="table-cell"><%= nutrition.patient.first_name %> <%= nutrition.patient.last_name %></div>
+              <div class="table-cell">
+                <%= nutrition.created_at.strftime("%b %d") if nutrition.created_at %> - 
+                <%= (nutrition.created_at + 30.days).strftime("%b %d") if nutrition.created_at %>
+              </div>
+              <div class="table-cell">
+                <span class="status-badge active">Activo</span>
+              </div>
+              <div class="table-cell">
+                <div class="table-actions">
+                  <a href="#" class="table-link">Editar</a>
+                  <a href="#" class="table-link">Duplicar</a>
+                  <a href="#" class="table-link primary">Generar con IA</a>
+                  <a href="#" class="table-link primary">Ver Lógica IA</a>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="table-row">
+            <div class="table-cell">Lindsay Walton</div>
+            <div class="table-cell">Mar 1 - Mar 31</div>
+            <div class="table-cell"><span class="status-badge active">Activo</span></div>
+            <div class="table-cell">
+              <div class="table-actions">
+                <a href="#" class="table-link">Editar</a>
+                <a href="#" class="table-link">Duplicar</a>
+                <a href="#" class="table-link primary">Generar con IA</a>
+                <a href="#" class="table-link primary">Ver Lógica IA</a>
+              </div>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell">Courtney Henry</div>
+            <div class="table-cell">Feb 15 - Mar 15</div>
+            <div class="table-cell"><span class="status-badge expiring">Expirando</span></div>
+            <div class="table-cell">
+              <div class="table-actions">
+                <a href="#" class="table-link">Editar</a>
+                <a href="#" class="table-link">Duplicar</a>
+                <a href="#" class="table-link primary">Generar con IA</a>
+                <a href="#" class="table-link primary">Ver Lógica IA</a>
+              </div>
+            </div>
+          </div>
+          <div class="table-row">
+            <div class="table-cell">Tom Cook</div>
+            <div class="table-cell">Jan 1 - Jan 31</div>
+            <div class="table-cell"><span class="status-badge completed">Completado</span></div>
+            <div class="table-cell">
+              <div class="table-actions">
+                <a href="#" class="table-link">Editar</a>
+                <a href="#" class="table-link">Duplicar</a>
+                <a href="#" class="table-link primary">Generar con IA</a>
+                <a href="#" class="table-link primary">Ver Lógica IA</a>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </main>
+
+  <!-- Right Sidebar -->
+  <aside class="right-sidebar">
+    <!-- Alerts and Tracking Card -->
+    <div class="sidebar-card">
+      <h3 class="card-title">Alertas y Seguimiento</h3>
+      
+      <div class="alert-item alert-danger">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-content">
+          <span class="alert-title">Adherencia Baja</span>
+          <span class="alert-description">Dries Vincent tiene baja adherencia (45%).</span>
+        </div>
+      </div>
+
+      <div class="alert-item alert-warning">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-content">
+          <span class="alert-title">Plan Expirando</span>
+          <span class="alert-description">El plan de C. Henry expira en 3 días.</span>
+        </div>
+      </div>
+
+      <div class="alert-item alert-danger">
+        <div class="alert-icon">🩺</div>
+        <div class="alert-content">
+          <span class="alert-title">Revisión Crítica</span>
+          <span class="alert-description">L. Alexander reportó síntomas inusuales.</span>
+        </div>
+      </div>
+
+      <div class="alert-item alert-info">
+        <div class="alert-icon">📊</div>
+        <div class="alert-content">
+          <span class="alert-title">Cambio de Peso</span>
+          <span class="alert-description">L. Alexander perdió 1.5kg esta semana.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Copilot Card -->
+    <div class="sidebar-card">
+      <h3 class="card-title">
+        <span class="copilot-icon">🤖</span>
+        Copiloto IA
+      </h3>
+      
+      <div class="copilot-input-group">
+        <input type="text" class="copilot-input" placeholder="Haz una pregunta...">
+        <button class="copilot-button">→</button>
+      </div>
+
+      <div class="quick-prompts">
+        <h4 class="prompts-title">Consultas Rápidas:</h4>
+        <div class="prompts-container">
+          <span class="prompt-chip">Calcular macros</span>
+          <span class="prompt-chip">Explicar plan al paciente</span>
+          <span class="prompt-chip">Sugerir recetas rápidas</span>
+          <span class="prompt-chip">Explicar lógica IA</span>
+        </div>
+      </div>
+    </div>
+  </aside>
 </div>
+
+<style>
+/* Dashboard Layout */
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Left Sidebar */
+.left-sidebar {
+  width: 260px;
+  background: white;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px 0;
+}
+
+.sidebar-nav {
+  padding: 24px 24px 0 24px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin-bottom: 4px;
+  color: #6b7280;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  font-weight: 500;
+}
+
+.nav-item:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.nav-item.active {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.nav-icon {
+  font-size: 18px;
+  width: 20px;
+  text-align: center;
+}
+
+.sidebar-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.user-role {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 32px;
+  max-width: calc(100vw - 600px);
+}
+
+.content-header {
+  margin-bottom: 32px;
+}
+
+.page-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.page-subtitle {
+  color: #6b7280;
+  margin: 0 0 24px 0;
+  font-size: 16px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-height: 44px;
+}
+
+.btn-outline {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.btn-outline:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.25);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px -5px rgba(139, 92, 246, 0.4);
+}
+
+.btn-icon {
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* AI Button Styles */
+.btn-ai {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-height: 44px;
+}
+
+.btn-ai-primary {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.25);
+}
+
+.btn-ai-primary:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 25px -5px rgba(139, 92, 246, 0.4);
+}
+
+.btn-ai-icon {
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+  margin: 0 0 12px 0;
+}
+
+.stat-value {
+  font-size: 40px;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1;
+}
+
+.stat-green {
+  color: #10b981;
+}
+
+.stat-chart {
+  margin-top: 8px;
+}
+
+/* Sections */
+.section-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 20px 0;
+}
+
+/* Patients */
+.patients-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.patient-row {
+  display: flex;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  padding: 20px;
+  gap: 24px;
+}
+
+.patient-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.patient-avatar {
+  width: 48px;
+  height: 48px;
+  background: #e5e7eb;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+}
+
+.patient-name {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.patient-meta {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.adherence-badge {
+  font-weight: 600;
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 24px;
+  text-align: center;
+  min-width: 60px;
+}
+
+.adherence-badge.high {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.adherence-badge.medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.adherence-badge.low {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.patient-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.action-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-height: 36px;
+}
+
+.action-link:not(.primary) {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  color: #64748b;
+}
+
+.action-link:not(.primary):hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #475569;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+}
+
+.action-link.primary {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 2px 4px -1px rgba(139, 92, 246, 0.25);
+}
+
+.action-link.primary:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px -2px rgba(139, 92, 246, 0.4);
+}
+
+/* Table */
+.table-container {
+  width: 100%;
+}
+
+.table-header, .table-row {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1.2fr 4fr;
+  gap: 16px;
+  padding: 16px 0;
+  align-items: center;
+}
+
+.table-header {
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+}
+
+.table-row {
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 14px;
+}
+
+.table-row:hover {
+  background: #f8fafc;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.expiring {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.completed {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.table-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  overflow-x: auto;
+  min-width: 0;
+}
+
+.table-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-height: 30px;
+  flex-shrink: 0;
+}
+
+.table-link:not(.primary) {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  color: #64748b;
+}
+
+.table-link:not(.primary):hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #475569;
+  transform: translateY(-1px);
+  box-shadow: 0 1px 3px -1px rgba(0, 0, 0, 0.1);
+}
+
+.table-link.primary {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 1px 3px -1px rgba(139, 92, 246, 0.25);
+}
+
+.table-link.primary:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px -1px rgba(139, 92, 246, 0.4);
+}
+
+/* Right Sidebar */
+.right-sidebar {
+  width: 340px;
+  padding: 32px 24px 32px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sidebar-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Alerts */
+.alert-item {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.alert-danger {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.alert-warning {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+}
+
+.alert-info {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.alert-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.alert-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.alert-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.alert-description {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* AI Copilot */
+.copilot-icon {
+  font-size: 20px;
+}
+
+.copilot-input-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.copilot-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+
+.copilot-input:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.copilot-button {
+  background: #8b5cf6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.copilot-button:hover {
+  background: #7c3aed;
+}
+
+.prompts-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: #374151;
+}
+
+.prompts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prompt-chip {
+  background: #f8fafc;
+  color: #8b5cf6;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  transition: all 0.15s ease;
+}
+
+.prompt-chip:hover {
+  background: #ede9fe;
+  border-color: #d8b4fe;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .right-sidebar {
+    width: 300px;
+  }
+  
+  .main-content {
+    max-width: calc(100vw - 560px);
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-layout {
+    flex-direction: column;
+  }
+  
+  .left-sidebar, .right-sidebar {
+    width: 100%;
+  }
+  
+  .main-content {
+    max-width: 100%;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .table-header, .table-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  
+  .patient-row {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .patient-actions {
+    justify-content: space-between;
+  }
+}
+</style>
