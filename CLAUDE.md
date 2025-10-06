@@ -11,10 +11,11 @@ NutriHabits is a Rails 7.1 nutrition management platform that connects nutrition
 - **Rails 7.1.5** with Ruby 3.3.5
 - **PostgreSQL** database
 - **Devise** for dual authentication (Nutritionist and Patient models)
-- **ruby_llm** gem for AI-powered nutrition analysis and plan generation
-- **Cloudinary** for image storage
+- **ruby_llm** gem (v1.8) for AI-powered nutrition analysis and plan generation
+- **Cloudinary** for image storage via Active Storage
 - **Bootstrap 5.3** for UI
 - **Hotwire** (Turbo + Stimulus) for frontend interactions
+- **Simple Form** with Bootstrap integration for forms
 
 ## Essential Commands
 
@@ -89,12 +90,15 @@ Located in `app/services/`:
    - Returns structured JSON with daily meal distributions
    - Considers patient history, previous plans, and clinical data
    - Output includes: objective, calories, macros, daily meals (breakfast/lunch/dinner/snacks) with ingredients, recipes, and nutritional breakdown
+   - Uses default model from RubyLLM configuration
 
 2. **`MealLogAnalysisService`**
-   - Analyzes meal photos using vision-capable LLM
-   - Takes patient, image_data, optional nutrition_plan
-   - Returns JSON with: ai_calories, ai_macros, ai_health_score (1-10), ai_feedback
-   - Compares meals against active nutrition plan when available
+   - Analyzes meal photos using vision-capable LLM (GPT-4o)
+   - Takes photo_attachment (Active Storage), meal
+   - Analyzes Cloudinary URLs from blob.url
+   - Returns JSON with: ai_calories, ai_macros (protein/carbs/fat), ai_health_score (1-10), ai_feedback, ai_comparison
+   - Compares meals against specific planned meal for that date and meal_type
+   - Handles markdown-wrapped JSON responses
 
 ### Authentication & Authorization
 
@@ -151,12 +155,21 @@ authenticate :nutritionist do
     resources :nested_resource
   end
 end
+
+authenticate :patient do
+  resources :meals do
+    resources :meal_logs
+  end
+end
 ```
 
 ## Important Considerations
 
 - The app uses both English (code) and Spanish (UI/AI prompts) - AI prompts and user-facing content are in Spanish
-- Cloudinary integration requires proper ENV configuration
+- Cloudinary integration requires proper ENV configuration (CLOUDINARY_URL)
 - LLM responses are parsed as JSON - always validate structure before persisting
+- LLM configuration requires OPENAI_API_KEY in ENV (see `config/initializers/ruby_llm.rb`)
 - Weight tracking uses dedicated `weight_patients` table for historical data points
 - Meal nutritional data is stored at meal level, not just plan level
+- Patient model has helper methods: `meal_logs_through_plans` and `available_meals` for complex associations
+- Active Storage is used for image attachments (meal photos) with Cloudinary as backend
