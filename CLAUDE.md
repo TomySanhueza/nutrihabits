@@ -12,7 +12,7 @@ NutriHabits is a Rails 7.1 nutrition management platform that connects nutrition
 - **PostgreSQL** database
 - **Devise** for dual authentication (Nutritionist and Patient models)
 - **ruby_llm** gem for AI-powered nutrition analysis and plan generation
-- **Cloudinary** for image storage
+- **Active Storage** with **Cloudinary** for image storage (meal log photos)
 - **Bootstrap 5.3** for UI
 - **Hotwire** (Turbo + Stimulus) for frontend interactions
 
@@ -65,14 +65,15 @@ The application has a dual-user system with distinct hierarchies:
   - belongs_to `nutritionist`
   - has_one `profile` (patient health data: weight, height, goals, conditions, lifestyle, diagnosis)
   - has_many `nutrition_plans`
-  - has_many `meal_logs` (AI-analyzed meal photos)
   - has_many `weight_patients` (weight tracking over time)
   - has_many `patient_ai_chats`
+  - Access to `meal_logs` through custom method `meal_logs_through_plans` (meal_logs belong to meals, not patients)
 
 **Nutrition Plan System:**
 - `NutritionPlan` (main plan with calories, macros, objectives, dates)
   - has_many `plans` (daily execution: date, mood, energy_level, activity, notes)
     - has_many `meals` (meal_type, ingredients, recipe, calories, protein, carbs, fat, status)
+      - has_one `meal_log` (AI-analyzed meal photo with Active Storage attachment)
 
 **Chat Systems:**
 - `Chat` (nutritionist-patient messaging)
@@ -91,10 +92,10 @@ Located in `app/services/`:
    - Output includes: objective, calories, macros, daily meals (breakfast/lunch/dinner/snacks) with ingredients, recipes, and nutritional breakdown
 
 2. **`MealLogAnalysisService`**
-   - Analyzes meal photos using vision-capable LLM
-   - Takes patient, image_data, optional nutrition_plan
-   - Returns JSON with: ai_calories, ai_macros, ai_health_score (1-10), ai_feedback
-   - Compares meals against active nutrition plan when available
+   - Analyzes meal photos using vision-capable LLM (GPT-4o)
+   - Takes photo_attachment (Active Storage), meal (with plan and nutrition_plan context)
+   - Returns JSON with: ai_calories, ai_protein, ai_carbs, ai_fat, ai_health_score (1-10), ai_feedback, ai_comparison
+   - Compares meals against the specific planned meal for that day and meal type
 
 ### Authentication & Authorization
 
@@ -157,6 +158,7 @@ end
 
 - The app uses both English (code) and Spanish (UI/AI prompts) - AI prompts and user-facing content are in Spanish
 - Cloudinary integration requires proper ENV configuration
-- LLM responses are parsed as JSON - always validate structure before persisting
+- LLM responses are parsed as JSON - always validate structure before persisting (some responses may include markdown code blocks that need stripping)
 - Weight tracking uses dedicated `weight_patients` table for historical data points
 - Meal nutritional data is stored at meal level, not just plan level
+- MealLog photos use Active Storage with Cloudinary backend - access URLs via `photo.blob.url`

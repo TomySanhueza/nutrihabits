@@ -26,7 +26,7 @@
   </aside>
 
   <!-- Main Content -->
-  <main class="main-content">
+  <main class="main-content ">
     <!-- Patient Header -->
     <div class="patient-header">
       <div class="patient-info-main">
@@ -38,12 +38,17 @@
       </div>
       <div class="patient-actions">
         <button class="btn btn-outline">Editar Perfil</button>
-        <%= button_to "Generar Plan", patient_nutrition_plans_path(@patient), method: :post, class: "btn btn-primary" %>
+        <%= button_to "Generar Plan IA", patient_nutrition_plans_path(@patient), method: :post, class: "btn btn-primary" %>
         <button class="btn-icon">📄</button>
         <button class="btn-icon">🗑️</button>
       </div>
     </div>
 
+    <% if @patient.profile.nil? %>
+        <%=  render "profiles/form" %>
+    <% end  %>
+
+    <div class="#{if @patient.nil? ? 'd-none' : ''}">
     <!-- Navigation Tabs -->
     <nav class="content-tabs">
       <a href="#" class="tab-item active">Resumen</a>
@@ -57,7 +62,7 @@
     <div class="patient-stats-grid">
       <div class="stat-card">
         <h3 class="stat-label">Peso</h3>
-        <div class="stat-value">65.2 kg</div>
+        <div class="stat-value"><%= @patient.profile.weight unless @patient.profile.nil? %> kg</div>
       </div>
       <div class="stat-card">
         <h3 class="stat-label">IMC</h3>
@@ -116,6 +121,9 @@
             <span class="status-badge on-track">En Progreso</span>
           </div>
         </div>
+        <% if @patient.nutrition_plans.any? %>
+          <%= link_to "Ver detalle", patient_nutrition_plan_path(@patient, @patient.nutrition_plans.last), class: "btn-view-detail" %>
+        <% end %>
       </div>
 
       <!-- Adherence Chart -->
@@ -130,6 +138,7 @@
           <div class="adherence-bar" style="height: 60%"></div>
         </div>
       </div>
+    </div>
     </div>
   </main>
 
@@ -184,6 +193,7 @@
     </div>
   </aside>
 </div>
+
 
 <style>
 /* Patient Page Layout */
@@ -320,16 +330,6 @@
   border-color: #9ca3af;
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  color: white;
-  border: none;
-}
-
-.btn-primary:hover {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-}
-
 .btn-icon {
   width: 44px;
   height: 44px;
@@ -446,6 +446,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  margin-bottom: 20px;
 }
 
 .plan-row {
@@ -462,6 +463,31 @@
 .plan-value {
   color: #1f2937;
   font-weight: 500;
+}
+
+/* View Detail Button */
+.btn-view-detail {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
+}
+
+.btn-view-detail:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
+  color: white;
 }
 
 /* Adherence Bars */
@@ -499,6 +525,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .card-title {
@@ -518,6 +545,10 @@
   padding: 16px;
   border-radius: 8px;
   margin-bottom: 12px;
+}
+
+.alert-item:last-child {
+  margin-bottom: 0;
 }
 
 .alert-danger {
@@ -598,6 +629,7 @@
   padding: 12px 16px;
   font-size: 16px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .copilot-button:hover {
@@ -616,9 +648,10 @@
   padding: 8px 12px;
   border-radius: 6px;
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   border: 1px solid #e5e7eb;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .suggestion-item:hover {

@@ -43,9 +43,9 @@
               <%# else %>
                 <%= image_tag "https://kitt.lewagon.com/placeholder/users/ssaunier",
                               class: "navbar-avatar me-2",
-                              alt: "Default avatar" %>
+                              alt: "Default avatar" if params[:controller] == "pages" %>
               <%# end %>
-              <span><%= current_nutritionist.email %></span>
+              <span><%= current_nutritionist.email if params[:controller] == "pages" %></span>
             </a>
 
             <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="navbarDropdown">

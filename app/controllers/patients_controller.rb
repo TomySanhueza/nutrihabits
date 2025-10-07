@@ -1,7 +1,7 @@
 class PatientsController < ApplicationController
 
   def index
-
+    @patients = current_nutritionist.patients
   end
   def new
     @patient = Patient.new
@@ -12,14 +12,15 @@ class PatientsController < ApplicationController
     @patient.nutritionist_id = current_nutritionist.id 
     if @patient.save
       #sign_in(@patient)
-      redirect_to nutritionist_dashboard_path, notice: 'Cuenta creada exitosamente.'
+      redirect_to @patient, notice: 'Cuenta creada exitosamente.'
     else
-      render :new
+      render :new, status: :unprocessable_entity
     end
   end
 
   def show 
     @patient = Patient.find(params[:id])
+    @profile = Profile.new
   end
 
   private
