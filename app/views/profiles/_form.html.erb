@@ -1,10 +1,390 @@
-<h1>Completa el perfil</h1>
-<%= simple_form_for [@patient, @profile] do |f| %>
-  <%= f.input :weight %>
-  <%= f.input :height %>
-  <%= f.input :goals %>
-  <%= f.input :conditions %>
-  <%= f.input :lifestyle %>
-  <%= f.input :diagnosis %>
-  <%= f.submit %>
-<% end %>
+<div class="profile-form-container">
+  <div class="form-header">
+    <div class="header-icon">📋</div>
+    <div class="header-content">
+      <h1 class="form-title">Perfil del Paciente</h1>
+      <p class="form-subtitle">Completa la información de salud para generar planes nutricionales personalizados</p>
+    </div>
+  </div>
+
+  <%= simple_form_for [@patient, @profile], html: { class: 'profile-form' } do |f| %>
+    <div class="form-sections">
+      <!-- Sección de Medidas Antropométricas -->
+      <div class="form-section">
+        <h2 class="section-title">
+          <span class="section-icon">📏</span>
+          Medidas Antropométricas
+        </h2>
+        <div class="form-row">
+          <div class="form-group">
+            <%= f.input :weight,
+                        label: 'Peso (kg)',
+                        input_html: {
+                          class: 'form-control-modern',
+                          placeholder: 'Ej: 70.5'
+                        },
+                        wrapper_html: { class: 'input-wrapper' } %>
+          </div>
+          <div class="form-group">
+            <%= f.input :height,
+                        label: 'Altura (cm)',
+                        input_html: {
+                          class: 'form-control-modern',
+                          placeholder: 'Ej: 170'
+                        },
+                        wrapper_html: { class: 'input-wrapper' } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección de Objetivos -->
+      <div class="form-section">
+        <h2 class="section-title">
+          <span class="section-icon">🎯</span>
+          Objetivos Nutricionales
+        </h2>
+        <%= f.input :goals,
+                    as: :text,
+                    label: 'Objetivos',
+                    input_html: {
+                      class: 'form-control-modern',
+                      rows: 4,
+                      placeholder: 'Describe los objetivos del paciente (ej: pérdida de peso, ganancia muscular, mejorar hábitos alimenticios...)'
+                    },
+                    wrapper_html: { class: 'input-wrapper' } %>
+      </div>
+
+      <!-- Sección de Condiciones Médicas -->
+      <div class="form-section">
+        <h2 class="section-title">
+          <span class="section-icon">🩺</span>
+          Condiciones Médicas
+        </h2>
+        <%= f.input :conditions,
+                    as: :text,
+                    label: 'Condiciones de Salud',
+                    input_html: {
+                      class: 'form-control-modern',
+                      rows: 4,
+                      placeholder: 'Alergias, intolerancias, condiciones médicas relevantes (ej: diabetes, hipertensión, celiaquía...)'
+                    },
+                    wrapper_html: { class: 'input-wrapper' },
+                    hint: 'Incluye alergias alimentarias e intolerancias' %>
+      </div>
+
+      <!-- Sección de Estilo de Vida -->
+      <div class="form-section">
+        <h2 class="section-title">
+          <span class="section-icon">🏃</span>
+          Estilo de Vida
+        </h2>
+        <%= f.input :lifestyle,
+                    as: :text,
+                    label: 'Información de Estilo de Vida',
+                    input_html: {
+                      class: 'form-control-modern',
+                      rows: 4,
+                      placeholder: 'Nivel de actividad física, horarios, hábitos alimenticios, preferencias dietéticas...'
+                    },
+                    wrapper_html: { class: 'input-wrapper' },
+                    hint: 'Incluye actividad física, horarios de comida y preferencias' %>
+      </div>
+
+      <!-- Sección de Diagnóstico Clínico -->
+      <div class="form-section">
+        <h2 class="section-title">
+          <span class="section-icon">📊</span>
+          Diagnóstico Clínico
+        </h2>
+        <%= f.input :diagnosis,
+                    as: :text,
+                    label: 'Diagnóstico y Notas Clínicas',
+                    input_html: {
+                      class: 'form-control-modern',
+                      rows: 4,
+                      placeholder: 'Diagnóstico nutricional, evaluaciones clínicas, notas importantes...'
+                    },
+                    wrapper_html: { class: 'input-wrapper' } %>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <%= link_to 'Cancelar', patient_path(@patient), class: 'btn-secondary' %>
+      <%= f.submit 'Guardar Perfil', class: 'btn-primary' %>
+    </div>
+  <% end %>
+</div>
+
+<style>
+/* Profile Form Container */
+.profile-form-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Form Header */
+.form-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 40px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.header-icon {
+  font-size: 48px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.form-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.form-subtitle {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Form Sections */
+.form-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.form-section {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.form-section:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-color: #d1d5db;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 24px 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.section-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+/* Form Controls */
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.form-group {
+  margin-bottom: 0;
+}
+
+.input-wrapper {
+  margin-bottom: 0;
+}
+
+.input-wrapper label {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.form-control-modern {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #1f2937;
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.form-control-modern:focus {
+  outline: none;
+  background: white;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.form-control-modern::placeholder {
+  color: #9ca3af;
+}
+
+/* Hints */
+.input-wrapper .form-text {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 2px solid #e5e7eb;
+}
+
+.btn-primary, .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 10px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 140px;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.25);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -5px rgba(139, 92, 246, 0.4);
+}
+
+.btn-secondary {
+  background: white;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.btn-secondary:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  color: #374151;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .profile-form-container {
+    padding: 20px;
+  }
+
+  .form-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .form-title {
+    font-size: 26px;
+  }
+
+  .form-subtitle {
+    font-size: 14px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-section {
+    padding: 20px;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .btn-primary, .btn-secondary {
+    width: 100%;
+  }
+}
+
+/* Simple Form Integration */
+.profile-form .input {
+  margin-bottom: 0;
+}
+
+.profile-form .input label.form-label {
+  display: block;
+  font-weight: 600;
+  font-size: 14px;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.profile-form .input textarea,
+.profile-form .input input[type="text"],
+.profile-form .input input[type="number"] {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: #1f2937;
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.profile-form .input textarea:focus,
+.profile-form .input input[type="text"]:focus,
+.profile-form .input input[type="number"]:focus {
+  outline: none;
+  background: white;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.profile-form .input .hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #6b7280;
+  font-style: italic;
+}
+</style>
