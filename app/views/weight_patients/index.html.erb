@@ -1,0 +1,64 @@
+<%# encoding: UTF-8 %>
+<% content_for :hide_navbar, true %>
+<div class="container-fluid p-0 bg-light min-vh-100">
+  <div class="mx-auto bg-white shadow" style="max-width: 448px;">
+
+    <div class="d-flex flex-column min-vh-100">
+
+      <!-- Header -->
+      <header class="p-4 position-relative bg-white border-bottom">
+        <%= link_to pats_dashboard_path, class: "position-absolute start-0 top-0 mt-4 ms-3 text-dark text-decoration-none" do %>
+          <i class="bi bi-arrow-left fs-4"></i>
+        <% end %>
+        <h1 class="fs-5 fw-semibold text-dark text-center mb-0">Historial de Peso</h1>
+      </header>
+
+      <!-- Main Content -->
+      <main class="flex-grow-1 px-4 py-4">
+
+        <!-- Add Weight Button -->
+        <div class="mb-4">
+          <%= link_to new_weight_patient_path, class: "btn btn-dark w-100 py-2 rounded-3 fw-semibold d-flex align-items-center justify-content-center gap-2" do %>
+            <i class="bi bi-plus-circle"></i>
+            Registrar Peso
+          <% end %>
+        </div>
+
+        <!-- Weight Records List -->
+        <% if @weight_patients.any? %>
+          <div class="d-flex flex-column gap-3">
+            <% @weight_patients.each do |weight_patient| %>
+              <%= link_to weight_patient_path(weight_patient), class: "text-decoration-none" do %>
+                <div class="bg-white border rounded-3 p-3 shadow-sm">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <p class="fs-5 fw-bold text-dark mb-1">
+                        <%= weight_patient.weight %> kg
+                      </p>
+                      <p class="small text-secondary mb-0">
+                        <i class="bi bi-calendar3 me-1"></i>
+                        <%= l(weight_patient.date, format: :long) %>
+                      </p>
+                    </div>
+                    <div>
+                      <i class="bi bi-chevron-right text-secondary"></i>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-5">
+            <i class="bi bi-inbox fs-1 text-secondary mb-3 d-block"></i>
+            <p class="text-secondary">No hay registros de peso aún</p>
+            <%= link_to "Agregar primer registro", new_weight_patient_path, class: "btn btn-outline-dark rounded-pill px-4 mt-2" %>
+          </div>
+        <% end %>
+
+      </main>
+
+    </div>
+
+  </div>
+</div>

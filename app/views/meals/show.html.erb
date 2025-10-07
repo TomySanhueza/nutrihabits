@@ -1,73 +1,110 @@
-<div class="container mt-4">
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h2>Detalle de Comida</h2>
-      <div>
-        <%= link_to 'Editar', edit_meal_path(@meal), class: 'btn btn-warning' %>
-        <%= link_to 'Volver', meals_path, class: 'btn btn-secondary' %>
+<%# encoding: UTF-8 %>
+<% content_for :hide_navbar, true %>
+<div class="container-fluid p-0 bg-light min-vh-100">
+  <div class="mx-auto bg-white shadow" style="max-width: 448px;">
+
+    <!-- Header -->
+    <header class="sticky-top bg-white border-bottom">
+      <div class="d-flex align-items-center px-3 py-3">
+        <%= link_to "#", class: "text-dark text-decoration-none me-3" do %>
+          <i class="bi bi-arrow-left fs-4"></i>
+        <% end %>
+        <h1 class="fs-6 fw-semibold mb-0 flex-grow-1">Ensalada tibia de pollo + quinoa...</h1>
+        <%= link_to "#", class: "text-dark text-decoration-none ms-2" do %>
+          <i class="bi bi-share fs-5"></i>
+        <% end %>
       </div>
-    </div>
-    <div class="card-body">
-      <div class="row mb-3">
-        <div class="col-md-6">
-          <p><strong>Fecha:</strong> <%= @meal.plan.date.strftime('%d/%m/%Y') %></p>
-          <p><strong>Tipo de Comida:</strong> <%= @meal.meal_type&.titleize %></p>
-          <p><strong>Estado:</strong>
-            <% case @meal.status %>
-            <% when 'completed' %>
-              <span class="badge bg-success">Completada</span>
-            <% when 'pending' %>
-              <span class="badge bg-warning">Pendiente</span>
-            <% when 'skipped' %>
-              <span class="badge bg-secondary">Omitida</span>
-            <% else %>
-              <span class="badge bg-info"><%= @meal.status %></span>
-            <% end %>
-          </p>
-        </div>
-        <div class="col-md-6">
-          <h5>Información Nutricional</h5>
-          <p><strong>Calorías:</strong> <%= @meal.calories %> kcal</p>
-          <p><strong>Proteínas:</strong> <%= @meal.protein %> g</p>
-          <p><strong>Carbohidratos:</strong> <%= @meal.carbs %> g</p>
-          <p><strong>Grasas:</strong> <%= @meal.fat %> g</p>
-        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+      <!-- Image -->
+      <div class="position-relative">
+        <%= image_tag "https://lh3.googleusercontent.com/aida-public/AB6AXuCOrvOVp-O1cHUuYnmNtXqoSePRve3n54_StBo9UZM0ZLNIqNwqpLZozupusf5H0ZabQ0rdHIj94lFSh7lGu3oiJseFt7r87VJ2QF6LQ9KPG7Kcnvt-hlsrZphh6p0Uh6R6glNdkn6AmbgHAg5_lYPSgr1b1n08LSaZJ_RymRUvkq-I_1TKCP8t0B9fMmVkDaFLjs03LQ9Ah2P3MEoFh6Tecj4my9oIk6LDwvO9vdM4xdfxrTrgj-wPKeGm9dEfXRy9pidIclgAocc",
+                      class: "w-100 object-fit-cover",
+                      style: "height: 224px;",
+                      alt: "Ensalada de pollo y quinoa" %>
       </div>
 
-      <div class="row mb-3">
-        <div class="col-12">
-          <h5>Ingredientes</h5>
-          <p><%= @meal.ingredients %></p>
-        </div>
-      </div>
+      <div class="p-4">
 
-      <div class="row">
-        <div class="col-12">
-          <h5>Receta</h5>
-          <p><%= simple_format(@meal.recipe) %></p>
-        </div>
-      </div>
+        <!-- Ingredientes Section -->
+        <section class="mb-5">
+          <h2 class="fs-5 fw-bold text-dark mb-3">Ingredientes</h2>
+          <ul class="list-unstyled">
+            <li class="d-flex align-items-center mb-2">
+              <span class="d-inline-block rounded-circle bg-success bg-opacity-25 me-3" style="width: 12px; height: 12px;"></span>
+              <span class="text-secondary">200g Pechuga de pollo</span>
+            </li>
+            <li class="d-flex align-items-center mb-2">
+              <span class="d-inline-block rounded-circle bg-success bg-opacity-25 me-3" style="width: 12px; height: 12px;"></span>
+              <span class="text-secondary">1 taza Quinoa cocida</span>
+            </li>
+            <li class="d-flex align-items-center mb-2">
+              <span class="d-inline-block rounded-circle bg-success bg-opacity-25 me-3" style="width: 12px; height: 12px;"></span>
+              <span class="text-secondary">1 taza Espinaca</span>
+            </li>
+            <li class="d-flex align-items-center mb-2">
+              <span class="d-inline-block rounded-circle bg-success bg-opacity-25 me-3" style="width: 12px; height: 12px;"></span>
+              <span class="text-secondary">1/2 Pimiento rojo, en tiras</span>
+            </li>
+            <li class="d-flex align-items-center mb-2">
+              <span class="d-inline-block rounded-circle bg-success bg-opacity-25 me-3" style="width: 12px; height: 12px;"></span>
+              <span class="text-secondary">1/4 Cebolla morada, en juliana</span>
+            </li>
+            <li class="d-flex align-items-center mb-2">
+              <span class="d-inline-block rounded-circle bg-success bg-opacity-25 me-3" style="width: 12px; height: 12px;"></span>
+              <span class="text-secondary">Aderezo de limón y aceite de oliva</span>
+            </li>
+          </ul>
+        </section>
 
-      <div class="row mt-4">
-        <div class="col-12">
-          <h5>Registro de Comida</h5>
-          <% if @meal.meal_log.present? %>
-            <div class="card">
-              <div class="card-body">
-                <p><strong>Fecha:</strong> <%= @meal.meal_log.logged_at.strftime('%d/%m/%Y %H:%M') %></p>
-                <p><strong>Calorías estimadas:</strong> <%= @meal.meal_log.ai_calories %> kcal</p>
-                <p><strong>Puntuación de salud:</strong> <%= @meal.meal_log.ai_health_score %>/10</p>
-                <%= link_to 'Ver detalle', meal_meal_log_path(@meal, @meal.meal_log), class: 'btn btn-sm btn-info' %>
-              </div>
+        <!-- Preparación Section -->
+        <section class="mb-5">
+          <h2 class="fs-5 fw-bold text-dark mb-3">Preparación</h2>
+          <ol class="ps-3 text-secondary lh-lg">
+            <li class="mb-2">Cocina la pechuga de pollo a la plancha con sal y pimienta. Una vez lista, córtala en tiras o cubos.</li>
+            <li class="mb-2">En un bol grande, mezcla la quinoa cocida con las espinacas frescas.</li>
+            <li class="mb-2">Agrega el pimiento rojo y la cebolla morada.</li>
+            <li class="mb-2">Incorpora el pollo tibio a la ensalada.</li>
+            <li class="mb-2">Adereza con una mezcla de jugo de limón, aceite de oliva, sal y pimienta al gusto.</li>
+            <li class="mb-2">Mezcla bien todos los ingredientes y sirve inmediatamente.</li>
+          </ol>
+        </section>
+
+        <!-- Información Nutricional Section -->
+        <section class="bg-light rounded-4 p-4 shadow-sm mb-4">
+          <h3 class="fs-6 fw-semibold text-dark mb-3">Información Nutricional (Estimada)</h3>
+          <div class="row text-center g-3">
+            <div class="col-3">
+              <p class="fs-5 fw-bold text-success mb-1">550</p>
+              <p class="small text-muted mb-0">kcal</p>
             </div>
-          <% else %>
-            <div class="alert alert-light">
-              <p class="mb-2">Aún no has registrado esta comida.</p>
-              <%= link_to 'Registrar Comida con Foto', new_meal_meal_log_path(@meal), class: 'btn btn-primary' %>
+            <div class="col-3">
+              <p class="fs-5 fw-bold text-dark mb-1">45g</p>
+              <p class="small text-muted mb-0">Proteína</p>
             </div>
+            <div class="col-3">
+              <p class="fs-5 fw-bold text-dark mb-1">20g</p>
+              <p class="small text-muted mb-0">Grasa</p>
+            </div>
+            <div class="col-3">
+              <p class="fs-5 fw-bold text-dark mb-1">48g</p>
+              <p class="small text-muted mb-0">Carbs</p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+    <!-- Sticky Footer Buttons -->
+    <div class="sticky-bottom bg-white border-top p-3">
+          <%= link_to "#", class: "btn btn-dark w-100 py-3 fw-semibold rounded-3 shadow d-flex align-items-center justify-content-center gap-2" do %>
+            <i class="bi bi-check-circle"></i>
+            Marcar como cocinada
           <% end %>
-        </div>
-      </div>
     </div>
+
   </div>
 </div>

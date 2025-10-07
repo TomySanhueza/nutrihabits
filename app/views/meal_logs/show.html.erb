@@ -1,67 +1,142 @@
-<div class="container mt-4">
-  <div class="row">
-    <div class="col-12">
-      <%#= link_to "← Volver", meal_logs_path, class: "btn btn-outline-secondary mb-3" %>
+<%# encoding: UTF-8 %>
+<% content_for :hide_navbar, true %>
+<div class="container-fluid p-0 bg-light min-vh-100">
+  <div class="mx-auto bg-white shadow" style="max-width: 448px;">
 
-      <div class="card">
-        <% if @meal_log.photo.attached? %>
-          <%= image_tag @meal_log.photo, class: "card-img-top" %>
+    <div class="d-flex flex-column min-vh-100">
+
+      <!-- Header -->
+      <header class="p-4 position-relative bg-white">
+        <%= link_to "#", class: "position-absolute start-0 top-0 mt-4 ms-3 text-dark text-decoration-none" do %>
+          <i class="bi bi-arrow-left fs-4"></i>
         <% end %>
-        <div class="card-body">
-          <h3 class="card-title"><%= @meal_log.meal_type&.titleize || "Comida Registrada" %></h3>
-          <p class="text-muted"><%= @meal_log.logged_at&.strftime("%d de %B de %Y a las %H:%M") %></p>
+        <h1 class="fs-5 fw-semibold text-dark text-center mb-0">Análisis de tu comida</h1>
+      </header>
 
-          <hr>
+      <!-- Main Content -->
+      <main class="flex-grow-1 px-4 pb-4">
 
-          <h5>Información Nutricional</h5>
-          <div class="row mt-3">
-            <div class="col-md-3 col-6 mb-3">
-              <div class="card bg-light">
-                <div class="card-body text-center">
-                  <h6 class="text-muted">Calorías</h6>
-                  <h4><%= @meal_log.ai_calories&.round || "N/A" %> <small>kcal</small></h4>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-              <div class="card bg-light">
-                <div class="card-body text-center">
-                  <h6 class="text-muted">Proteína</h6>
-                  <h4><%= @meal_log.ai_protein&.round(1) || "N/A" %> <small>g</small></h4>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-              <div class="card bg-light">
-                <div class="card-body text-center">
-                  <h6 class="text-muted">Carbohidratos</h6>
-                  <h4><%= @meal_log.ai_carbs&.round(1) || "N/A" %> <small>g</small></h4>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-              <div class="card bg-light">
-                <div class="card-body text-center">
-                  <h6 class="text-muted">Grasas</h6>
-                  <h4><%= @meal_log.ai_fat&.round(1) || "N/A" %> <small>g</small></h4>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <hr>
-
-          <h5>Evaluación Nutricional</h5>
-          <div class="alert alert-info mt-3">
-            <h6>Puntaje de Salud: <%= @meal_log.ai_health_score&.round(1) || "N/A" %> / 10</h6>
-            <p class="mb-0"><%= @meal_log.ai_feedback %></p>
-          </div>
-
-          <div class="mt-4">
-            <%#= link_to "Eliminar Registro", @meal_log, method: :delete, data: { confirm: "¿Estás seguro de eliminar este registro?" }, class: "btn btn-danger" %>
+        <!-- Image Section with Action Buttons -->
+        <div class="position-relative rounded-4 overflow-hidden mb-4">
+          <%= image_tag "https://lh3.googleusercontent.com/aida-public/AB6AXuAdLYYsnmWGnAsTdH7GGPbxMldoKczrc_08P-fwhpmII9XTB18kOmlxBSuW4gCGV4inGxjsHmYiLgIs0tZ-qumDTYKKaIw5EGoxmNNbB2ukDU_PKwsLzsdRB1ciyocGM_an60vq4qqk2O76Y_ihtnJkV5tkj1FVytcrVG4Myfegwf5w5e_gPtgxCnmC8NKY9PZqxr73NmZWBzgC8olkAmYL19fA0No8SXEhfJRUhJqoz2WJDxUa1UChLRvhH6ZYyX-6jyarVuT7vjs",
+                      class: "w-100 object-fit-cover",
+                      style: "height: 200px;",
+                      alt: "Foto de ensalada saludable" %>
+          <div class="position-absolute top-0 end-0 mt-2 me-2 d-flex gap-2">
+            <button type="button" class="btn btn-white bg-white bg-opacity-75 rounded-circle p-2 shadow-sm border-0">
+              <i class="bi bi-camera text-dark"></i>
+            </button>
+            <button type="button" class="btn btn-white bg-white bg-opacity-75 rounded-circle p-2 shadow-sm border-0">
+              <i class="bi bi-pencil text-dark"></i>
+            </button>
           </div>
         </div>
-      </div>
+
+        <!-- Health Score & Calories Card -->
+        <div class="bg-success bg-opacity-10 border border-success border-opacity-25 rounded-4 p-3 mb-3">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <p class="small text-success mb-1">Health Score</p>
+              <p class="fs-2 fw-bold text-success mb-0">
+                8.5<span class="fs-5 fw-medium text-success opacity-75">/10</span>
+              </p>
+            </div>
+            <div class="text-end">
+              <p class="small text-secondary mb-1">Calorías Totales</p>
+              <p class="fs-4 fw-bold text-dark mb-0">
+                450 <span class="fs-6 fw-normal text-secondary">kcal</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macros Grid -->
+        <div class="row g-2 mb-3">
+          <div class="col-4">
+            <div class="bg-light rounded-3 p-3 text-center">
+              <p class="small text-secondary mb-1">Proteína</p>
+              <p class="fs-6 fw-semibold text-dark mb-0">25g</p>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="bg-light rounded-3 p-3 text-center">
+              <p class="small text-secondary mb-1">Grasa</p>
+              <p class="fs-6 fw-semibold text-dark mb-0">18g</p>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="bg-light rounded-3 p-3 text-center">
+              <p class="small text-secondary mb-1">Carbs</p>
+              <p class="fs-6 fw-semibold text-dark mb-0">45g</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feedback Box -->
+        <div class="bg-light rounded-3 p-3 mb-3">
+          <p class="small text-secondary mb-0 lh-base">
+            Buena fuente de energía 👌 y porción equilibrada de carbohidratos. Agregar una proteína magra o vegetales le daría más saciedad y balance 🌿. Vas muy bien, ¡cada elección cuenta! 💪
+          </p>
+        </div>
+
+        <!-- Comparison Card -->
+        <div class="bg-white border rounded-4 p-3 mb-3">
+          <h3 class="fs-6 fw-semibold text-dark mb-3 d-flex align-items-center gap-2">
+            <i class="bi bi-arrow-left-right text-success"></i>
+            Comparación con tu plan
+          </h3>
+          <div class="d-flex flex-column gap-2 small">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-secondary">Calorías:</span>
+              <span class="fw-medium text-warning">+120 kcal sobre el plan</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-secondary">Proteínas:</span>
+              <span class="fw-medium text-danger">-10 g</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-secondary">Carbohidratos:</span>
+              <span class="fw-medium text-warning">+25 g</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="text-secondary">Grasas:</span>
+              <span class="fw-medium text-success">Dentro del rango</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ingredients Analysis Card -->
+        <div class="bg-white border rounded-4 p-3 mb-3">
+          <h3 class="fs-6 fw-semibold text-dark mb-2 d-flex align-items-center gap-2">
+            <i class="bi bi-basket text-success"></i>
+            Análisis de ingredientes
+          </h3>
+          <p class="small text-secondary mb-0 lh-base">
+            Buen equilibrio entre fuentes naturales. Usaste ingredientes frescos y simples, aunque podrías sumar algo de color con vegetales o legumbres.
+          </p>
+        </div>
+
+        <!-- Suggestions Card -->
+        <div class="bg-white border rounded-4 p-3 mb-4">
+          <h3 class="fs-6 fw-semibold text-dark mb-2 d-flex align-items-center gap-2">
+            <i class="bi bi-lightbulb text-success"></i>
+            Sugerencias para mejorar
+          </h3>
+          <p class="small text-secondary mb-0 lh-base">
+            Vas muy bien. Para el próximo plato, intenta incluir una porción de proteína magra o verduras al vapor — pequeños ajustes que suman mucho.
+          </p>
+        </div>
+
+      </main>
+
+      <!-- Sticky Footer Button -->
+      <footer class="sticky-bottom bg-white border-top p-3">
+        <button type="submit" class="btn btn-dark w-100 py-2 rounded-3 fw-semibold shadow-sm">
+          Registrar Almuerzo
+        </button>
+      </footer>
+
     </div>
+
   </div>
 </div>

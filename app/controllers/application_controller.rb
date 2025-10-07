@@ -1,9 +1,10 @@
 class ApplicationController < ActionController::Base
-  before_action :authenticate_nutritionist!
   before_action :configure_permitted_parameters, if: :devise_controller?
   def after_sign_in_path_for(resource)
     if resource.is_a?(Nutritionist)
       nutritionist_dashboard_path
+    elsif resource.is_a?(Patient)
+      pats_dashboard_path
     else
       super
     end
