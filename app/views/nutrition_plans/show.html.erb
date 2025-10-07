@@ -62,34 +62,34 @@
     </div>
 
     <!-- Plan Overview Section -->
-    <div class="plan-overview-section">
-      <div class="overview-cards-grid">
-        <div class="overview-card-item">
-          <div class="overview-card-label">Objetivo</div>
-          <div class="overview-card-value"><%= @nutrition_plan.objective || "Pérdida de peso" %></div>
+    <div class="plan-overview-unified-card">
+      <div class="overview-top-row">
+        <div class="overview-unified-item">
+          <div class="overview-unified-label">Objetivo</div>
+          <div class="overview-unified-value"><%= @nutrition_plan.objective || "Control de peso, mejora metabólica y recuperación neurológica" %></div>
         </div>
-        <div class="overview-card-item">
-          <div class="overview-card-label">Vigente</div>
-          <div class="overview-card-value">
-            <%= @nutrition_plan.start_date&.strftime("%d %b %Y") || "01 Ago 2024" %> - <%= @nutrition_plan.end_date&.strftime("%d %b %Y") || "31 Ago 2024" %>
+        <div class="overview-unified-item">
+          <div class="overview-unified-label">Vigente</div>
+          <div class="overview-unified-value">
+            <%= @nutrition_plan.start_date&.strftime("%d %b %Y") || "06 Oct 2025" %> - <%= @nutrition_plan.end_date&.strftime("%d %b %Y") || "06 Oct 2025" %>
           </div>
         </div>
-        <div class="overview-card-item">
-          <div class="overview-card-label">Estado</div>
+        <div class="overview-unified-item">
+          <div class="overview-unified-label">Estado</div>
           <div class="plan-status-badge-show">
-            <%= (@nutrition_plan.status || 'Activo').capitalize %>
+            <%= (@nutrition_plan.status || 'Active').capitalize %>
           </div>
         </div>
       </div>
 
-      <div class="macros-cards-grid">
-        <div class="macro-card-item">
-          <div class="macro-card-label">Calorías diarias</div>
-          <div class="macro-card-value"><%= @nutrition_plan.calories || 2200 %> kcal</div>
+      <div class="overview-bottom-row">
+        <div class="overview-unified-item">
+          <div class="overview-unified-label">Calorías diarias</div>
+          <div class="overview-unified-value"><%= @nutrition_plan.calories || 2200 %>.0 kcal</div>
         </div>
-        <div class="macro-card-item">
-          <div class="macro-card-label">Macros</div>
-          <div class="macro-card-value">P: <%= @nutrition_plan.protein || 165 %>g / G: <%= @nutrition_plan.fat || 73 %>g / C: <%= @nutrition_plan.carbs || 220 %>g</div>
+        <div class="overview-unified-item">
+          <div class="overview-unified-label">Macros</div>
+          <div class="overview-unified-value">P: <%= @nutrition_plan.protein || 110 %>.0g / G: <%= @nutrition_plan.fat || 70 %>.0g / C: <%= @nutrition_plan.carbs || 280 %>.0g</div>
         </div>
       </div>
     </div>
@@ -354,39 +354,47 @@ Es importante que realices los entrenamientos de fuerza 3 veces por semana 2 dí
   border-color: #059669;
 }
 
-/* Plan Overview Section */
-.plan-overview-section {
-  margin-bottom: 32px;
-}
-
-.overview-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.overview-card-item {
+/* Plan Overview Unified Card */
+.plan-overview-unified-card {
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
 }
 
-.overview-card-label {
+.overview-top-row {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1fr;
+  gap: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f3f4f6;
+  margin-bottom: 24px;
+}
+
+.overview-bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 32px;
+}
+
+.overview-unified-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.overview-unified-label {
   font-size: 14px;
   color: #6b7280;
   font-weight: 500;
 }
 
-.overview-card-value {
-  font-size: 16px;
+.overview-unified-value {
+  font-size: 15px;
   color: #1f2937;
   font-weight: 600;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
 .plan-status-badge-show {
@@ -398,36 +406,6 @@ Es importante que realices los entrenamientos de fuerza 3 veces por semana 2 dí
   background: #dcfce7;
   color: #166534;
   width: fit-content;
-}
-
-/* Macros Cards Grid */
-.macros-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
-
-.macro-card-item {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.macro-card-label {
-  font-size: 14px;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.macro-card-value {
-  font-size: 16px;
-  color: #1f2937;
-  font-weight: 600;
-  line-height: 1.4;
 }
 
 /* Section Titles */
@@ -567,14 +545,14 @@ Es importante que realices los entrenamientos de fuerza 3 veces por semana 2 dí
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .overview-cards-grid {
+  .overview-top-row {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 20px;
   }
 
-  .macros-cards-grid {
+  .overview-bottom-row {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 20px;
   }
 }
 
