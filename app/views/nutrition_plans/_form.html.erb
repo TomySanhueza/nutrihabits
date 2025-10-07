@@ -1,48 +1,167 @@
-<div data-controller="nested-form">
+<div class="nutrition-plan-form-container" data-controller="nested-form">
   <%= simple_form_for [@patient, @nutrition_plan] do |f| %>
-    <div class="card mb-4">
-      <div class="card-header">
-        <h5>Información General del Plan</h5>
-      </div>
-      <div class="card-body">
-        <%= f.input :objective, label: "Objetivo" %>
-        <div class="row">
-          <div class="col-md-6">
-            <%= f.input :calories, label: "Calorías (kcal)" %>
-          </div>
-          <div class="col-md-6">
-            <%= f.input :protein, label: "Proteínas (g)" %>
-          </div>
+
+    <!-- Header Section -->
+    <div class="form-header mb-4">
+      <div class="d-flex align-items-center justify-content-between">
+        <div>
+          <h1 class="form-title mb-2">
+            <span class="title-icon">🍎</span>
+            <%= @nutrition_plan.new_record? ? 'Crear Plan Nutricional' : 'Editar Plan Nutricional' %>
+          </h1>
+          <p class="form-subtitle">Complete la información del plan nutricional para <%= @patient.first_name %> <%= @patient.last_name %></p>
         </div>
-        <div class="row">
-          <div class="col-md-6">
-            <%= f.input :fat, label: "Grasas (g)" %>
-          </div>
-          <div class="col-md-6">
-            <%= f.input :carbs, label: "Carbohidratos (g)" %>
-          </div>
+        <div>
+          <%= link_to patient_nutrition_plan_path(@patient,@nutrition_plan), class: "btn-back" do %>
+            <span>← Volver</span>
+          <% end %>
         </div>
-        <div class="row">
-          <div class="col-md-6">
-            <%= f.input :start_date, label: "Fecha de inicio", as: :date %>
-          </div>
-          <div class="col-md-6">
-            <%= f.input :end_date, label: "Fecha de término", as: :date %>
-          </div>
-        </div>
-        <%= f.input :meal_distribution, label: "Distribución de comidas" %>
-        <%= f.input :notes, label: "Notas", as: :text %>
       </div>
     </div>
 
-    <div class="card mb-4">
-      <div class="card-header">
-        <h5>Planes Diarios</h5>
+    <!-- Información General Card -->
+    <div class="plan-section-card mb-4">
+      <div class="section-card-header">
+        <div class="d-flex align-items-center gap-2">
+          <span class="section-icon">📋</span>
+          <h2 class="section-card-title mb-0">Información General del Plan</h2>
+        </div>
+        <p class="section-card-subtitle">Define los objetivos y parámetros principales del plan</p>
       </div>
-      <div class="card-body">
-        <div id="plans">
+      <div class="section-card-body">
+        <div class="form-group-custom mb-4">
+          <%= f.input :objective,
+              label: "Objetivo del Plan",
+              input_html: {
+                class: "form-control-modern",
+                placeholder: "Ej: Pérdida de peso, Control glucémico, Ganancia muscular..."
+              },
+              wrapper_html: { class: "mb-0" } %>
+        </div>
+
+        <!-- Macros Grid -->
+        <div class="macros-grid mb-4">
+          <div class="macro-card">
+            <label class="macro-label">
+              <span class="macro-emoji">🔥</span>
+              Calorías
+            </label>
+            <%= f.input :calories,
+                label: false,
+                input_html: {
+                  class: "form-control-macro",
+                  placeholder: "1800"
+                },
+                wrapper_html: { class: "mb-0" } %>
+            <span class="macro-unit">kcal</span>
+          </div>
+
+          <div class="macro-card">
+            <label class="macro-label">
+              <span class="macro-emoji">💪</span>
+              Proteínas
+            </label>
+            <%= f.input :protein,
+                label: false,
+                input_html: {
+                  class: "form-control-macro",
+                  placeholder: "130"
+                },
+                wrapper_html: { class: "mb-0" } %>
+            <span class="macro-unit">g</span>
+          </div>
+
+          <div class="macro-card">
+            <label class="macro-label">
+              <span class="macro-emoji">🌾</span>
+              Carbohidratos
+            </label>
+            <%= f.input :carbs,
+                label: false,
+                input_html: {
+                  class: "form-control-macro",
+                  placeholder: "200"
+                },
+                wrapper_html: { class: "mb-0" } %>
+            <span class="macro-unit">g</span>
+          </div>
+
+          <div class="macro-card">
+            <label class="macro-label">
+              <span class="macro-emoji">🥑</span>
+              Grasas
+            </label>
+            <%= f.input :fat,
+                label: false,
+                input_html: {
+                  class: "form-control-macro",
+                  placeholder: "60"
+                },
+                wrapper_html: { class: "mb-0" } %>
+            <span class="macro-unit">g</span>
+          </div>
+        </div>
+
+        <!-- Dates -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <%= f.input :start_date,
+                label: "📅 Fecha de Inicio",
+                as: :date,
+                input_html: { class: "form-control-modern" } %>
+          </div>
+          <div class="col-md-6">
+            <%= f.input :end_date,
+                label: "📅 Fecha de Término",
+                as: :date,
+                input_html: { class: "form-control-modern" } %>
+          </div>
+        </div>
+
+        <%= f.input :notes,
+            label: "📝 Notas Adicionales",
+            as: :text,
+            input_html: {
+              class: "form-control-modern",
+              rows: 3,
+              placeholder: "Instrucciones especiales, consideraciones, restricciones..."
+            } %>
+      </div>
+    </div>
+
+    <!-- Planes Diarios Card -->
+    <div class="plan-section-card mb-4">
+      <div class="section-card-header">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="d-flex align-items-center gap-2">
+              <span class="section-icon">📆</span>
+              <h2 class="section-card-title mb-0">Planes Diarios</h2>
+            </div>
+            <p class="section-card-subtitle">Configura los planes día a día con sus comidas específicas</p>
+          </div>
+          <button type="button"
+                  class="btn-add-plan"
+                  data-action="click->nested-form#add_association"
+                  data-association-insertion-node="#plans"
+                  data-association-insertion-method="append">
+            <span class="btn-icon">➕</span>
+            <span>Agregar Día</span>
+          </button>
+        </div>
+      </div>
+      <div class="section-card-body">
+        <div id="plans" class="plans-container">
           <%= f.simple_fields_for :plans do |plan_form| %>
             <%= render 'plan_fields', f: plan_form %>
+          <% end %>
+
+          <% if @nutrition_plan.plans.empty? %>
+            <div class="empty-state">
+              <span class="empty-icon">📋</span>
+              <p class="empty-text">No hay planes diarios configurados</p>
+              <p class="empty-subtext">Haz clic en "Agregar Día" para comenzar</p>
+            </div>
           <% end %>
         </div>
 
@@ -51,15 +170,342 @@
             <%= render 'plan_fields', f: plan_form %>
           <% end %>
         </template>
-
-        <div class="links mt-3">
-          <button type="button" class="btn btn-secondary btn-sm" data-action="click->nested-form#add_association" data-association-insertion-node="#plans" data-association-insertion-method="append">
-            Agregar Día
-          </button>
-        </div>
       </div>
     </div>
 
-    <%= f.submit "Guardar Plan", class: "btn btn-primary" %>
+    <!-- Actions Footer -->
+    <div class="form-actions">
+      <%= f.submit "💾 Guardar Plan Nutricional", class: "btn-submit-plan" %>
+      <%= link_to "Cancelar", patient_path(@patient), class: "btn-cancel" %>
+    </div>
   <% end %>
 </div>
+
+<style>
+/* Nutrition Plan Form Styles */
+.nutrition-plan-form-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Header */
+.form-header {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.form-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.title-icon {
+  font-size: 2rem;
+}
+
+.form-subtitle {
+  color: #6b7280;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.625rem 1.25rem;
+  background: #f3f4f6;
+  color: #374151;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.btn-back:hover {
+  background: #e5e7eb;
+  color: #1f2937;
+  transform: translateY(-1px);
+}
+
+/* Section Cards */
+.plan-section-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.section-card-header {
+  padding: 1.75rem 2rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(to right, #fafafa, #ffffff);
+}
+
+.section-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.section-card-subtitle {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0.5rem 0 0 0;
+}
+
+.section-icon {
+  font-size: 1.5rem;
+}
+
+.section-card-body {
+  padding: 2rem;
+}
+
+/* Form Controls */
+.form-control-modern {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  transition: all 0.2s;
+}
+
+.form-control-modern:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  outline: none;
+}
+
+.form-group-custom label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  font-size: 0.9375rem;
+}
+
+/* Macros Grid */
+.macros-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+}
+
+.macro-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.macro-card:hover {
+  border-color: #8b5cf6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
+}
+
+.macro-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.macro-emoji {
+  font-size: 1.25rem;
+}
+
+.form-control-macro {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  color: #1f2937;
+  transition: all 0.2s;
+}
+
+.form-control-macro:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  outline: none;
+}
+
+.macro-unit {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Add Plan Button */
+.btn-add-plan {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(139, 92, 246, 0.25);
+}
+
+.btn-add-plan:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(139, 92, 246, 0.4);
+}
+
+.btn-icon {
+  font-size: 0.875rem;
+}
+
+/* Plans Container */
+.plans-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+.empty-subtext {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+/* Form Actions */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-start;
+  padding: 1.5rem 0;
+}
+
+.btn-submit-plan {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(16, 185, 129, 0.25);
+  text-decoration: none;
+}
+
+.btn-submit-plan:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(16, 185, 129, 0.4);
+  color: white;
+}
+
+.btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.875rem 2rem;
+  background: white;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.btn-cancel:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  color: #374151;
+  transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nutrition-plan-form-container {
+    padding: 1rem;
+  }
+
+  .form-header {
+    padding: 1.5rem;
+  }
+
+  .form-title {
+    font-size: 1.5rem;
+  }
+
+  .macros-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .section-card-header {
+    padding: 1.25rem;
+  }
+
+  .section-card-body {
+    padding: 1.25rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .btn-submit-plan,
+  .btn-cancel {
+    width: 100%;
+    justify-content: center;
+  }
+}
+</style>

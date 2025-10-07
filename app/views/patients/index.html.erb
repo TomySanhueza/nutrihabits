@@ -165,7 +165,7 @@
                       <span>&#128065;</span>
                     <% end %>
                     <% if patient.nutrition_plans.any? %>
-                      <%= link_to "#", class: "action-btn", title: "Ver Planes" do %>
+                      <%= link_to patient_nutrition_plans_path(patient), class: "action-btn", title: "Ver Planes" do %>
                         <span>&#128200;</span>
                       <% end %>
                     <% end %>

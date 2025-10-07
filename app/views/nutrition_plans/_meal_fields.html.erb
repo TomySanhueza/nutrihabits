@@ -1,42 +1,236 @@
-<div class="nested-fields border-start border-3 border-info ps-3 mb-3">
+<div class="meal-card nested-fields">
   <%= f.hidden_field :_destroy %>
 
-  <div class="row align-items-center mb-2">
-    <div class="col">
-      <strong>Comida</strong>
-    </div>
-    <div class="col-auto">
-      <button type="button" class="btn btn-danger btn-sm" data-action="click->nested-form#remove_association">
-        Eliminar
+  <!-- Meal Header -->
+  <div class="meal-card-header">
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2">
+        <span class="meal-icon">🍽️</span>
+        <h6 class="meal-title mb-0">Comida</h6>
+      </div>
+      <button type="button"
+              class="btn-remove-meal"
+              data-action="click->nested-form#remove_association"
+              title="Eliminar comida">
+        ✕
       </button>
     </div>
   </div>
 
-  <div class="row">
-    <div class="col-md-6">
-      <%= f.input :meal_type, label: "Tipo de comida", collection: ['Desayuno', 'Colación AM', 'Almuerzo', 'Colación PM', 'Cena', 'Colación noche'], include_blank: 'Seleccionar' %>
+  <!-- Meal Body -->
+  <div class="meal-card-body">
+    <!-- Type and Status -->
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <%= f.input :meal_type,
+            label: "🍴 Tipo de Comida",
+            collection: ['Desayuno', 'Colación AM', 'Almuerzo', 'Colación PM', 'Cena', 'Colación noche'],
+            include_blank: 'Seleccionar',
+            input_html: { class: "form-control-modern" } %>
+      </div>
+      <div class="col-md-6">
+        <%= f.input :status,
+            label: "📊 Estado",
+            collection: ['Pendiente', 'Completado', 'Parcial', 'Omitido'],
+            include_blank: 'Seleccionar',
+            input_html: { class: "form-control-modern" } %>
+      </div>
     </div>
-    <div class="col-md-6">
-      <%= f.input :status, label: "Estado", collection: ['Pendiente', 'Completado', 'Parcial', 'Omitido'], include_blank: 'Seleccionar' %>
-    </div>
-  </div>
 
-  <%= f.input :ingredients, label: "Ingredientes", as: :text, input_html: { rows: 2 }, placeholder: "Ej: 2 huevos, 50g avena, 1 plátano..." %>
+    <!-- Ingredients -->
+    <%= f.input :ingredients,
+        label: "🥗 Ingredientes",
+        as: :text,
+        input_html: {
+          rows: 2,
+          class: "form-control-modern",
+          placeholder: "Ej: 2 huevos, 50g avena, 1 plátano, 200ml leche..."
+        } %>
 
-  <%= f.input :recipe, label: "Preparación/Receta", as: :text, input_html: { rows: 2 }, placeholder: "Instrucciones de preparación..." %>
+    <!-- Recipe -->
+    <%= f.input :recipe,
+        label: "👨‍🍳 Preparación/Receta",
+        as: :text,
+        input_html: {
+          rows: 2,
+          class: "form-control-modern",
+          placeholder: "1. Cocinar los huevos, 2. Preparar la avena, 3. Servir..."
+        } %>
 
-  <div class="row">
-    <div class="col-md-3">
-      <%= f.input :calories, label: "Calorías (kcal)" %>
+    <!-- Nutrition Info -->
+    <div class="nutrition-info-label mb-2">
+      <span class="label-icon">📊</span>
+      <span class="label-text">Información Nutricional</span>
     </div>
-    <div class="col-md-3">
-      <%= f.input :protein, label: "Proteínas (g)" %>
-    </div>
-    <div class="col-md-3">
-      <%= f.input :carbs, label: "Carbohidratos (g)" %>
-    </div>
-    <div class="col-md-3">
-      <%= f.input :fat, label: "Grasas (g)" %>
+    <div class="nutrition-grid">
+      <div class="nutrition-item">
+        <%= f.input :calories,
+            label: false,
+            placeholder: "Calorías",
+            input_html: { class: "form-control-nutrition" },
+            wrapper_html: { class: "mb-0" } %>
+        <span class="nutrition-label">🔥 kcal</span>
+      </div>
+
+      <div class="nutrition-item">
+        <%= f.input :protein,
+            label: false,
+            placeholder: "Proteínas",
+            input_html: { class: "form-control-nutrition" },
+            wrapper_html: { class: "mb-0" } %>
+        <span class="nutrition-label">💪 g</span>
+      </div>
+
+      <div class="nutrition-item">
+        <%= f.input :carbs,
+            label: false,
+            placeholder: "Carbohidratos",
+            input_html: { class: "form-control-nutrition" },
+            wrapper_html: { class: "mb-0" } %>
+        <span class="nutrition-label">🌾 g</span>
+      </div>
+
+      <div class="nutrition-item">
+        <%= f.input :fat,
+            label: false,
+            placeholder: "Grasas",
+            input_html: { class: "form-control-nutrition" },
+            wrapper_html: { class: "mb-0" } %>
+        <span class="nutrition-label">🥑 g</span>
+      </div>
     </div>
   </div>
 </div>
+
+<style>
+/* Meal Card Styles */
+.meal-card {
+  background: white;
+  border: 1px solid #d1d5db;
+  border-left: 4px solid #8b5cf6;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.meal-card:hover {
+  border-left-color: #7c3aed;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
+}
+
+.meal-card-header {
+  background: linear-gradient(to right, #faf5ff, #ffffff);
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0.875rem 1rem;
+}
+
+.meal-icon {
+  font-size: 1.125rem;
+}
+
+.meal-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.btn-remove-meal {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.btn-remove-meal:hover {
+  background: #fee2e2;
+  border-color: #fecaca;
+  color: #dc2626;
+  transform: scale(1.05);
+}
+
+.meal-card-body {
+  padding: 1rem;
+}
+
+.meal-card-body label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.8125rem;
+  margin-bottom: 0.375rem;
+}
+
+/* Nutrition Info */
+.nutrition-info-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+}
+
+.label-icon {
+  font-size: 1rem;
+}
+
+.label-text {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.nutrition-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+.nutrition-item {
+  text-align: center;
+}
+
+.form-control-nutrition {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-align: center;
+  color: #1f2937;
+  transition: all 0.2s;
+}
+
+.form-control-nutrition:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  outline: none;
+}
+
+.nutrition-label {
+  display: block;
+  margin-top: 0.375rem;
+  font-size: 0.6875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nutrition-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .meal-card-body {
+    padding: 0.875rem;
+  }
+}
+</style>
