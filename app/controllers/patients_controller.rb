@@ -1,5 +1,5 @@
 class PatientsController < ApplicationController
-
+  #before_action :authenticate_patient!
   def index
     @patients = current_nutritionist.patients
   end
@@ -9,9 +9,10 @@ class PatientsController < ApplicationController
 
   def create
     @patient = Patient.new(patient_params)
-    @patient.nutritionist_id = current_nutritionist.id 
+    @patient.nutritionist_id = current_nutritionist.id
+    @patient.password_confirmation = @patient.password
+
     if @patient.save
-      #sign_in(@patient)
       redirect_to @patient, notice: 'Cuenta creada exitosamente.'
     else
       render :new, status: :unprocessable_entity
@@ -23,13 +24,10 @@ class PatientsController < ApplicationController
     @profile = Profile.new
   end
 
-  def dashboard
-    
-  end
 
   private
 
   def patient_params
-    params.require(:patient).permit(:email, :password, :first_name, :last_name, :phone)
+    params.require(:patient).permit(:email, :password, :password_confirmation, :first_name, :last_name, :phone)
   end
 end
