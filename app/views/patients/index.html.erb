@@ -1,0 +1,927 @@
+<div class="patients-index-layout">
+  <!-- Left Sidebar -->
+  <aside class="left-sidebar">
+    <nav class="sidebar-nav">
+      <%= link_to nutritionist_dashboard_path, class: "nav-item" do %>
+        <span class="nav-icon-box dashboard-icon">
+          <span class="icon-symbol">📊</span>
+        </span>
+        <span class="nav-text">Dashboard</span>
+      <% end %>
+      <%= link_to patients_path, class: "nav-item active" do %>
+        <span class="nav-icon-box patients-icon">
+          <span class="icon-symbol">👥</span>
+        </span>
+        <span class="nav-text">Pacientes</span>
+      <% end %>
+      <a href="#" class="nav-item">
+        <span class="nav-icon-box nutrition-icon">
+          <span class="icon-symbol">🍎</span>
+        </span>
+        <span class="nav-text">Planes Nutricionales</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon-box ai-icon">
+          <span class="icon-symbol">🤖</span>
+        </span>
+        <span class="nav-text">Copiloto IA</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon-box settings-icon">
+          <span class="icon-symbol">⚙️</span>
+        </span>
+        <span class="nav-text">Configuraciones</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <%= image_tag "https://kitt.lewagon.com/placeholder/users/ssaunier",
+                    class: "user-avatar",
+                    alt: current_nutritionist.email %>
+      <div class="user-info">
+        <div class="user-name"><%= current_nutritionist.first_name %> <%= current_nutritionist.last_name %></div>
+        <div class="user-role">Nutricionista</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content-patients">
+    <!-- Header -->
+    <div class="patients-header">
+      <div>
+        <h1 class="page-title">Pacientes</h1>
+      </div>
+      <%= link_to new_patient_path, class: "btn btn-primary-add", data: {turbo_frame: "new_patient"} do %>
+        <span style="font-size: 1.2rem;">+</span> Crear Paciente
+      <% end %>
+    </div>
+
+    <!-- Turbo Frame for New Patient Form -->
+    <%= turbo_frame_tag "new_patient" %>
+
+    <!-- Filters Section -->
+    <div class="filters-section">
+      <%= form_with url: patients_path, method: :get, class: "filters-form", data: { turbo: false } do |f| %>
+        <div class="filter-group">
+          <span class="search-icon">&#128269;</span>
+          <%= f.text_field :search,
+                          placeholder: "Filtrar por nombre...",
+                          value: params[:search],
+                          class: "form-control-filter" %>
+        </div>
+
+        <%= f.select :plan_status,
+            options_for_select([
+              ["Estado del Plan (Todos)", ""],
+              ["Activo", "active"],
+              ["Expirando", "expiring"],
+              ["Completado", "completed"]
+            ], params[:plan_status]),
+            {},
+            class: "form-select-filter" %>
+
+        <%= f.select :adherence_level,
+            options_for_select([
+              ["Nivel de Adherencia (Todos)", ""],
+              ["Alta (>80%)", "high"],
+              ["Media (50-80%)", "medium"],
+              ["Baja (<50%)", "low"]
+            ], params[:adherence_level]),
+            {},
+            class: "form-select-filter" %>
+
+        <%= f.select :last_interaction,
+            options_for_select([
+              ["Ultima Interaccion (Todos)", ""],
+              ["Ultimos 7 dias", "7"],
+              ["Ultimos 30 dias", "30"],
+              ["Mas de 30 dias", "30+"]
+            ], params[:last_interaction]),
+            {},
+            class: "form-select-filter" %>
+      <% end %>
+    </div>
+
+    <!-- Patients Table -->
+    <div class="patients-table-card">
+      <table class="patients-table">
+        <thead>
+          <tr>
+            <th>Paciente</th>
+            <th>Ultima Interaccion</th>
+            <th>Adherencia %</th>
+            <th>Estado del Plan</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if current_nutritionist.patients.any? %>
+            <% current_nutritionist.patients.each_with_index do |patient, index| %>
+              <tr>
+                <!-- Patient Info -->
+                <td>
+                  <div class="patient-cell">
+                    <div class="patient-avatar-circle">
+                      <%= (patient.first_name&.first || "P").upcase %><%= (patient.last_name&.first || "A").upcase %>
+                    </div>
+                    <span class="patient-name-text">
+                      <%= patient.first_name %> <%= patient.last_name %>
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Last Interaction -->
+                <td class="text-muted-cell">
+                  <%= time_ago_in_words(patient.updated_at) %>
+                </td>
+
+                <!-- Adherence % -->
+                <td>
+                  <% adherence = [95, 72, 40, 88, 65][index % 5] %>
+                  <div class="adherence-container">
+                    <div class="adherence-bar-bg">
+                      <div class="adherence-bar-fill <%= adherence >= 80 ? 'high' : (adherence >= 50 ? 'medium' : 'low') %>"
+                           style="width: <%= adherence %>%"></div>
+                    </div>
+                    <span class="adherence-percentage <%= adherence >= 80 ? 'high' : (adherence >= 50 ? 'medium' : 'low') %>">
+                      <%= adherence %>%
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Plan Status -->
+                <td>
+                  <% status = patient.nutrition_plans.last ? "active" : "inactive" %>
+                  <span class="plan-status-badge <%= status %>">
+                    <%= status == "active" ? "Activo" : "Sin Plan" %>
+                  </span>
+                </td>
+
+                <!-- Actions -->
+                <td>
+                  <div class="action-buttons-group">
+                    <%= link_to patient_path(patient), class: "action-btn", title: "Ver Detalles" do %>
+                      <span>&#128065;</span>
+                    <% end %>
+                    <% if patient.nutrition_plans.any? %>
+                      <%= link_to "#", class: "action-btn", title: "Ver Planes" do %>
+                        <span>&#128200;</span>
+                      <% end %>
+                    <% end %>
+                    <%= link_to "#", class: "action-btn", title: "Editar" do %>
+                      <span>&#9998;</span>
+                    <% end %>
+                    <%= link_to "#", class: "action-btn", title: "Mensajes" do %>
+                      <span>&#128172;</span>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="5" class="text-center" style="padding: 3rem; color: #6b7280;">
+                No tienes pacientes registrados. Crea tu primer paciente!
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- Right Sidebar - Alerts & AI Copilot -->
+  <aside class="right-sidebar">
+    <!-- Patient Alerts Card -->
+    <div class="sidebar-card">
+      <h3 class="sidebar-card-title">Alertas de Pacientes</h3>
+
+      <div class="alert-item-box alert-warning-box">
+        <div class="alert-icon-box">&#9888;</div>
+        <div class="alert-content-box">
+          <h4 class="alert-title-box">Check-in Perdido</h4>
+          <p class="alert-text-box">Ana Perez no ha registrado peso en 7 dias.</p>
+        </div>
+      </div>
+
+      <div class="alert-item-box alert-danger-box">
+        <div class="alert-icon-box">&#9888;</div>
+        <div class="alert-content-box">
+          <h4 class="alert-title-box">Adherencia Baja</h4>
+          <p class="alert-text-box">Carlos Gomez con 40% de adherencia la semana pasada.</p>
+        </div>
+      </div>
+
+      <div class="alert-item-box alert-info-box">
+        <div class="alert-icon-box">&#8987;</div>
+        <div class="alert-content-box">
+          <h4 class="alert-title-box">Plan Expirando</h4>
+          <p class="alert-text-box">El plan de C. Gomez expira en 5 dias.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Copilot Card -->
+    <div class="sidebar-card">
+      <h3 class="sidebar-card-title">
+        <span class="copilot-icon-title">&#10024;</span>
+        Copiloto IA
+      </h3>
+
+      <div class="copilot-input-wrapper">
+        <input type="text"
+               class="copilot-input-field"
+               placeholder="Pregunta sobre pacientes...">
+        <button class="copilot-send-btn">&rarr;</button>
+      </div>
+
+      <div class="quick-prompts-section">
+        <h4 class="prompts-subtitle">Consultas Rapidas:</h4>
+        <button class="prompt-button">Analizar adherencia del paciente</button>
+        <button class="prompt-button">Resumir evolucion clinica</button>
+        <button class="prompt-button">Recomendar ajustes al plan</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<style>
+/* Patients Index Layout */
+.patients-index-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Left Sidebar - Reusing Dashboard Styles */
+.left-sidebar {
+  width: 260px;
+  background: #fafafa;
+  border-right: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 28px 20px 24px 20px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.sidebar-nav {
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 4px;
+  color: #4b5563;
+  text-decoration: none;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 15px;
+  position: relative;
+  background: transparent;
+}
+
+.nav-item:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.nav-item.active {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+/* Icon Boxes with Colors */
+.nav-icon-box {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.icon-symbol {
+  font-size: 18px;
+}
+
+/* Dashboard Icon */
+.dashboard-icon {
+  background: transparent;
+}
+
+.dashboard-icon .icon-symbol {
+  font-size: 18px;
+}
+
+/* Patients Icon */
+.patients-icon {
+  background: transparent;
+}
+
+.patients-icon .icon-symbol {
+  font-size: 18px;
+  color: #7c3aed;
+}
+
+.nav-item.active .patients-icon .icon-symbol {
+  color: #7c3aed;
+}
+
+/* Nutrition Plans Icon - Apple */
+.nutrition-icon {
+  background: transparent;
+}
+
+.nutrition-icon .icon-symbol {
+  font-size: 18px;
+  color: #dc2626;
+}
+
+.nav-item.active .nutrition-icon .icon-symbol {
+  color: #7c3aed;
+}
+
+/* AI Copilot Icon - Robot */
+.ai-icon {
+  background: transparent;
+}
+
+.ai-icon .icon-symbol {
+  font-size: 18px;
+  color: #8b5cf6;
+}
+
+.nav-item.active .ai-icon .icon-symbol {
+  color: #7c3aed;
+}
+
+/* Settings Icon - Gear */
+.settings-icon {
+  background: transparent;
+}
+
+.settings-icon .icon-symbol {
+  font-size: 18px;
+  color: #9ca3af;
+}
+
+.nav-item.active .settings-icon .icon-symbol {
+  color: #7c3aed;
+}
+
+.nav-text {
+  font-weight: 500;
+}
+
+.sidebar-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.user-role {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Main Content */
+.main-content-patients {
+  flex: 1;
+  padding: 32px;
+  max-width: calc(100vw - 620px);
+  overflow-y: auto;
+}
+
+.patients-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.page-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.btn-primary-add {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btn-primary-add:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+  color: white;
+}
+
+/* Filters Section */
+.filters-section {
+  margin-bottom: 24px;
+}
+
+.filters-form {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  opacity: 0.5;
+}
+
+.form-control-filter {
+  width: 100%;
+  padding: 10px 12px 10px 36px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.form-control-filter:focus {
+  outline: none;
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.form-select-filter {
+  flex: 1;
+  min-width: 180px;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form-select-filter:focus {
+  outline: none;
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+/* Patients Table */
+.patients-table-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.patients-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.patients-table thead {
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.patients-table thead th {
+  padding: 16px 20px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.patients-table tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+  transition: background 0.15s ease;
+}
+
+.patients-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.patients-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.patients-table tbody td {
+  padding: 16px 20px;
+  vertical-align: middle;
+  font-size: 14px;
+  color: #374151;
+}
+
+/* Patient Cell */
+.patient-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.patient-avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.patient-name-text {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.text-muted-cell {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Adherence Display */
+.adherence-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.adherence-bar-bg {
+  width: 80px;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.adherence-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.adherence-bar-fill.high {
+  background: #10b981;
+}
+
+.adherence-bar-fill.medium {
+  background: #f59e0b;
+}
+
+.adherence-bar-fill.low {
+  background: #ef4444;
+}
+
+.adherence-percentage {
+  font-weight: 600;
+  font-size: 14px;
+  min-width: 45px;
+}
+
+.adherence-percentage.high {
+  color: #10b981;
+}
+
+.adherence-percentage.medium {
+  color: #f59e0b;
+}
+
+.adherence-percentage.low {
+  color: #ef4444;
+}
+
+/* Plan Status Badge */
+.plan-status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.plan-status-badge.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.plan-status-badge.expiring {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.plan-status-badge.completed {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.plan-status-badge.inactive {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* Action Buttons */
+.action-buttons-group {
+  display: flex;
+  gap: 6px;
+}
+
+.action-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.action-btn:hover {
+  background: #f3f4f6;
+  border-color: #7c3aed;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.15);
+}
+
+/* Right Sidebar */
+.right-sidebar {
+  width: 340px;
+  padding: 32px 24px 32px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+  max-height: 100vh;
+}
+
+.sidebar-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Alert Items */
+.alert-item-box {
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  border-left: 4px solid;
+}
+
+.alert-item-box:last-child {
+  margin-bottom: 0;
+}
+
+.alert-warning-box {
+  background: #fffbeb;
+  border-left-color: #f59e0b;
+}
+
+.alert-danger-box {
+  background: #fef2f2;
+  border-left-color: #ef4444;
+}
+
+.alert-info-box {
+  background: #eff6ff;
+  border-left-color: #3b82f6;
+}
+
+.alert-icon-box {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.alert-content-box {
+  flex: 1;
+}
+
+.alert-title-box {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+}
+
+.alert-text-box {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* AI Copilot */
+.copilot-icon-title {
+  font-size: 20px;
+}
+
+.copilot-input-wrapper {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.copilot-input-field {
+  width: 100%;
+  padding: 12px 48px 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.copilot-input-field:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.copilot-send-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.copilot-send-btn:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.quick-prompts-section {
+  margin-top: 8px;
+}
+
+.prompts-subtitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b7280;
+  margin: 0 0 12px 0;
+}
+
+.prompt-button {
+  display: block;
+  width: 100%;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  text-align: left;
+  color: #7c3aed;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.prompt-button:hover {
+  background: #ede9fe;
+  border-color: #7c3aed;
+  transform: translateX(4px);
+}
+
+.prompt-button:last-child {
+  margin-bottom: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+  .main-content-patients {
+    max-width: calc(100vw - 580px);
+  }
+
+  .right-sidebar {
+    width: 300px;
+  }
+
+  .left-sidebar {
+    width: 260px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .patients-index-layout {
+    flex-direction: column;
+  }
+
+  .left-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .main-content-patients {
+    max-width: 100%;
+  }
+
+  .right-sidebar {
+    width: 100%;
+    padding: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .filters-form {
+    flex-direction: column;
+  }
+
+  .filter-group,
+  .form-select-filter {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .patients-table-card {
+    overflow-x: auto;
+  }
+
+  .patients-table {
+    min-width: 800px;
+  }
+}
+</style>

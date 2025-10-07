@@ -44,28 +44,6 @@
   }
 }
 
-.btn-primary {
-  display: block;
-  width: 100%;
-  padding: 0.8rem;
-  border-radius: 30px;
-  border: none;
-  font-weight: 600;
-  font-size: 1rem;
-  background: #8B5CF6;
-  color: #fff;
-  text-align: center;
-  cursor: pointer;
-  transition: background 0.25s ease, transform 0.1s ease;
-
-  &:hover {
-    background: #7C3AED;
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-}
 
 .btn-outline-primary {
   display: block;

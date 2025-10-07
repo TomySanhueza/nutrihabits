@@ -29,7 +29,7 @@
                     class: "user-avatar", 
                     alt: "Dr. Amelia Harper" %>
       <div class="user-info">
-        <div class="user-name">Dr. Amelia Harper</div>
+        <div class="user-name"><%= current_nutritionist.first_name %> <%= current_nutritionist.last_name %></div>
         <div class="user-role">Nutritionist</div>
       </div>
     </div>
@@ -40,26 +40,24 @@
     <!-- Header -->
     <div class="content-header">
       <div class="header-content">
-        <h1 class="page-title">Bienvenido, Dr. Harper</h1>
+        <h1 class="page-title">Bienvenido, <%= current_nutritionist.first_name  %> <%= current_nutritionist.last_name %></h1>
         <p class="page-subtitle">Gestiona tus pacientes y sus planes nutricionales.</p>
       </div>
       <div class="header-actions">
-        <%= link_to new_patient_path, class: "btn btn-outline" do %>
+        <%= link_to new_patient_path, class: "btn btn-success btn-create-patient", data: {turbo_frame: "new_patient"}  do %>
           <span class="btn-icon">👤</span>
-          Crear Paciente
+          <span class="btn-text">Crear Paciente</span>
         <% end %>
-        <button class="btn-ai btn-ai-primary">
-          <span class="btn-ai-icon">✨</span>
-          Generar Plan con IA
-        </button>
+
       </div>
     </div>
+        <%= turbo_frame_tag "new_patient" %>
 
     <!-- Stats Grid -->
     <div class="stats-grid">
       <div class="stat-card">
         <h3 class="stat-label">Pacientes Activos</h3>
-        <div class="stat-value"><%= @patients.count %></div>
+        <div class="stat-value"><%= current_nutritionist.patients.count %></div>
       </div>
       <div class="stat-card">
         <h3 class="stat-label">Adherencia Promedio</h3>
@@ -436,24 +434,33 @@
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  color: #ffffff;
-  border: none;
-  box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.25);
-}
 
-.btn-primary:hover {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 25px -5px rgba(139, 92, 246, 0.4);
-}
 
 .btn-icon {
   font-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  filter: grayscale(100%) brightness(200%);
+}
+
+/* Create Patient Button Specific Styles */
+.btn-create-patient {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-create-patient .btn-icon {
+  filter: grayscale(100%) brightness(200%);
+}
+
+.btn-create-patient .btn-text {
+  color: white;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
 }
 
 /* AI Button Styles */
