@@ -22,6 +22,10 @@ class PatientsController < ApplicationController
     @patient = Patient.find(params[:id])
   end
 
+  def dashboard
+    
+  end
+
   private
 
   def patient_params

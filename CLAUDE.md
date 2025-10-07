@@ -16,6 +16,7 @@ NutriHabits is a Rails 7.1 nutrition management platform that connects nutrition
 - **Bootstrap 5.3** for UI
 - **Hotwire** (Turbo + Stimulus) for frontend interactions
 - **Simple Form** with Bootstrap integration for forms
+- **Kramdown** (with GFM parser and Rouge) for markdown rendering
 
 ## Essential Commands
 
@@ -77,8 +78,13 @@ The application has a dual-user system with distinct hierarchies:
 
 **Chat Systems:**
 - `Chat` (nutritionist-patient messaging)
-  - has_many `messages`
-- Separate AI chat systems for both user types with context and metadata storage
+  - has_many `messages` (with role: nutritionist/patient and text content)
+- `NutritionistAiChat` (nutritionist-AI conversations)
+  - has_many `nutritionist_ai_messages` (role, content, metadata stored as jsonb)
+  - stores title, model, and context (jsonb) for conversation state
+- `PatientAiChat` (patient-AI conversations)
+  - has_many `patient_ai_messages` (role, content, metadata stored as jsonb)
+  - stores context (jsonb) for conversation state
 
 ### AI Service Layer
 
@@ -134,10 +140,12 @@ bin/rails db:migrate
 
 AI services use `RubyLLM.chat` and expect structured JSON responses. Key patterns:
 
-1. Initialize with `@chat = RubyLLM.chat`
-2. Define detailed system prompts with expected JSON structure
-3. Parse responses with `JSON.parse(response)`
-4. Handle both text rationale and structured data outputs
+1. Initialize with `@chat = RubyLLM.chat` (default model) or `@chat = RubyLLM.chat(model: 'gpt-4o')` (vision)
+2. Define detailed system prompts in Spanish with expected JSON structure
+3. For vision tasks: use `@chat.with_instructions(system_prompt)` then `@chat.ask(prompt, with: image_url)`
+4. Parse responses with `JSON.parse(response.content)`
+5. Handle markdown-wrapped JSON (extract from ```json blocks if present)
+6. Handle both text rationale and structured data outputs
 
 ### Model Relationships
 
@@ -162,6 +170,23 @@ authenticate :patient do
   end
 end
 ```
+
+### Controller Patterns
+
+Controllers follow Rails conventions with authentication and nested resource handling:
+
+- **Nutritionist controllers**: Access `current_nutritionist` and load nested patients via params
+- **Patient controllers**: Access `current_patient` and load related data through associations
+- **Nested routes**: Use `before_action` to load parent resources (e.g., `set_patient`, `set_nutrition_plan`)
+- **AI service calls**: Instantiate services in controller actions and handle JSON responses
+
+### Image Handling with Active Storage
+
+For meal photo uploads:
+1. Models use `has_one_attached :photo` (Active Storage)
+2. Controllers accept photo uploads via strong params
+3. Access public URLs with `attachment.blob.url` (returns Cloudinary URL)
+4. Pass URLs to AI services for vision analysis
 
 ## Important Considerations
 
