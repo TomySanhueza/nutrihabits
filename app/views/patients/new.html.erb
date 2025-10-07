@@ -1,12 +1,12 @@
 <%= turbo_frame_tag "new_patient" do %>
-<div class="container w-50 border p-3 mt-3">
+<div class="container border p-3 mt-3 mb-3 rounded-4 bg-white">
 <%= simple_form_for @patient do |f| %>
-  <%= f.input :first_name %>
-  <%= f.input :last_name %>
-  <%= f.input :email %>
-  <%= f.input :password %>
-  <%= f.input :phone %>
-  <%= f.submit class:"btn btn-primary" %>
+  <%= f.input :first_name, label:"Nombre(s)" %>
+  <%= f.input :last_name, label:"Apellido(s)" %>
+  <%= f.input :email, label:"E-mail" %>
+  <%= f.input :password, label:"Contraseña" %>
+  <%= f.input :phone, label:"Teléfono" %>
+  <%= f.submit "Crear paciente", class:"btn btn-primary" %>
 <% end %>
 </div>
 <% end  %>

@@ -1,43 +1,87 @@
-<div class="nested-fields border rounded p-3 mb-3" data-controller="nested-form">
+<div class="plan-day-card nested-fields" data-controller="nested-form">
   <%= f.hidden_field :_destroy %>
 
-  <div class="row align-items-center mb-3">
-    <div class="col">
-      <h6 class="mb-0">Plan Diario</h6>
-    </div>
-    <div class="col-auto">
-      <button type="button" class="btn btn-danger btn-sm" data-action="click->nested-form#remove_association">
-        Eliminar
+  <!-- Day Header -->
+  <div class="day-card-header">
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-3">
+        <span class="day-icon">📅</span>
+        <div>
+          <h4 class="day-title mb-0">Plan Diario</h4>
+          <p class="day-subtitle mb-0">Configura las comidas y detalles del día</p>
+        </div>
+      </div>
+      <button type="button"
+              class="btn-remove-day"
+              data-action="click->nested-form#remove_association"
+              title="Eliminar día">
+        <span>🗑️</span>
       </button>
     </div>
   </div>
 
-  <div class="row">
-    <div class="col-md-6">
-      <%= f.input :date, label: "Fecha", as: :date, html5: true %>
-    </div>
-    <div class="col-md-6">
-      <%= f.input :mood, label: "Estado de ánimo", collection: ['Excelente', 'Bueno', 'Normal', 'Bajo', 'Muy bajo'], include_blank: 'Seleccionar' %>
-    </div>
-  </div>
+  <!-- Day Body -->
+  <div class="day-card-body">
+    <!-- Day Details Grid -->
+    <div class="day-details-grid mb-4">
+      <div class="detail-item">
+        <%= f.input :date,
+            label: "📆 Fecha",
+            as: :date,
+            html5: true,
+            input_html: { class: "form-control-modern" } %>
+      </div>
 
-  <div class="row">
-    <div class="col-md-6">
-      <%= f.input :energy_level, label: "Nivel de energía", collection: ['Muy alto', 'Alto', 'Medio', 'Bajo', 'Muy bajo'], include_blank: 'Seleccionar' %>
-    </div>
-    <div class="col-md-6">
-      <%= f.input :activity, label: "Actividad física", collection: ['Sedentario', 'Ligero', 'Moderado', 'Activo', 'Muy activo'], include_blank: 'Seleccionar' %>
-    </div>
-  </div>
+      <div class="detail-item">
+        <%= f.input :mood,
+            label: "😊 Estado de Ánimo",
+            collection: ['Excelente', 'Bueno', 'Normal', 'Bajo', 'Muy bajo'],
+            include_blank: 'Seleccionar',
+            input_html: { class: "form-control-modern" } %>
+      </div>
 
-  <%= f.input :notes, label: "Notas del día", as: :text, input_html: { rows: 2 } %>
+      <div class="detail-item">
+        <%= f.input :energy_level,
+            label: "⚡ Nivel de Energía",
+            collection: ['Muy alto', 'Alto', 'Medio', 'Bajo', 'Muy bajo'],
+            include_blank: 'Seleccionar',
+            input_html: { class: "form-control-modern" } %>
+      </div>
 
-  <div class="card mt-3">
-    <div class="card-header bg-light">
-      <h6 class="mb-0">Comidas del Día</h6>
+      <div class="detail-item">
+        <%= f.input :activity,
+            label: "🏃 Actividad Física",
+            collection: ['Sedentario', 'Ligero', 'Moderado', 'Activo', 'Muy activo'],
+            include_blank: 'Seleccionar',
+            input_html: { class: "form-control-modern" } %>
+      </div>
     </div>
-    <div class="card-body">
-      <div class="meals-<%= f.object.object_id %>">
+
+    <%= f.input :notes,
+        label: "📝 Notas del Día",
+        as: :text,
+        input_html: { rows: 2, class: "form-control-modern", placeholder: "Observaciones o instrucciones especiales para este día..." } %>
+
+    <!-- Meals Section -->
+    <div class="meals-section mt-4">
+      <div class="meals-section-header">
+        <div class="d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-2">
+            <span class="meals-icon">🍽️</span>
+            <h5 class="meals-title mb-0">Comidas del Día</h5>
+          </div>
+          <button type="button"
+                  class="btn-add-meal"
+                  data-action="click->nested-form#add_association"
+                  data-association-insertion-node=".meals-<%= f.object.object_id %>"
+                  data-association-insertion-method="append">
+            <span class="btn-icon">➕</span>
+            <span>Agregar Comida</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="meals-container meals-<%= f.object.object_id %>">
         <%= f.simple_fields_for :meals do |meal_form| %>
           <%= render 'meal_fields', f: meal_form %>
         <% end %>
@@ -48,12 +92,150 @@
           <%= render 'meal_fields', f: meal_form %>
         <% end %>
       </template>
-
-      <div class="links mt-2">
-        <button type="button" class="btn btn-secondary btn-sm" data-action="click->nested-form#add_association" data-association-insertion-node=".meals-<%= f.object.object_id %>" data-association-insertion-method="append">
-          Agregar Comida
-        </button>
-      </div>
     </div>
   </div>
 </div>
+
+<style>
+/* Plan Day Card Styles */
+.plan-day-card {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.plan-day-card:hover {
+  border-color: #8b5cf6;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.1);
+}
+
+.day-card-header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-bottom: 2px solid #e5e7eb;
+  padding: 1.25rem 1.5rem;
+}
+
+.day-icon {
+  font-size: 1.75rem;
+}
+
+.day-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.day-subtitle {
+  font-size: 0.8125rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
+.btn-remove-day {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1rem;
+}
+
+.btn-remove-day:hover {
+  background: #fecaca;
+  border-color: #fca5a5;
+  transform: scale(1.05);
+}
+
+.day-card-body {
+  padding: 1.5rem;
+}
+
+/* Day Details Grid */
+.day-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.detail-item label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Meals Section */
+.meals-section {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1.25rem;
+}
+
+.meals-section-header {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.meals-icon {
+  font-size: 1.25rem;
+}
+
+.meals-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.btn-add-meal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(139, 92, 246, 0.2);
+}
+
+.btn-add-meal:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(139, 92, 246, 0.3);
+}
+
+.meals-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .day-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .day-card-header,
+  .day-card-body {
+    padding: 1rem;
+  }
+
+  .meals-section {
+    padding: 1rem;
+  }
+}
+</style>

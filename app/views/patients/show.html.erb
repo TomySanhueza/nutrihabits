@@ -52,7 +52,7 @@
     <!-- Navigation Tabs -->
     <nav class="content-tabs">
       <a href="#" class="tab-item active">Resumen</a>
-      <a href="#" class="tab-item">Planes Nutricionales</a>
+      <%= link_to "Planes Nutricionales", patient_nutrition_plans_path(@patient), class:"tab-item" %>   
       <a href="#" class="tab-item">Historial del Paciente</a>
       <a href="#" class="tab-item">Registro de Comidas</a>
       <a href="#" class="tab-item">Controles Diarios</a>
@@ -62,11 +62,19 @@
     <div class="patient-stats-grid">
       <div class="stat-card">
         <h3 class="stat-label">Peso</h3>
-        <div class="stat-value"><%= @patient.profile.weight unless @patient.profile.nil? %> kg</div>
+        <div class="stat-value">
+          <% if @patient.weight_patients.empty?   %>
+            <%= @patient.profile&.weight %>
+          <% else %> 
+            <%= @patient.weight_patients.last %>
+          <% end %>
+          kg
+        </div>
       </div>
       <div class="stat-card">
-        <h3 class="stat-label">IMC</h3>
-        <div class="stat-value">22.5</div>
+        <h3 class="stat-label">IMC</h3> 
+        <% cuadrado_altura = ((@patient.profile&.height) / 100) ** 2 if @patient.profile %>
+        <div class="stat-value"><%= (@patient.profile.weight / cuadrado_altura).round if @patient.profile %></div>
       </div>
       <div class="stat-card">
         <h3 class="stat-label">Adherencia</h3>
@@ -139,9 +147,67 @@
         </div>
       </div>
     </div>
+
+    <!-- Profile Information Section -->
+    <div class="profile-section">
+      <div class="profile-container-card">
+        <h2 class="profile-container-title">Perfil del Paciente</h2>
+
+        <div class="profile-item">
+          <div class="profile-item-header">
+            <span class="profile-item-icon">📏</span>
+            <h3 class="profile-item-label">Altura</h3>
+          </div>
+          <p class="profile-item-value"><%= @patient.profile&.height %> m</p>
+        </div>
+
+        <div class="profile-divider"></div>
+
+        <div class="profile-item">
+          <div class="profile-item-header">
+            <span class="profile-item-icon">🎯</span>
+            <h3 class="profile-item-label">Objetivos</h3>
+          </div>
+          <p class="profile-item-value"><%= @patient.profile&.goals %></p>
+        </div>
+
+        <div class="profile-divider"></div>
+
+        <div class="profile-item">
+          <div class="profile-item-header">
+            <span class="profile-item-icon">⚕️</span>
+            <h3 class="profile-item-label">Condiciones</h3>
+          </div>
+          <p class="profile-item-value"><%= @patient.profile&.conditions %></p>
+        </div>
+
+        <div class="profile-divider"></div>
+
+        <div class="profile-item">
+          <div class="profile-item-header">
+            <span class="profile-item-icon">🏃</span>
+            <h3 class="profile-item-label">Estilo de Vida</h3>
+          </div>
+          <p class="profile-item-value"><%= @patient.profile&.lifestyle %></p>
+        </div>
+
+        <div class="profile-divider"></div>
+
+        <div class="profile-item">
+          <div class="profile-item-header">
+            <span class="profile-item-icon">📋</span>
+            <h3 class="profile-item-label">Diagnóstico</h3>
+          </div>
+          <p class="profile-item-value"><%= @patient.profile&.diagnosis %></p>
+        </div>
+      </div>
+    </div>
     </div>
   </main>
 
+
+
+   
   <!-- Right Sidebar -->
   <aside class="right-sidebar">
     <!-- Patient Alerts -->
@@ -509,6 +575,75 @@
 
 .adherence-bar.active {
   background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+/* Profile Section */
+.profile-section {
+  margin-top: 32px;
+}
+
+.profile-container-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.profile-container-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 28px 0;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.profile-item {
+  padding: 16px 0;
+}
+
+.profile-item-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.profile-item-icon {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.profile-item-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.profile-item-value {
+  font-size: 15px;
+  font-weight: 400;
+  color: #1f2937;
+  margin: 0;
+  line-height: 1.6;
+  padding-left: 52px;
+}
+
+.profile-divider {
+  height: 1px;
+  background: #f3f4f6;
+  margin: 0;
 }
 
 /* Right Sidebar */

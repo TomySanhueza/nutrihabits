@@ -29,7 +29,8 @@ class NutritionPlansController < ApplicationController
       ai_rationale: response["criteria_explanation"],
       nutritionist: current_nutritionist,
       status: 'active',
-      start_date: Date.today
+      start_date: Date.today,
+      end_date: Date.today + 6
     )
 
     # Poblar plans y meals desde meal_distribution
@@ -39,7 +40,7 @@ class NutritionPlansController < ApplicationController
 
       daily_meals.each do |meal_type, meal_data|
         plan.meals.create(
-          meal_type: meal_type,
+          meal_type: meal_type["meal type"],
           ingredients: meal_data["ingredients"],
           recipe: meal_data["recipe"],
           calories: meal_data["calorias"],
