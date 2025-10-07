@@ -16,12 +16,11 @@ Rails.application.routes.draw do
     namespace :pats do
       get 'dashboard', to: 'dashboard#show'
     end
-    # resources :meals do
-      # resources :meal_logs, except: [:edit, :update]
-    # end
+    resources :meals do
+      resources :meal_logs, except: [:edit, :update]
+    end
+    resources :weight_patients
     # get "dashboard", to: "patients#dashboard"
     # get "plans/:id", to: "plans#show", as: :plan
-    # get "weight/new", to: "weight_patients#new", as: :new_weight
-    # post "weight/patients", to: "weight_patients#create"
   end
 end

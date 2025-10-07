@@ -1,15 +1,78 @@
-<div class="container mt-4">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <%#= link_to "← Volver", meal_logs_path, class: "btn btn-outline-secondary mb-3" %>
+<%# encoding: UTF-8 %>
+<% content_for :hide_navbar, true %>
+<div class="container-fluid p-0 bg-light min-vh-100">
+  <div class="mx-auto bg-white shadow" style="max-width: 448px;">
 
-      <div class="card">
-        <div class="card-body">
-          <h3 class="card-title mb-4">Registrar Nueva Comida</h3>
+    <div class="d-flex flex-column min-vh-100">
 
-          <%= render 'form', meal_log: @meal_log %>
+      <!-- Header -->
+      <header class="p-4 position-relative">
+        <%= link_to "#", class: "position-absolute start-0 top-0 mt-4 ms-3 text-dark text-decoration-none" do %>
+          <i class="bi bi-arrow-left fs-4"></i>
+        <% end %>
+        <h1 class="fs-5 fw-semibold text-dark text-center mb-0">Registrar comida</h1>
+      </header>
+
+      <!-- Main Content -->
+      <main class="flex-grow-1 px-4 pb-4">
+
+        <!-- Camera Upload Area -->
+        <div class="bg-light rounded-4 p-5 mb-4 d-flex flex-column align-items-center justify-content-center" style="min-height: 280px;">
+          <button type="button" class="btn btn-white bg-white rounded-circle shadow p-4 mb-3 border-0" style="width: 100px; height: 100px;">
+            <i class="bi bi-camera-fill text-success" style="font-size: 2.5rem;"></i>
+          </button>
+          <button type="button" class="btn btn-link text-secondary text-decoration-none d-flex align-items-center gap-2">
+            <i class="bi bi-image"></i>
+            <span class="small">Subir de la galería</span>
+          </button>
         </div>
-      </div>
+
+        <!-- Form Section -->
+        <div class="mb-4">
+          <!-- Text Input -->
+          <div class="mb-4">
+            <input
+              type="text"
+              class="form-control border-secondary rounded-3 py-2"
+              placeholder="¿Qué comiste? (opcional)"
+              aria-label="Descripción de la comida">
+          </div>
+
+          <!-- Meal Type Buttons -->
+          <div class="row g-2">
+            <div class="col-6">
+              <button type="button" class="btn btn-light border rounded-pill w-100 py-2 fw-medium text-secondary small">
+                Desayuno
+              </button>
+            </div>
+            <div class="col-6">
+              <button type="button" class="btn btn-dark rounded-pill w-100 py-2 fw-medium small">
+                Almuerzo
+              </button>
+            </div>
+            <div class="col-6">
+              <button type="button" class="btn btn-light border rounded-pill w-100 py-2 fw-medium text-secondary small">
+                Cena
+              </button>
+            </div>
+            <div class="col-6">
+              <button type="button" class="btn btn-light border rounded-pill w-100 py-2 fw-medium text-secondary small">
+                Snack
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </main>
+
+      <!-- Sticky Footer Button -->
+      <footer class="sticky-bottom bg-white border-top p-3">
+        <button type="submit" class="btn btn-dark w-100 py-2 rounded-3 fw-semibold shadow-sm">
+          Analizar y Registrar
+        </button>
+      </footer>
+
     </div>
+
   </div>
 </div>
