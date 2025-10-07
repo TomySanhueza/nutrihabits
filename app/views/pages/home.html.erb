@@ -4,12 +4,13 @@
     <div class="row justify-content-center">
       <div class="col-lg-8 text-center">
         <h1 class="hero-title">
-          Transforma tu nutrición
-          <br>con ayuda profesional
+          La plataforma inteligente
+          <br>que potencia tu trabajo
+          <br>como nutricionista
         </h1>
         <p class="hero-subtitle">
-          Conecta con nutricionistas expertos y lleva un seguimiento 
-          personalizado de tu alimentación con inteligencia artificial.
+          Gestión de pacientes y planes nutricionales impulsados por IA,
+          integrados en una app personalizada para cada paciente.
         </p>
         <div class="hero-buttons">
           <% if nutritionist_signed_in? %>
@@ -18,6 +19,126 @@
             <%= link_to "Comenzar gratis", new_nutritionist_registration_path, class: "btn btn-primary btn-lg me-3" %>
             <%= link_to "Iniciar sesión", new_nutritionist_session_path, class: "btn btn-outline-primary btn-lg" %>
           <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Platform Overview Section -->
+<section class="platform-overview-section">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <div class="platform-content">
+          <h2 class="platform-title gabarito-font">
+            Una sola herramienta para
+            <br><span class="highlight-text">gestionar, planificar y acompañar</span> a tus pacientes
+            <!--<br>a tus pacientes -->
+          </h2>
+          <p class="platform-description">
+            Con <strong>NutriHabits</strong> podrás centralizar gestión la gestión de 
+            pacientes, crear plans nutricionales asistidos por IA y dar 
+            acceso cliente a una app personalizada que les facilite 
+            seguir su plan paso a paso.
+          </p>
+          <div class="platform-cta">
+            <%= link_to "Empieza ahora", new_nutritionist_registration_path, class: "btn btn-primary btn-lg" %>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="platform-visual">
+          <div class="platform-image">
+            <%= image_tag "Photoroom.png", 
+                alt: "NutriHabits Platform Preview", 
+                class: "img-fluid platform-preview" %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+  <div class="container">
+    <div class="row mb-2">
+      <div class="col-12 text-center">
+        <h2 class="features-section-title">¿Qué incluye Nutrihabits?</h2>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="mobile-preview">
+          <%= image_tag "Photoroom_2.png", 
+              alt: "NutriHabits Mobile App", 
+              class: "img-fluid mobile-app-image" %>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="features-content">
+          <div class="feature-item">
+            <div class="feature-content">
+              <h4 class="feature-title-detailed">👩‍⚕️ Gestión integral de pacientes:</h4>
+              <p class="feature-description-detailed">
+                Perfiles, historiales, evolución clínica.
+              </p>
+            </div>
+          </div>
+          
+          <div class="feature-item">
+            <div class="feature-content">
+              <h4 class="feature-title-detailed">🥗 Planes nutricionales asistidos por IA:</h4>
+              <p class="feature-description-detailed">
+                Genera propuestas personalizadas que puedes ajustar en minutos.
+              </p>
+            </div>
+          </div>
+          
+          <div class="feature-item">
+            <div class="feature-content">
+              <h4 class="feature-title-detailed">📲 App para pacientes:</h4>
+              <p class="feature-description-detailed">
+                Registro de comidas con fotos + análisis IA, check-ins diarios,
+                seguimiento de energía, humor y peso.
+              </p>
+            </div>
+          </div>
+          
+          <div class="feature-item">
+            <div class="feature-content">
+              <h4 class="feature-title-detailed">💬 Chat nutricionista → paciente</h4>
+              <p class="feature-description-detailed">
+                Comunicación directa y centralizada en un mismo lugar.
+              </p>
+            </div>
+          </div>
+          
+          <div class="feature-item">
+            <div class="feature-content">
+              <h4 class="feature-title-detailed">🤖 Asistente IA para nutricionistas</h4>
+              <p class="feature-description-detailed">
+                Tu copiloto para recetas, cálculos y recomendaciones rápidas.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <p class="cta-message">
+          Nutrihabits es la herramienta que transforma tu consulta en una experiencia digital y personalizada. Haz crecer tu práctica, mejora la adherencia y potencia la vida de tus pacientes.
+        </p>
+        <div class="cta-button">
+          <%= link_to "Regístrate", new_nutritionist_registration_path, class: "btn btn-primary btn-lg" %>
         </div>
       </div>
     </div>

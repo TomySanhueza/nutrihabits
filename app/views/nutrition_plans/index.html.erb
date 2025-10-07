@@ -1,18 +1,770 @@
-<h1>Planes Nutricionales de <%= @patient.first_name %> <%= @patient.last_name %></h1>
+<div class="nutrition-plans-index-layout">
+  <!-- Left Sidebar -->
+  <aside class="left-sidebar">
+    <nav class="sidebar-nav">
+      <%= link_to nutritionist_dashboard_path, class: "nav-item" do %>
+        <span class="nav-icon">📊</span>
+        <span>Dashboard</span>
+      <% end %>
+      <%= link_to patients_path, class: "nav-item" do %>
+        <span class="nav-icon">👥</span>
+        <span>Pacientes</span>
+      <% end %>
+      <a href="#" class="nav-item active">
+        <span class="nav-icon">🍎</span>
+        <span>Planes Nutricionales</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">🤖</span>
+        <span>Copiloto IA</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">⚙️</span>
+        <span>Configuraciones</span>
+      </a>
+    </nav>
 
-<%= link_to "Crear Nuevo Plan", new_patient_nutrition_plan_path(@patient) %>
+    <div class="sidebar-footer">
+      <%= image_tag "https://kitt.lewagon.com/placeholder/users/ssaunier",
+                    class: "user-avatar",
+                    alt: "Nutritionist" %>
+      <div class="user-info">
+        <div class="user-name"><%= current_nutritionist&.first_name || "Nutritionist" %> <%= current_nutritionist&.last_name || "" %></div>
+        <div class="user-role">Nutritionist</div>
+      </div>
+    </div>
+  </aside>
 
-<% if @nutrition_plans.any? %>
-  <ul>
-    <% @nutrition_plans.each do |plan| %>
-      <li>
-        <strong>Objetivo:</strong> <%= plan.objective&.truncate(20) %>
-        <strong>Estado:</strong> <%= plan.status %>
-        <strong>Período:</strong> <%= plan.start_date %> - <%= plan.end_date %>
-        <%= link_to "Ver detalle", patient_nutrition_plan_path(@patient, plan) %>
-      </li>
-    <% end %>
-  </ul>
-<% else %>
-  <p>No hay planes nutricionales creados para este paciente.</p>
-<% end %>
+  <!-- Main Content -->
+  <main class="main-content-plans">
+    <!-- Header -->
+    <div class="plans-header">
+      <div class="header-left">
+        <%= link_to patient_path(@patient), class: "back-button" do %>
+          ←
+        <% end %>
+        <div class="header-info">
+          <h1 class="page-title">Planes Nutricionales</h1>
+          <p class="page-subtitle">de <%= @patient.first_name %> <%= @patient.last_name %></p>
+        </div>
+      </div>
+      <%= link_to new_patient_nutrition_plan_path(@patient), class: "btn-create-plan" do %>
+        <span>+</span>
+        Crear Nuevo Plan
+      <% end %>
+    </div>
+
+    <!-- Plans Container -->
+    <div class="plans-container">
+      <% if @nutrition_plans.any? %>
+        <div class="plans-card">
+          <div class="plans-grid">
+            <% @nutrition_plans.each do |plan| %>
+              <div class="plan-card-item">
+                <!-- Plan Title -->
+                <h3 class="plan-card-title"><%= (plan.status || 'Active').titleize %> Plan</h3>
+
+                <!-- Plan Info Grid -->
+                <div class="plan-info-row">
+                  <div class="plan-info-col">
+                    <div class="plan-info-label">Goal</div>
+                    <div class="plan-info-text"><%= plan.objective || "Weight Loss" %></div>
+                  </div>
+
+                  <div class="plan-info-col">
+                    <div class="plan-info-label">Dates</div>
+                    <div class="plan-info-text">
+                      <%= plan.start_date&.strftime("%b %-d") || "Jul 1" %> - <%= plan.end_date&.strftime("%b %-d, %Y") || "Jul 31, 2024" %>
+                    </div>
+                  </div>
+
+                  <div class="plan-info-col">
+                    <div class="plan-info-label">Status</div>
+                    <div class="plan-status-badge plan-status-<%= plan.status || 'active' %>">
+                      <%= (plan.status || 'Active').capitalize %>
+                    </div>
+                  </div>
+
+                  <div class="plan-info-col">
+                    <div class="plan-info-label">Adherence</div>
+                    <div class="plan-adherence-badge plan-adherence-high">92%</div>
+                  </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="plan-quick-actions-row">
+                  <span class="quick-actions-label">Quick Actions:</span>
+                  <%= link_to "View Plan", patient_nutrition_plan_path(@patient, plan), class: "quick-action-link" %>
+                  <%= link_to "Edit", edit_patient_nutrition_plan_path(@patient, plan), class: "quick-action-link" %>
+                  <%= link_to "View AI Logic", "#", class: "quick-action-link" %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% else %>
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <h3 class="empty-title">No hay planes nutricionales</h3>
+          <p class="empty-description">Aún no se ha creado ningún plan nutricional para este paciente.</p>
+          <%= link_to new_patient_nutrition_plan_path(@patient), class: "btn-create-plan-empty" do %>
+            <span>+</span>
+            Crear Primer Plan
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </main>
+
+  <!-- Right Sidebar -->
+  <aside class="right-sidebar-plans">
+    <!-- Alerts and Tracking Card -->
+    <div class="sidebar-card-plans">
+      <h3 class="card-title-plans">Alertas y Seguimiento</h3>
+
+      <div class="alert-item-plans alert-danger-plans">
+        <div class="alert-icon-plans">⚠️</div>
+        <div class="alert-content-plans">
+          <span class="alert-title-plans">Adherencia Baja</span>
+          <span class="alert-description-plans">Dries Vincent tiene baja adherencia (45%).</span>
+        </div>
+      </div>
+
+      <div class="alert-item-plans alert-warning-plans">
+        <div class="alert-icon-plans">⚠️</div>
+        <div class="alert-content-plans">
+          <span class="alert-title-plans">Plan Expirando</span>
+          <span class="alert-description-plans">El plan de C. Henry expira en 3 días.</span>
+        </div>
+      </div>
+
+      <div class="alert-item-plans alert-danger-plans">
+        <div class="alert-icon-plans">🩺</div>
+        <div class="alert-content-plans">
+          <span class="alert-title-plans">Revisión Crítica</span>
+          <span class="alert-description-plans">L. Alexander reportó síntomas inusuales.</span>
+        </div>
+      </div>
+
+      <div class="alert-item-plans alert-info-plans">
+        <div class="alert-icon-plans">📊</div>
+        <div class="alert-content-plans">
+          <span class="alert-title-plans">Cambio de Peso</span>
+          <span class="alert-description-plans">L. Alexander perdió 1.5kg esta semana.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Copilot Card -->
+    <div class="sidebar-card-plans">
+      <h3 class="card-title-plans">
+        <span class="copilot-icon-plans">🤖</span>
+        Copiloto IA
+      </h3>
+
+      <div class="copilot-input-group-plans">
+        <input type="text" class="copilot-input-plans" placeholder="Haz una pregunta...">
+        <button class="copilot-button-plans">→</button>
+      </div>
+
+      <div class="quick-prompts-plans">
+        <h4 class="prompts-title-plans">Consultas Rápidas:</h4>
+        <div class="prompts-container-plans">
+          <span class="prompt-chip-plans">Calcular macros</span>
+          <span class="prompt-chip-plans">Explicar plan al paciente</span>
+          <span class="prompt-chip-plans">Sugerir recetas rápidas</span>
+          <span class="prompt-chip-plans">Explicar lógica IA</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<style>
+/* Layout */
+.nutrition-plans-index-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Left Sidebar */
+.left-sidebar {
+  width: 260px;
+  background: white;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 24px 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.sidebar-nav {
+  padding: 24px 24px 0 24px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin-bottom: 4px;
+  color: #6b7280;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  font-weight: 500;
+}
+
+.nav-item:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.nav-item.active {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.nav-icon {
+  font-size: 18px;
+  width: 20px;
+  text-align: center;
+}
+
+.sidebar-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.user-role {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Main Content */
+.main-content-plans {
+  flex: 1;
+  padding: 32px 48px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Header */
+.plans-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #6b7280;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  font-size: 20px;
+}
+
+.back-button:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.page-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.page-subtitle {
+  color: #6b7280;
+  margin: 0;
+  font-size: 16px;
+}
+
+.btn-create-plan {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btn-create-plan:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+  color: white;
+}
+
+/* Plans Container */
+.plans-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.plans-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 32px;
+  width: 100%;
+  max-width: 1000px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Plans Grid */
+.plans-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Plan Card Item */
+.plan-card-item {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px 24px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.plan-card-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+/* Plan Card Title */
+.plan-card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+/* Plan Info Row */
+.plan-info-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.plan-info-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.plan-info-label {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.plan-info-text {
+  font-size: 14px;
+  color: #1f2937;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* Plan Status Badge */
+.plan-status-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+  line-height: 1.2;
+  width: fit-content;
+}
+
+.plan-status-active {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.plan-status-inactive {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.plan-status-completed {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+/* Plan Adherence Badge */
+.plan-adherence-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  width: fit-content;
+}
+
+.plan-adherence-high {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.plan-adherence-medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.plan-adherence-low {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Quick Actions Row */
+.plan-quick-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.quick-actions-label {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.quick-action-link {
+  font-size: 13px;
+  color: #7c3aed;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.quick-action-link:hover {
+  color: #6d28d9;
+  text-decoration: underline;
+}
+
+
+/* Empty State */
+.empty-state {
+  background: white;
+  border: 2px dashed #e5e7eb;
+  border-radius: 16px;
+  padding: 64px 32px;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 24px;
+  opacity: 0.5;
+}
+
+.empty-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 12px 0;
+}
+
+.empty-description {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0 0 32px 0;
+  line-height: 1.6;
+}
+
+.btn-create-plan-empty {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.btn-create-plan-empty:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+  color: white;
+}
+
+/* Right Sidebar */
+.right-sidebar-plans {
+  width: 340px;
+  padding: 32px 24px 32px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sidebar-card-plans {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.card-title-plans {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Alerts */
+.alert-item-plans {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.alert-item-plans:last-child {
+  margin-bottom: 0;
+}
+
+.alert-danger-plans {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.alert-warning-plans {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+}
+
+.alert-info-plans {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.alert-icon-plans {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.alert-content-plans {
+  display: flex;
+  flex-direction: column;
+}
+
+.alert-title-plans {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.alert-description-plans {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* AI Copilot */
+.copilot-icon-plans {
+  font-size: 20px;
+}
+
+.copilot-input-group-plans {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.copilot-input-plans {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+
+.copilot-input-plans:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.copilot-button-plans {
+  background: #8b5cf6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copilot-button-plans:hover {
+  background: #7c3aed;
+}
+
+.prompts-title-plans {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: #374151;
+}
+
+.prompts-container-plans {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.prompt-chip-plans {
+  background: #f8fafc;
+  color: #8b5cf6;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  transition: all 0.15s ease;
+}
+
+.prompt-chip-plans:hover {
+  background: #ede9fe;
+  border-color: #d8b4fe;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .main-content-plans {
+    padding: 24px;
+  }
+
+  .plans-card {
+    padding: 24px;
+  }
+
+  .right-sidebar-plans {
+    width: 300px;
+  }
+
+  .plan-info-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .nutrition-plans-index-layout {
+    flex-direction: column;
+  }
+
+  .left-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+
+  .right-sidebar-plans {
+    width: 100%;
+    padding: 24px;
+  }
+
+  .main-content-plans {
+    padding: 16px;
+  }
+
+  .plans-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .btn-create-plan {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .plan-info-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .plan-quick-actions-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+</style>

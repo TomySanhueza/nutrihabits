@@ -1,0 +1,10 @@
+<h1>Completa el perfil de #</h1>
+<%= simple_form_for [@patient, @profile] do |f| %>
+  <%= f.input :weight %>
+  <%= f.input :height %>
+  <%= f.input :goals %>
+  <%= f.input :conditions %>
+  <%= f.input :lifestyle %>
+  <%= f.input :diagnosis %>
+  <%= f.submit %>
+<% end %>

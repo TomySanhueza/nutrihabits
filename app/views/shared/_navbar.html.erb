@@ -43,9 +43,9 @@
               <%# else %>
                 <%= image_tag "https://kitt.lewagon.com/placeholder/users/ssaunier",
                               class: "navbar-avatar me-2",
-                              alt: "Default avatar" %>
+                              alt: "Default avatar" if params[:controller] == "pages" %>
               <%# end %>
-              <span><%= current_nutritionist.email %></span>
+              <span><%= current_nutritionist.email if params[:controller] == "pages" %></span>
             </a>
 
             <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="navbarDropdown">
@@ -59,7 +59,6 @@
                   class: "dropdown-item text-danger" %>
               </li>
             </ul>
-
           </li>
 
         <% else %>
@@ -68,24 +67,17 @@
           <li class="nav-item dropdown">
             <a class="btn btn-outline-dark dropdown-toggle me-2 px-3 fw-semibold" href="#" id="loginDropdown"
                role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Log in as
+              Iniciar sesión como
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="loginDropdown">
-              <li><%= link_to "Patient", new_nutritionist_session_path(role: :patient), class: "dropdown-item" %></li>
-              <li><%= link_to "Nutritionist", new_nutritionist_session_path(role: :nutritionist), class: "dropdown-item" %></li>
+              <li><%= link_to "Paciente", new_nutritionist_session_path(role: :patient), class: "dropdown-item" %></li>
+              <li><%= link_to "Nutricionista", new_nutritionist_session_path(role: :nutritionist), class: "dropdown-item" %></li>
             </ul>
           </li>
 
-          <!-- Sign up -->
-          <li class="nav-item dropdown">
-            <a class="btn btn-dark dropdown-toggle px-3 fw-semibold" href="#" id="signupDropdown"
-               role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Sign Up
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="signupDropdown">
-              <li><%= link_to "Patient", new_nutritionist_registration_path(role: :patient), class: "dropdown-item" %></li>
-              <li><%= link_to "Nutritionist", new_nutritionist_registration_path(role: :nutritionist), class: "dropdown-item" %></li>
-            </ul>
+          <!-- Sign up directo (solo nutricionista) -->
+          <li class="nav-item">
+            <%= link_to "Registrarse", new_nutritionist_registration_path, class: "btn btn-dark px-3 fw-semibold" %>
           </li>
 
         <% end %>
@@ -94,4 +86,5 @@
     </div>
   </div>
 </nav>
+
 

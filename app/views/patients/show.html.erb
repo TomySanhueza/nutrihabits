@@ -1,2 +1,695 @@
-<%= @patient.first_name %>
-<%= button_to "Crear plan", patient_nutrition_plans_path(@patient) %>
+<div class="patient-layout">
+  <!-- Left Sidebar -->
+  <aside class="left-sidebar">
+    <nav class="sidebar-nav">
+      <%= link_to nutritionist_dashboard_path, class: "nav-item" do %>
+        <span class="nav-icon">📊</span>
+        <span>Panel de Control</span>
+      <% end %>
+      <%= link_to patients_path, class: "nav-item active" do %>
+        <span class="nav-icon">👥</span>
+        <span>Pacientes</span>
+      <% end %>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">🍎</span>
+        <span>Planes Nutricionales</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">🤖</span>
+        <span>Copiloto IA</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">⚙️</span>
+        <span>Configuraciones</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content ">
+    <!-- Patient Header -->
+    <div class="patient-header">
+      <div class="patient-info-main">
+        <h1 class="patient-name"><%= @patient.first_name %> <%= @patient.last_name %></h1>
+        <div class="patient-status-bar">
+          <span class="status-badge active">Plan Activo</span>
+          <span class="next-checkin">Próxima revisión: 28 Jul, 2024</span>
+        </div>
+      </div>
+      <div class="patient-actions">
+        <button class="btn btn-outline">Editar Perfil</button>
+        <%= button_to "Generar Plan IA", patient_nutrition_plans_path(@patient), method: :post, class: "btn btn-primary" %>
+        <button class="btn-icon">📄</button>
+        <button class="btn-icon">🗑️</button>
+      </div>
+    </div>
+
+    <% if @patient.profile.nil? %>
+        <%=  render "profiles/form" %>
+    <% end  %>
+
+    <div class="#{if @patient.nil? ? 'd-none' : ''}">
+    <!-- Navigation Tabs -->
+    <nav class="content-tabs">
+      <a href="#" class="tab-item active">Resumen</a>
+      <a href="#" class="tab-item">Planes Nutricionales</a>
+      <a href="#" class="tab-item">Historial del Paciente</a>
+      <a href="#" class="tab-item">Registro de Comidas</a>
+      <a href="#" class="tab-item">Controles Diarios</a>
+    </nav>
+
+    <!-- Stats Grid -->
+    <div class="patient-stats-grid">
+      <div class="stat-card">
+        <h3 class="stat-label">Peso</h3>
+        <div class="stat-value"><%= @patient.profile.weight unless @patient.profile.nil? %> kg</div>
+      </div>
+      <div class="stat-card">
+        <h3 class="stat-label">IMC</h3>
+        <div class="stat-value">22.5</div>
+      </div>
+      <div class="stat-card">
+        <h3 class="stat-label">Adherencia</h3>
+        <div class="stat-value stat-excellent">92%</div>
+      </div>
+      <div class="stat-card">
+        <h3 class="stat-label">Cambio de Peso</h3>
+        <div class="stat-value stat-positive">-1.8 kg</div>
+      </div>
+    </div>
+
+    <!-- Charts and Plan Section -->
+    <div class="content-grid">
+      <!-- Weight Evolution Chart -->
+      <div class="chart-card">
+        <h2 class="section-title">Evolución del Peso</h2>
+        <div class="chart-container">
+          <svg width="100%" height="200" viewBox="0 0 400 200">
+            <defs>
+              <linearGradient id="weightGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:0.3"/>
+                <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0"/>
+              </linearGradient>
+            </defs>
+            <path d="M50,150 Q100,120 150,130 Q200,110 250,100 Q300,80 350,70" 
+                  stroke="#8b5cf6" stroke-width="3" fill="none"/>
+            <path d="M50,150 Q100,120 150,130 Q200,110 250,100 Q300,80 350,70 L350,180 L50,180 Z" 
+                  fill="url(#weightGradient)"/>
+            <circle cx="350" cy="70" r="4" fill="#8b5cf6"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Current Plan -->
+      <div class="plan-card">
+        <h2 class="section-title">Plan Actual</h2>
+        <div class="plan-details">
+          <div class="plan-row">
+            <span class="plan-label">Objetivo:</span>
+            <span class="plan-value">Pérdida de Peso</span>
+          </div>
+          <div class="plan-row">
+            <span class="plan-label">Fecha de Inicio:</span>
+            <span class="plan-value">01 Jul, 2024</span>
+          </div>
+          <div class="plan-row">
+            <span class="plan-label">Fecha de Fin:</span>
+            <span class="plan-value">31 Jul, 2024</span>
+          </div>
+          <div class="plan-row">
+            <span class="plan-label">Estado:</span>
+            <span class="status-badge on-track">En Progreso</span>
+          </div>
+        </div>
+        <% if @patient.nutrition_plans.any? %>
+          <%= link_to "Ver detalle", patient_nutrition_plan_path(@patient, @patient.nutrition_plans.last), class: "btn-view-detail" %>
+        <% end %>
+      </div>
+
+      <!-- Adherence Chart -->
+      <div class="chart-card adherence-chart">
+        <h2 class="section-title">Adherencia</h2>
+        <div class="bars-container">
+          <div class="adherence-bar" style="height: 40%"></div>
+          <div class="adherence-bar" style="height: 70%"></div>
+          <div class="adherence-bar active" style="height: 90%"></div>
+          <div class="adherence-bar active" style="height: 85%"></div>
+          <div class="adherence-bar active" style="height: 95%"></div>
+          <div class="adherence-bar" style="height: 60%"></div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </main>
+
+  <!-- Right Sidebar -->
+  <aside class="right-sidebar">
+    <!-- Patient Alerts -->
+    <div class="sidebar-card">
+      <h3 class="card-title">Alertas del Paciente</h3>
+      
+      <div class="alert-item alert-danger">
+        <div class="alert-dot red"></div>
+        <div class="alert-content">
+          <span class="alert-title">Alto Consumo de Sodio</span>
+          <span class="alert-description">El registro de ayer muestra niveles altos de sodio</span>
+        </div>
+      </div>
+
+      <div class="alert-item alert-warning">
+        <div class="alert-dot yellow"></div>
+        <div class="alert-content">
+          <span class="alert-title">Comida Omitida</span>
+          <span class="alert-description">Ana se saltó el desayuno esta mañana</span>
+        </div>
+      </div>
+
+      <div class="alert-item alert-success">
+        <div class="alert-dot green"></div>
+        <div class="alert-content">
+          <span class="alert-title">Objetivo Logrado</span>
+          <span class="alert-description">Cumplió la meta semanal de consumo de agua</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Copilot -->
+    <div class="sidebar-card">
+      <h3 class="card-title">
+        <span class="copilot-icon">🤖</span>
+        Copiloto IA
+      </h3>
+      
+      <div class="copilot-input-group">
+        <input type="text" class="copilot-input" placeholder="Pregunta sobre Ana...">
+        <button class="copilot-button">→</button>
+      </div>
+
+      <div class="quick-suggestions">
+        <div class="suggestion-item">Resumir progreso</div>
+        <div class="suggestion-item">Sugerir ajustes de comida</div>
+        <div class="suggestion-item">¿Alertas recientes?</div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+
+<style>
+/* Patient Page Layout */
+.patient-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+/* Left Sidebar */
+.left-sidebar {
+  width: 240px;
+  background: white;
+  border-right: 1px solid #e5e7eb;
+  padding: 24px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-nav {
+  padding: 24px 24px 0 24px;
+  flex: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin-bottom: 4px;
+  color: #6b7280;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  font-weight: 500;
+}
+
+.nav-item:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.nav-item.active {
+  background: #fdf2f8;
+  color: #ec4899;
+}
+
+.nav-icon {
+  font-size: 18px;
+  width: 20px;
+  text-align: center;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 32px;
+  max-width: calc(100vw - 580px);
+}
+
+/* Patient Header */
+.patient-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.patient-name {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.patient-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.on-track {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.next-checkin {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.patient-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-outline {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.btn-outline:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.btn-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: white;
+  border: 1px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.btn-icon:hover {
+  background: #f9fafb;
+}
+
+/* Content Tabs */
+.content-tabs {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 32px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tab-item {
+  padding: 12px 0;
+  color: #6b7280;
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tab-item:hover {
+  color: #374151;
+}
+
+.tab-item.active {
+  color: #8b5cf6;
+  border-bottom-color: #8b5cf6;
+}
+
+/* Stats Grid */
+.patient-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 500;
+  margin: 0 0 12px 0;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  line-height: 1;
+}
+
+.stat-excellent {
+  color: #10b981;
+}
+
+.stat-positive {
+  color: #10b981;
+}
+
+/* Content Grid */
+.content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+.chart-card, .plan-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.chart-card.adherence-chart {
+  grid-column: span 1;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 20px 0;
+}
+
+/* Chart Container */
+.chart-container {
+  height: 200px;
+  position: relative;
+}
+
+/* Plan Details */
+.plan-details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.plan-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.plan-label {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.plan-value {
+  color: #1f2937;
+  font-weight: 500;
+}
+
+/* View Detail Button */
+.btn-view-detail {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
+}
+
+.btn-view-detail:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
+  color: white;
+}
+
+/* Adherence Bars */
+.bars-container {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+  height: 120px;
+  padding: 20px 0;
+}
+
+.adherence-bar {
+  flex: 1;
+  background: #e5e7eb;
+  border-radius: 4px;
+  min-height: 20px;
+  transition: all 0.3s ease;
+}
+
+.adherence-bar.active {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+/* Right Sidebar */
+.right-sidebar {
+  width: 340px;
+  padding: 32px 24px 32px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sidebar-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Alerts */
+.alert-item {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.alert-item:last-child {
+  margin-bottom: 0;
+}
+
+.alert-danger {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.alert-warning {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+}
+
+.alert-success {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.alert-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.alert-dot.red { background: #ef4444; }
+.alert-dot.yellow { background: #f59e0b; }
+.alert-dot.green { background: #10b981; }
+
+.alert-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.alert-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.alert-description {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* AI Copilot */
+.copilot-icon {
+  font-size: 20px;
+}
+
+.copilot-input-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.copilot-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+
+.copilot-input:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.copilot-button {
+  background: #8b5cf6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copilot-button:hover {
+  background: #7c3aed;
+}
+
+.quick-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.suggestion-item {
+  background: #f8fafc;
+  color: #8b5cf6;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  transition: all 0.15s ease;
+}
+
+.suggestion-item:hover {
+  background: #ede9fe;
+  border-color: #d8b4fe;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .patient-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .patient-layout {
+    flex-direction: column;
+  }
+  
+  .left-sidebar, .right-sidebar {
+    width: 100%;
+  }
+  
+  .main-content {
+    max-width: 100%;
+  }
+  
+  .patient-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .patient-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
