@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_10_05_180705) do
+ActiveRecord::Schema[7.1].define(version: 2025_10_06_214217) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -119,6 +119,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_05_180705) do
     t.jsonb "context"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "title"
+    t.string "model"
     t.index ["nutritionist_id"], name: "index_nutritionist_ai_chats_on_nutritionist_id"
   end
 
