@@ -10,11 +10,13 @@
         </h1>
         <p class="hero-subtitle">
           Gestión de pacientes y planes nutricionales impulsados por IA,
-          integrados en una app personalizada para cada paciente.
+          junto con una app personalizada para cada paciente.
         </p>
         <div class="hero-buttons d-flex gap-3 justify-content-center flex-wrap">
           <% if nutritionist_signed_in? %>
-            <%= link_to "Mi Dashboard", "#", class: "btn btn-primary btn-lg" %>
+            <%= link_to "Mi Dashboard", nutritionist_dashboard_path, class: "btn btn-primary btn-lg" %>
+          <% elsif patient_signed_in? %>
+            <%= link_to "Mi Dashboard", pats_dashboard_path, class: "btn btn-primary btn-lg" %>
           <% else %>
             <%= link_to "Comenzar gratis", new_nutritionist_registration_path, class: "btn btn-primary btn-lg" %>
             <%= link_to "Iniciar sesión", new_nutritionist_session_path, class: "btn-outline-transparente" %>
@@ -37,9 +39,9 @@
             <!--<br>a tus pacientes -->
           </h2>
           <p class="platform-description">
-            Con <strong>NutriHabits</strong> podrás centralizar gestión la gestión de 
+            Con <strong>NutriHabits</strong> podrás centralizar la gestión de tus 
             pacientes, crear plans nutricionales asistidos por IA y dar 
-            acceso cliente a una app personalizada que les facilite 
+            acceso a tus pacientes a una app personalizada que les facilite 
             seguir su plan paso a paso.
           </p>
           <div class="platform-cta">

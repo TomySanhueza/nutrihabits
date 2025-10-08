@@ -6,10 +6,10 @@
     <!-- Header -->
     <header class="sticky-top bg-white border-bottom">
       <div class="d-flex align-items-center px-3 py-3">
-        <%= link_to "#", class: "text-dark text-decoration-none me-3" do %>
+        <%= link_to pats_dashboard_path, class: "text-dark text-decoration-none me-3" do %>
           <i class="bi bi-arrow-left fs-4"></i>
         <% end %>
-        <h1 class="fs-6 fw-semibold mb-0 flex-grow-1">Ensalada tibia de pollo + quinoa...</h1>
+        <h1 class="fs-6 fw-semibold mb-0 flex-grow-1"><%= @meal.meal_type&.humanize || "Comida" %></h1>
         <%= link_to "#", class: "text-dark text-decoration-none ms-2" do %>
           <i class="bi bi-share fs-5"></i>
         <% end %>
@@ -23,7 +23,7 @@
         <%= image_tag "https://lh3.googleusercontent.com/aida-public/AB6AXuCOrvOVp-O1cHUuYnmNtXqoSePRve3n54_StBo9UZM0ZLNIqNwqpLZozupusf5H0ZabQ0rdHIj94lFSh7lGu3oiJseFt7r87VJ2QF6LQ9KPG7Kcnvt-hlsrZphh6p0Uh6R6glNdkn6AmbgHAg5_lYPSgr1b1n08LSaZJ_RymRUvkq-I_1TKCP8t0B9fMmVkDaFLjs03LQ9Ah2P3MEoFh6Tecj4my9oIk6LDwvO9vdM4xdfxrTrgj-wPKeGm9dEfXRy9pidIclgAocc",
                       class: "w-100 object-fit-cover",
                       style: "height: 224px;",
-                      alt: "Ensalada de pollo y quinoa" %>
+                      alt: @meal.meal_type %>
       </div>
 
       <div class="p-4">
@@ -31,65 +31,52 @@
         <!-- Ingredientes Section -->
         <section class="mb-5">
           <h2 class="fs-5 fw-bold text-dark mb-3">Ingredientes</h2>
-          <ul class="list-unstyled">
-            <li class="d-flex align-items-center mb-2">
-              <span class="d-inline-block rounded-circle bg-success bg-opacity-25 me-3" style="width: 12px; height: 12px;"></span>
-              <span class="text-secondary">200g Pechuga de pollo</span>
-            </li>
-            <li class="d-flex align-items-center mb-2">
-              <span class="d-inline-block rounded-circle bg-success bg-opacity-25 me-3" style="width: 12px; height: 12px;"></span>
-              <span class="text-secondary">1 taza Quinoa cocida</span>
-            </li>
-            <li class="d-flex align-items-center mb-2">
-              <span class="d-inline-block rounded-circle bg-success bg-opacity-25 me-3" style="width: 12px; height: 12px;"></span>
-              <span class="text-secondary">1 taza Espinaca</span>
-            </li>
-            <li class="d-flex align-items-center mb-2">
-              <span class="d-inline-block rounded-circle bg-success bg-opacity-25 me-3" style="width: 12px; height: 12px;"></span>
-              <span class="text-secondary">1/2 Pimiento rojo, en tiras</span>
-            </li>
-            <li class="d-flex align-items-center mb-2">
-              <span class="d-inline-block rounded-circle bg-success bg-opacity-25 me-3" style="width: 12px; height: 12px;"></span>
-              <span class="text-secondary">1/4 Cebolla morada, en juliana</span>
-            </li>
-            <li class="d-flex align-items-center mb-2">
-              <span class="d-inline-block rounded-circle bg-success bg-opacity-25 me-3" style="width: 12px; height: 12px;"></span>
-              <span class="text-secondary">Aderezo de limón y aceite de oliva</span>
-            </li>
-          </ul>
+          <% if @meal.ingredients.present? %>
+            <ul class="list-unstyled">
+              <% @meal.ingredients.split(',').each do |ingredient| %>
+                <li class="d-flex align-items-center mb-2">
+                  <span class="d-inline-block rounded-circle bg-success bg-opacity-25 me-3" style="width: 12px; height: 12px;"></span>
+                  <span class="text-secondary"><%= ingredient.strip %></span>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p class="text-muted">No hay ingredientes registrados.</p>
+          <% end %>
         </section>
 
         <!-- Preparación Section -->
         <section class="mb-5">
           <h2 class="fs-5 fw-bold text-dark mb-3">Preparación</h2>
-          <ol class="ps-3 text-secondary lh-lg">
-            <li class="mb-2">Cocina la pechuga de pollo a la plancha con sal y pimienta. Una vez lista, córtala en tiras o cubos.</li>
-            <li class="mb-2">En un bol grande, mezcla la quinoa cocida con las espinacas frescas.</li>
-            <li class="mb-2">Agrega el pimiento rojo y la cebolla morada.</li>
-            <li class="mb-2">Incorpora el pollo tibio a la ensalada.</li>
-            <li class="mb-2">Adereza con una mezcla de jugo de limón, aceite de oliva, sal y pimienta al gusto.</li>
-            <li class="mb-2">Mezcla bien todos los ingredientes y sirve inmediatamente.</li>
-          </ol>
+          <% if @meal.recipe.present? %>
+            <ol class="ps-3 text-secondary lh-lg">
+              <% @meal.recipe.split(/\d+\./).reject(&:blank?).each do |step| %>
+                <li class="mb-2"><%= step.strip %></li>
+              <% end %>
+            </ol>
+          <% else %>
+            <p class="text-muted">No hay instrucciones de preparación registradas.</p>
+          <% end %>
         </section>
 
         <!-- Información Nutricional Section -->
         <section class="bg-light rounded-4 p-4 shadow-sm mb-4">
-          <h3 class="fs-6 fw-semibold text-dark mb-3">Información Nutricional (Estimada)</h3>
+          <h3 class="fs-6 fw-semibold text-dark mb-3">Información Nutricional</h3>
           <div class="row text-center g-3">
             <div class="col-3">
-              <p class="fs-5 fw-bold text-success mb-1">550</p>
+              <p class="fs-5 fw-bold text-success mb-1"><%= @meal.calories&.round || 0 %></p>
               <p class="small text-muted mb-0">kcal</p>
             </div>
             <div class="col-3">
-              <p class="fs-5 fw-bold text-dark mb-1">45g</p>
+              <p class="fs-5 fw-bold text-dark mb-1"><%= @meal.protein&.round || 0 %>g</p>
               <p class="small text-muted mb-0">Proteína</p>
             </div>
             <div class="col-3">
-              <p class="fs-5 fw-bold text-dark mb-1">20g</p>
+              <p class="fs-5 fw-bold text-dark mb-1"><%= @meal.fat&.round || 0 %>g</p>
               <p class="small text-muted mb-0">Grasa</p>
             </div>
             <div class="col-3">
-              <p class="fs-5 fw-bold text-dark mb-1">48g</p>
+              <p class="fs-5 fw-bold text-dark mb-1"><%= @meal.carbs&.round || 0 %>g</p>
               <p class="small text-muted mb-0">Carbs</p>
             </div>
           </div>
