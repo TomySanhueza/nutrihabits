@@ -18,7 +18,7 @@
         <div class="d-flex justify-content-between align-items-center">
           <div>
             <p class="text-muted small fw-medium mb-1">Objetivo calórico diario</p>
-            <h2 class="fs-1 fw-bold mb-0"> <%= current_patient.plans.last.meals.plunck(:calories).sum if current_patient.plans.meals %> <span class="fs-6 fw-normal">kcal</span></h2>
+            <h2 class="fs-1 fw-bold mb-0"> <%= current_patient.plans.last&.meals&.sum(:calories) || 0 %> <span class="fs-6 fw-normal">kcal</span></h2>
             <p class="text-muted" style="font-size: 0.75rem; margin-top: 0.25rem;">P: 135g G: 60g C: 180g</p>
             <p class="text-muted" style="font-size: 0.7rem; margin-top: 0.5rem;">Plan: 1 Oct – 31 Oct</p>
           </div>
@@ -45,7 +45,7 @@
             <p class="text-muted mb-0" style="font-size: 0.75rem;">Último registro: hace 2 días</p>
           </div>
           <div class="d-flex align-items-baseline">
-            <span class="fs-1 fw-bold">65.2</span>
+            <span class="fs-1 fw-bold"><%= current_patient&.weight_patients.last || 0 %></span>
             <span class="fs-6 text-muted ms-1">kg</span>
           </div>
         </div>
@@ -61,9 +61,9 @@
       <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOrvOVp-O1cHUuYnmNtXqoSePRve3n54_StBo9UZM0ZLNIqNwqpLZozupusf5H0ZabQ0rdHIj94lFSh7lGu3oiJseFt7r87VJ2QF6LQ9KPG7Kcnvt-hlsrZphh6p0Uh6R6glNdkn6AmbgHAg5_lYPSgr1b1n08LSaZJ_RymRUvkq-I_1TKCP8t0B9fMmVkDaFLjs03LQ9Ah2P3MEoFh6Tecj4my9oIk6LDwvO9vdM4xdfxrTrgj-wPKeGm9dEfXRy9pidIclgAocc"
            class="card-img-top" alt="Ensalada de pollo y quinoa" style="height: 130px; object-fit: cover;">
       <div class="card-body p-3">
-        <h3 class="fw-bold fs-6 mb-1">Almuerzo 12:30</h3>
-        <p class="text-muted small mb-2">Ensalada tibia de pollo + quinoa + vegetales</p>
-        <p class="text-muted mb-3" style="font-size: 0.75rem;">Sugerido: 150g pollo, 1/2 taza quinoa, 1 taza vegetales</p>
+        <h3 class="fw-bold fs-6 mb-1"><%= current_patient&.meals&.first&.meal_type || "Sin plan asignado" %></h3>
+        <p class="text-muted small mb-2"><%= current_patient&.meals&.first&.ingredients&.truncate(15) || "Sin plan asignado"  %></p>
+        <p class="text-muted mb-3" style="font-size: 0.75rem;"></p>
         <div class="row g-2">
           <div class="col-6">
             <button class="btn btn-outline-secondary w-100 py-2 fw-semibold rounded-3 shadow-sm small">Ver receta</button>
@@ -86,7 +86,7 @@
             <div class="flex-grow-1 bg-secondary bg-opacity-25 rounded-pill" style="height: 16px; overflow: hidden;">
               <div class="bg-success rounded-pill h-100" style="width: 100%;"></div>
             </div>
-            <span class="small fw-medium text-end" style="min-width: 90px;">450/450<br>kcal</span>
+            <span class="small fw-medium text-end" style="min-width: 90px;"><%= current_patient&.meals&.first&.calories || 0 %><br>kcal</span>
           </div>
           <!-- Almuerzo -->
           <div class="d-flex align-items-center gap-2">
@@ -94,19 +94,19 @@
             <div class="flex-grow-1 bg-secondary bg-opacity-25 rounded-pill" style="height: 16px; overflow: hidden;">
               <div class="bg-warning rounded-pill h-100" style="width: 110%;"></div>
             </div>
-            <span class="small fw-medium text-warning text-end" style="min-width: 90px;">660/600<br>kcal</span>
+            <span class="small fw-medium text-warning text-end" style="min-width: 90px;"><%= current_patient&.meals&.second&.calories || 0 %><br>kcal</span>
           </div>
           <!-- Cena -->
           <div class="d-flex align-items-center gap-2 opacity-50">
             <span class="text-muted small" style="min-width: 70px;">Cena</span>
             <div class="flex-grow-1 bg-secondary bg-opacity-25 rounded-pill" style="height: 16px;"></div>
-            <span class="small text-muted text-end" style="min-width: 90px;">0/600<br>kcal</span>
+            <span class="small text-muted text-end" style="min-width: 90px;"><%= current_patient&.meals&.third&.calories || 0 %><br>kcal</span>
           </div>
           <!-- Snack -->
           <div class="d-flex align-items-center gap-2 opacity-50">
             <span class="text-muted small" style="min-width: 70px;">Snack</span>
             <div class="flex-grow-1 bg-secondary bg-opacity-25 rounded-pill" style="height: 16px;"></div>
-            <span class="small text-muted text-end" style="min-width: 90px;">0/150<br>kcal</span>
+            <span class="small text-muted text-end" style="min-width: 90px;"><%= current_patient&.meals&.fourth&.calories || 0 %><br>kcal</span>
           </div>
         </div>
       </div>
