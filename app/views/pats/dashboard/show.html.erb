@@ -45,14 +45,14 @@
             <p class="text-muted mb-0" style="font-size: 0.75rem;">Último registro: hace 2 días</p>
           </div>
           <div class="d-flex align-items-baseline">
-            <span class="fs-1 fw-bold"><%= current_patient&.weight_patients.last || 0 %></span>
+            <span class="fs-1 fw-bold"><%= current_patient&.weight_patients&.last&.weight || 0 %></span>
             <span class="fs-6 text-muted ms-1">kg</span>
           </div>
         </div>
-        <button class="btn btn-dark w-100 py-2 fw-semibold rounded-3 shadow-sm d-flex align-items-center justify-content-center gap-2">
+        <%= link_to new_weight_patient_path, class: "btn btn-dark w-100 py-2 fw-semibold rounded-3 shadow-sm d-flex align-items-center justify-content-center gap-2 text-decoration-none" do %>
           <i class="bi bi-speedometer2"></i>
           Registrar Peso
-        </button>
+        <% end %>
       </div>
     </section>
 
@@ -64,14 +64,16 @@
         <h3 class="fw-bold fs-6 mb-1"><%= current_patient&.meals&.first&.meal_type || "Sin plan asignado" %></h3>
         <p class="text-muted small mb-2"><%= current_patient&.meals&.first&.ingredients&.truncate(15) || "Sin plan asignado"  %></p>
         <p class="text-muted mb-3" style="font-size: 0.75rem;"></p>
-        <div class="row g-2">
-          <div class="col-6">
-            <button class="btn btn-outline-secondary w-100 py-2 fw-semibold rounded-3 shadow-sm small">Ver receta</button>
-          </div>
-          <div class="col-6">
-            <button class="btn btn-light w-100 py-2 fw-semibold rounded-3 shadow-sm small" style="border: 1px solid #dee2e6;">Alternativas</button>
-          </div>
-        </div>
+        <% if current_patient&.meals&.first.present? %>
+          <%= link_to meal_path(current_patient.meals.first), class: "btn btn-dark w-100 py-2 fw-semibold rounded-3 shadow-sm d-flex align-items-center justify-content-center gap-2 text-decoration-none" do %>
+            <i class="bi bi-book"></i>
+            Ver receta
+          <% end %>
+        <% else %>
+          <button class="btn btn-secondary w-100 py-2 fw-semibold rounded-3 shadow-sm" disabled>
+            Sin plan asignado
+          </button>
+        <% end %>
       </div>
     </section>
 
