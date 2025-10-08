@@ -90,8 +90,18 @@ class MealLogAnalysisService
     # Configurar instrucciones del sistema
     @chat.with_instructions(system_prompt)
 
-    # Obtener la URL pública de Cloudinary directamente del blob
-    image_url = @photo.blob.url
+    # Obtener la URL pública directa de Cloudinary
+    # Cloudinary genera URLs públicas que OpenAI puede acceder directamente
+    # La URL debe ser la directa de Cloudinary, no la de Rails que hace redirect
+    if @photo.blob.service_name.to_s == 'cloudinary'
+      # Obtener metadata de Cloudinary
+      blob = @photo.blob
+      # La URL de Cloudinary está en blob.service_url
+      image_url = blob.service_url
+    else
+      # Para desarrollo local, usar blob.url
+      image_url = @photo.blob.url
+    end
 
     # Enviar la URL de la imagen al modelo
     response = @chat.ask("Analiza esta imagen de comida según las instrucciones y retorna el JSON con el análisis nutricional.", with: image_url)
