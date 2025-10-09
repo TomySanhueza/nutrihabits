@@ -70,7 +70,7 @@
               Iniciar sesión como
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="loginDropdown">
-              <li><%= link_to "Paciente", new_patient_session_path(role: :patient), class: "dropdown-item" %></li>
+              <li><%= link_to "Paciente", new_nutritionist_session_path(role: :patient), class: "dropdown-item" %></li>
               <li><%= link_to "Nutricionista", new_nutritionist_session_path(role: :nutritionist), class: "dropdown-item" %></li>
             </ul>
           </li>
