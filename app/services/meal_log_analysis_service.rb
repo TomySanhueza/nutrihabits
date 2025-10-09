@@ -6,7 +6,7 @@ class MealLogAnalysisService
     @meal = meal # El meal específico para ese día y tipo de comida
     @plan = meal.plan # El plan del día
     @nutrition_plan = meal.plan.nutrition_plan # El plan nutricional general
-    @chat = RubyLLM.chat(model: 'gpt-4o')
+    @chat = RubyLLM.chat(model: 'gpt-4-vision-preview')
   end
 
   def call
@@ -89,61 +89,38 @@ class MealLogAnalysisService
 
     # Configurar instrucciones del sistema
     @chat.with_instructions(system_prompt)
+    analyze
+  end
 
-    # Obtener la URL pública directa de Cloudinary
-    # Cloudinary genera URLs públicas que OpenAI puede acceder directamente
-    # La URL debe ser la directa de Cloudinary, no la de Rails que hace redirect
-    if @photo.blob.service_name.to_s == 'cloudinary'
-      # Obtener metadata de Cloudinary
-      blob = @photo.blob
-      # La URL de Cloudinary está en blob.service_url
-      image_url = blob.service_url
-    else
-      # Para desarrollo local, usar blob.url
-      image_url = @photo.blob.url
-    end
+  private
 
-    # Enviar la URL de la imagen al modelo
-    response = @chat.ask("Analiza esta imagen de comida según las instrucciones y retorna el JSON con el análisis nutricional.", with: image_url)
-
-    # Limpiar la respuesta para extraer solo el JSON
-    content = response.content
-
-    # Extraer JSON si viene envuelto en bloques de código markdown
-    if content.include?('```json')
-      content = content.split('```json')[1].split('```')[0]
-    elsif content.include?('```')
-      content = content.split('```')[1].split('```')[0]
-    end
-
-    # Limpiar el contenido
-    content = content.strip
-    
-    # Verificar si el contenido comienza y termina con llaves
-    unless content.start_with?('{') && content.end_with?('}')
-      raise "La respuesta no contiene un JSON válido: #{content}"
-    end
-
+  def analyze
     begin
-      parsed_content = JSON.parse(content)
-      
-      # Verificar que todos los campos requeridos estén presentes
-      required_fields = [
-        "ai_calories", "ai_protein", "ai_carbs", "ai_fat",
-        "ai_health_score", "ai_feedback", "ai_comparison"
-      ]
-      
-      missing_fields = required_fields - parsed_content.keys
-      if missing_fields.any?
-        raise "Faltan campos requeridos en el JSON: #{missing_fields.join(', ')}"
+      # Obtener la URL pública directa de la imagen
+      image_url = if Rails.env.production?
+        # En producción, usar url directa de Cloudinary
+        @photo.url
+      else
+        # En desarrollo, usar URL de Active Storage
+        Rails.application.routes.url_helpers.url_for(@photo)
       end
-      
-      parsed_content
-    rescue JSON::ParserError => e
-      Rails.logger.error("Error al parsear JSON: #{e.message}")
-      Rails.logger.error("Contenido que causó el error: #{content}")
-      raise "Error al analizar la respuesta: #{e.message}"
+
+      message = {
+        role: "user",
+        content: [
+          { type: "text", text: analysis_prompt },
+          { type: "image_url", image_url: { url: image_url } }
+        ]
+      }
+
+      response = @chat.call(messages: [message])
+      response.content
+    rescue StandardError => e
+      Rails.logger.error "Error analizando imagen: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      "Lo siento, hubo un error al analizar la imagen. Por favor, intenta de nuevo."
     end
+  end
   end
 
   private
@@ -164,6 +141,29 @@ class MealLogAnalysisService
 
   def meal_context
     return "No hay información de la comida planificada para este momento." unless @meal
+
+    <<-CONTEXT
+      **Información de la comida planificada:**
+      - Tipo de comida: #{@meal.meal_type}
+      - Descripción: #{@meal.description}
+      - Calorías planificadas: #{@meal.calories} kcal
+      - Proteína planificada: #{@meal.protein}g
+      - Carbohidratos planificados: #{@meal.carbs}g
+      - Grasas planificadas: #{@meal.fat}g
+      - Notas adicionales: #{@meal.notes}
+    CONTEXT
+  end
+
+  def analysis_prompt
+    <<-PROMPT
+      Por favor, analiza esta comida considerando:
+      
+      #{plan_context}
+      #{meal_context}
+
+      Genera una respuesta en formato JSON válido según las instrucciones anteriores.
+    PROMPT
+  end
 
     <<-CONTEXT
 
