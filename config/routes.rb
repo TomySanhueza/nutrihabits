@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   authenticate :patient do
     namespace :pats do
       get 'dashboard', to: 'dashboard#show'
+      post 'update_status', to: 'status#update'
     end
     resources :meals do
       resources :meal_logs, except: [:edit, :update]
