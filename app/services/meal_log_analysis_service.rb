@@ -36,8 +36,8 @@ class MealLogAnalysisService
           "ai_feedback": "string — comentario breve, empático y motivador (<280 caracteres). Refuerza los aciertos, señala oportunidades de mejora de forma amable y ofrece una recomendación práctica que impulse la adherencia sin generar culpa.",
           "ai_comparison": {
             "macronutrient_comparison": "string — Comparación detallada de macronutrientes vs. la comida planificada (ej: 'Calorías: +120 kcal sobre el plan, Proteínas: -10 g, Carbohidratos: +25 g, Grasas: dentro del rango.')",
-            "ingredient_analysis": "string — Análisis cualitativo de ingredientes utilizados vs. los planificados, destacando el equilibrio y calidad (ej: 'Buen equilibrio entre fuentes naturales. Usaste ingredientes frescos y simples, aunque podrías sumar algo de color con vegetales o legumbres.'). NO incluyas caracter extraño o adicionales qu epuedan afectar al parsing del json",
-            "improvement_suggestion": "string — Sugerencia práctica y constructiva para mejorar en la próxima comida (ej: 'Vas muy bien. Para el próximo plato, intenta incluir una porción de proteína magra o verduras al vapor — pequeños ajustes que suman mucho.').NO incluyas caracter extraño o adicionales qu epuedan afectar al parsing del json"
+            "ingredient_analysis": "string — Análisis cualitativo de ingredientes utilizados vs. los planificados, destacando el equilibrio y calidad",
+            "improvement_suggestion": "string — Sugerencia práctica y constructiva para mejorar en la próxima comida"
           }
         }
 
@@ -101,12 +101,39 @@ class MealLogAnalysisService
 
     # Extraer JSON si viene envuelto en bloques de código markdown
     if content.include?('```json')
-      content = content.split('```json')[1].split('```')[0].strip
+      content = content.split('```json')[1].split('```')[0]
     elsif content.include?('```')
-      content = content.split('```')[1].split('```')[0].strip
+      content = content.split('```')[1].split('```')[0]
     end
 
-    JSON.parse(content)
+    # Limpiar el contenido
+    content = content.strip
+    
+    # Verificar si el contenido comienza y termina con llaves
+    unless content.start_with?('{') && content.end_with?('}')
+      raise "La respuesta no contiene un JSON válido: #{content}"
+    end
+
+    begin
+      parsed_content = JSON.parse(content)
+      
+      # Verificar que todos los campos requeridos estén presentes
+      required_fields = [
+        "ai_calories", "ai_protein", "ai_carbs", "ai_fat",
+        "ai_health_score", "ai_feedback", "ai_comparison"
+      ]
+      
+      missing_fields = required_fields - parsed_content.keys
+      if missing_fields.any?
+        raise "Faltan campos requeridos en el JSON: #{missing_fields.join(', ')}"
+      end
+      
+      parsed_content
+    rescue JSON::ParserError => e
+      Rails.logger.error("Error al parsear JSON: #{e.message}")
+      Rails.logger.error("Contenido que causó el error: #{content}")
+      raise "Error al analizar la respuesta: #{e.message}"
+    end
   end
 
   private
