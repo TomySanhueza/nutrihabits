@@ -1,0 +1,15 @@
+owner:
+  id: 101
+  email: owner@example.com
+  encrypted_password: <%= Devise::Encryptor.digest(Nutritionist, "password123") %>
+  first_name: Owner
+  last_name: One
+  phone: "111111111"
+
+other_owner:
+  id: 102
+  email: other-owner@example.com
+  encrypted_password: <%= Devise::Encryptor.digest(Nutritionist, "password123") %>
+  first_name: Owner
+  last_name: Two
+  phone: "222222222"

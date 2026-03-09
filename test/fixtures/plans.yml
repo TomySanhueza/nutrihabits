@@ -1,0 +1,26 @@
+owned_plan_day:
+  id: 501
+  nutrition_plan_id: 401
+  date: 2026-03-01
+  mood: good
+  energy_level: high
+  activity: walk
+  notes: First day
+
+sibling_plan_day:
+  id: 502
+  nutrition_plan_id: 402
+  date: 2026-03-01
+  mood: calm
+  energy_level: medium
+  activity: gym
+  notes: First day
+
+foreign_plan_day:
+  id: 503
+  nutrition_plan_id: 403
+  date: 2026-03-01
+  mood: good
+  energy_level: medium
+  activity: bike
+  notes: First day

@@ -1,0 +1,29 @@
+owned_history:
+  id: 601
+  patient_id: 201
+  nutritionist_id: 101
+  nutrition_plan_id: 401
+  visit_date: 2026-03-02
+  notes: Initial follow-up
+  weight: 70.0
+  metrics: Stable
+
+sibling_history:
+  id: 602
+  patient_id: 202
+  nutritionist_id: 101
+  nutrition_plan_id: 402
+  visit_date: 2026-03-02
+  notes: Initial follow-up
+  weight: 72.0
+  metrics: Stable
+
+foreign_history:
+  id: 603
+  patient_id: 203
+  nutritionist_id: 102
+  nutrition_plan_id: 403
+  visit_date: 2026-03-02
+  notes: Initial follow-up
+  weight: 83.0
+  metrics: Monitor

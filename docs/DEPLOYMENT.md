@@ -21,6 +21,38 @@
 | SMTP creds | Configuradas en credentials o variables de entorno |
 | `RAILS_HOSTNAME` | Hostname para links en emails |
 
+## Local Bootstrap Notes
+
+- El repositorio fija Ruby `3.3.5` en `.ruby-version` y Bundler `2.7.1` en `Gemfile.lock`.
+- En máquinas con `rbenv`, validar primero:
+  - `ruby -v`
+  - `which bundle`
+  - `bundle -v`
+- Si `bundle` apunta a `/usr/bin/bundle` o no encuentra `2.7.1`, el problema suele ser de activación de `rbenv` en la shell, no de instalación de Bundler.
+- Fallback temporal recomendado:
+```bash
+rbenv exec bundle _2.7.1_ install
+rbenv exec bundle _2.7.1_ exec rails about
+```
+
+## Local PostgreSQL Bootstrap
+
+- Development y test deben usar TCP por defecto (`127.0.0.1`) en lugar de depender del socket Unix `/tmp/.s.PGSQL.5432`.
+- `config/database.yml` ya prioriza:
+  - `PGHOST` (default `127.0.0.1`)
+  - `PGPORT` (default `5432`)
+  - `PGUSER`
+  - `PGPASSWORD`
+- Si `DATABASE_URL` está presente, sigue siendo la fuente preferida y Rails la mergea por encima de `database.yml`.
+- Diagnóstico mínimo recomendado:
+```bash
+pg_isready -h 127.0.0.1 -p 5432
+bundle exec rails about
+bundle exec rails db:prepare
+bundle exec rails test test/controllers/plans_controller_test.rb test/controllers/nutrition_plans_controller_test.rb
+```
+- Si `lsof -nP -iTCP:5432 -sTCP:LISTEN` muestra PostgreSQL escuchando pero `pg_isready` falla solo dentro del sandbox, tratarlo como restricción del entorno y mover la validación a una terminal local real o CI con acceso a DB.
+
 **Editar credentials:**
 ```bash
 bin/rails credentials:edit

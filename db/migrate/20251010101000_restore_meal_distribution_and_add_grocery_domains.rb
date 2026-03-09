@@ -1,5 +1,13 @@
+require "json"
+
 class RestoreMealDistributionAndAddGroceryDomains < ActiveRecord::Migration[7.1]
+  class MigrationNutritionPlan < ActiveRecord::Base
+    self.table_name = "nutrition_plans"
+  end
+
   def up
+    normalize_existing_meal_distributions!
+
     change_column :nutrition_plans,
                   :meal_distribution,
                   :jsonb,
@@ -83,5 +91,32 @@ class RestoreMealDistributionAndAddGroceryDomains < ActiveRecord::Migration[7.1]
     drop_table :grocery_lists
     drop_table :user_supermarket_preferences
     change_column :nutrition_plans, :meal_distribution, :text
+  end
+
+  private
+
+  def normalize_existing_meal_distributions!
+    say_with_time "Normalizing nutrition_plans.meal_distribution to valid JSON text" do
+      MigrationNutritionPlan.where.not(meal_distribution: [ nil, "" ]).find_each do |nutrition_plan|
+        normalized = normalize_meal_distribution(nutrition_plan.meal_distribution)
+        next if normalized == nutrition_plan.meal_distribution
+
+        nutrition_plan.update_columns(meal_distribution: normalized)
+      rescue JSON::ParserError => e
+        raise StandardError, "Could not normalize nutrition_plan #{nutrition_plan.id}: #{e.message}"
+      end
+    end
+  end
+
+  def normalize_meal_distribution(raw_value)
+    raw_text = raw_value.to_s.strip
+    return raw_value if raw_text.blank?
+
+    JSON.generate(JSON.parse(raw_text))
+  rescue JSON::ParserError
+    ruby_hash_text = raw_text.gsub("=>", ":")
+    ruby_hash_text = ruby_hash_text.gsub(/:\s*nil(?=\s*[,}])/, ": null")
+
+    JSON.generate(JSON.parse(ruby_hash_text))
   end
 end

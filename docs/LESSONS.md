@@ -40,9 +40,10 @@ JSON.parse(cleaned)
 
 **Contexto:** Setup de desarrollo
 **Error:** `bin/rails` no ejecuta; Bundler/Ruby version mismatch
-**Causa:** El repo requiere Ruby 3.3.5 y Bundler 2.7.1. El entorno del agente no tiene esa versión instalada
-**Solución:** Usar `rbenv` o `rvm` para instalar Ruby 3.3.5; verificar con `ruby -v` antes de `bundle install`
+**Causa:** El repo requiere Ruby 3.3.5 y Bundler 2.7.1, pero la shell estaba resolviendo `ruby` a `2.6.10` del sistema y `bundle` a `/usr/bin/bundle`. `rbenv` sí tenía Ruby 3.3.5 y Bundler 2.7.1 instalados, pero no era el binario activo por defecto.
+**Solución:** Corregir la activación global de `rbenv` en shells login para que los shims tengan prioridad efectiva; validar con `ruby -v`, `which bundle`, `rbenv which bundle`. Mientras el fix global no esté verificado, usar `rbenv exec bundle _2.7.1_ ...` como fallback explícito.
 **Impacto:** Todas las migraciones pendientes y validaciones de flujo end-to-end requieren el entorno correcto
+**Lección:** Antes de instalar gemas o tocar `Gemfile.lock`, confirmar qué Ruby y qué `bundle` está usando realmente la shell.
 
 ---
 
@@ -77,6 +78,31 @@ NutritionPlanGeneratorService.new(patient.profile, start_date, end_date)
 - Los helpers `current_nutritionist` y `current_patient` son independientes — en un controller de nutritionist, `current_patient` retorna `nil` (no hay sesión de paciente activa)
 - Los filtros `authenticate :nutritionist` y `authenticate :patient` son exclusivos — no mezclar en el mismo controller
 - El sign_out de un tipo no afecta al otro: `sign_out :nutritionist` no cierra sesión del paciente
+
+### Shell / Tooling con rbenv
+
+- Si `bundle` resuelve a `/usr/bin/bundle`, la shell está usando el Bundler del sistema aunque `rbenv` tenga la versión correcta instalada.
+- `eval "$(rbenv init - zsh)"` en `.zshrc` no alcanza para shells login no interactivas; en ese caso debe estar también en `.zprofile` o el archivo de arranque equivalente.
+- Verificación mínima antes de asumir que “falta Bundler”:
+  - `ruby -v`
+  - `which ruby`
+  - `which bundle`
+  - `rbenv versions`
+  - `rbenv exec bundle _2.7.1_ -v`
+- Si `rbenv exec bundle _2.7.1_ -v` funciona pero `bundle -v` falla, el problema es de activación/PATH, no de instalación.
+
+### PostgreSQL connectivity por capas
+
+- Si `config/database.yml` omite `host`, Rails/pg suele preferir socket Unix local.
+- En sandboxes, contenedores o entornos con permisos recortados, ese socket puede fallar incluso cuando PostgreSQL está corriendo correctamente.
+- Recomendación operativa del proyecto:
+  - usar `host: 127.0.0.1` por defecto en development/test
+  - preferir `DATABASE_URL` explícito cuando exista
+- Diagnóstico por capas antes de culpar al código:
+  1. `ruby -v` y `bundle -v`
+  2. `bundle exec rails about`
+  3. `pg_isready -h 127.0.0.1 -p 5432` y `lsof -nP -iTCP:5432 -sTCP:LISTEN`
+  4. `bundle exec rails db:prepare` y luego tests/migraciones
 
 ### Active Job + Sidekiq
 
@@ -124,6 +150,34 @@ NutritionPlanGeneratorService.new(patient.profile, start_date, end_date)
 **Solución requerida:** Añadir auth o eliminar el controller si no está en uso activo
 **Impacto:** Cualquier request no autenticado puede leer planes de cualquier paciente
 
+### 2026-03-09 — PlansController legacy eliminado en lugar de endurecido
+**Contexto:** Cierre de Sprint 1 Task 01
+**Error:** Existía una superficie legacy insegura aunque la ruta activa ya no estaba publicada
+**Causa raíz:** Controller scaffold/debug no consolidado, mantenido en el repo pese a no formar parte del producto soportado
+**Solución adoptada:** Eliminar `PlansController`, eliminar `app/views/plans/show.html.erb`, quitar la referencia comentada en rutas y consolidar el acceso soportado en `NutritionPlansController`
+**Lección:** Si un endpoint no pertenece al producto soportado, no se endurece “por si acaso”; se elimina para reducir superficie de ataque.
+
+### 2026-03-09 — Validación automática parcial bloqueada por entorno
+**Contexto:** Validación de la corrección de seguridad de Sprint 1
+**Error:** Los tests focalizados no pudieron ejecutarse inicialmente con `bundle exec rails test ...`
+**Causa:** Toolchain activa incorrecta en la shell, no un fallo funcional del cambio implementado
+**Solución adoptada:** Separar evidencia de validación estática de validación runtime y registrar explícitamente el bloqueo del entorno hasta corregir `rbenv`/Bundler
+**Lección:** Marcar siempre cuándo una validación queda bloqueada por entorno, para no confundir “no ejecutado” con “falló”.
+
+### 2026-03-09 — PostgreSQL local bloqueado por sandbox tras corregir Bundler
+**Contexto:** Reintento de `bundle exec rails test test/controllers/plans_controller_test.rb test/controllers/nutrition_plans_controller_test.rb`
+**Error:** `connection to server on socket "/tmp/.s.PGSQL.5432" failed: Operation not permitted`
+**Causa:** El toolchain Ruby/Bundler ya estaba correcto. PostgreSQL sí estaba escuchando en `127.0.0.1:5432`, pero el repo seguía favoreciendo socket Unix al no definir `host`, y además este sandbox no puede abrir conectividad local ni por socket Unix ni por TCP loopback.
+**Solución adoptada:** Estandarizar TCP en `config/database.yml` y `.env.example`, documentar `DATABASE_URL`/`PGHOST` como camino recomendado y dejar explícito que la validación final de DB debe hacerse en una terminal local real o CI con acceso a PostgreSQL.
+**Lección:** No asumir que “PostgreSQL no responde” implica que el servidor está caído; primero distinguir entre socket Unix, TCP y restricciones del entorno de ejecución.
+
+### 2026-03-09 — Validación final de PostgreSQL confirmada fuera del sandbox
+**Contexto:** Ejecución con permisos elevados tras corregir Ruby/Bundler, `database.yml` y `schema.rb`
+**Resultado:** `bundle exec rails db:prepare` completó correctamente y la suite focalizada de controllers pasó con `24 runs, 73 assertions, 0 failures, 0 errors`
+**Causa raíz resuelta:** El repo ya no depende implícitamente del socket Unix y el entorno validado tuvo acceso real a PostgreSQL
+**Solución adoptada:** Mantener TCP (`127.0.0.1`) como default en development/test, conservar el diagnóstico por capas y tratar el sandbox sin permisos como limitación operativa, no como bug del repo
+**Lección:** Una vez corregida la configuración del repo, la validación definitiva de DB debe ejecutarse en un entorno con acceso real a PostgreSQL para separar problemas de aplicación de restricciones del runner.
+
 ### 2026-03-09 — Lógica de negocio en NutritionPlansController#create
 **Contexto:** Creación de Plans y Meals desde meal_distribution
 **Error:** 20+ líneas de iteración y creación de registros en el controller, sin transaction block
@@ -136,6 +190,14 @@ NutritionPlanGeneratorService.new(patient.profile, start_date, end_date)
 **Error:** `db:schema:load` no incluye dominio de grocery ni campos operacionales de Patient/MealLog
 **Causa:** Migraciones 20251010* fueron creadas pero schema.rb no fue regenerado
 **Solución:** Siempre usar `bin/rails db:migrate` en este proyecto hasta hacer `db:schema:dump` con todas las migraciones aplicadas
+
+### 2026-03-09 — rails test bloqueado por PostgreSQL inaccesible en sandbox y schema desactualizado
+**Contexto:** validación focalizada de controllers de Sprint 1
+**Error:** Intenté ejecutar `bundle exec rails test ...`, pero falló antes de correr la suite por bloqueo de conexión a PostgreSQL en `/tmp/.s.PGSQL.5432` dentro del sandbox.
+**Causa:** El entorno inicial no podía abrir el socket local de PostgreSQL, y además el proyecto dependía de migraciones 20251010 que no estaban reflejadas en `db/schema.rb`. Durante la reparación apareció un segundo problema: la migración `20251010101000` asumía JSON válido en `nutrition_plans.meal_distribution`, pero había filas persistidas con formato hash de Ruby (`=>`).
+**Solución requerida:** correr la suite en un entorno con PostgreSQL accesible, ejecutar `bin/rails db:migrate`, normalizar previamente `meal_distribution` a JSON válido, regenerar `db/schema.rb` y recién después repetir la suite focalizada.
+**Pendiente operativo:** si el entorno de test usa `db/schema.rb`, puede requerir recrear la base de test desde el schema actualizado antes de correr `rails test`.
+**Lección:** no considerar “tests no ejecutados” como bloqueo ambiguo; registrar siempre si el problema es conectividad de DB, schema stale, datos legacy incompatibles con la migración o una combinación de los tres.
 
 ### 2026-03-09 — meal_distribution cambió de tipo dos veces
 **Contexto:** Column type de NutritionPlan#meal_distribution

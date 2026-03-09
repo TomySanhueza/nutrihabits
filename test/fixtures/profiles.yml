@@ -1,0 +1,21 @@
+owned_profile:
+  id: 301
+  patient_id: 201
+  nutritionist_id: 101
+  weight: 70.0
+  height: 175.0
+  goals: Improve adherence
+  conditions: None
+  lifestyle: Active
+  diagnosis: Balanced nutrition
+
+foreign_profile:
+  id: 302
+  patient_id: 203
+  nutritionist_id: 102
+  weight: 82.0
+  height: 180.0
+  goals: Reduce body fat
+  conditions: Hypertension
+  lifestyle: Sedentary
+  diagnosis: Needs structured plan

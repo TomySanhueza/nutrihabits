@@ -138,9 +138,6 @@ La creación de `Plans` y `Meals` desde `meal_distribution` vive en el controlle
 ### 🟡 `MealLog#meal_type` — denormalización sin garantía de consistencia
 El campo `meal_type` en `meal_logs` se copia del `Meal` en el controller (`@meal_log.meal_type = @meal.meal_type`). Es redundante con `meal_log.meal.meal_type` y puede quedar desfasado. No hay validación a nivel de modelo que garantice coherencia.
 
-### 🟡 `schema.rb` desactualizado
-El `schema.rb` tiene versión `20251006214217` pero hay migraciones hasta `20251010101000`. `db:schema:load` no incluye el dominio de grocery ni los campos operacionales de Patient/MealLog. **Usar siempre `db:migrate`, nunca `db:schema:load` hasta regenerar el schema.rb corriendo todas las migraciones.**
-
 ## Patrón de Adapter (Catálogos)
 
 - `SupermarketCatalogProvider` define la interfaz pública

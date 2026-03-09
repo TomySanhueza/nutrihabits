@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_10_06_214217) do
+ActiveRecord::Schema[7.1].define(version: 2025_10_10_101000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -53,6 +53,56 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_06_214217) do
     t.index ["patient_id"], name: "index_chats_on_patient_id"
   end
 
+  create_table "grocery_list_items", force: :cascade do |t|
+    t.bigint "grocery_list_id", null: false
+    t.string "ingredient_name", null: false
+    t.string "normalized_name", null: false
+    t.decimal "quantity_value", precision: 10, scale: 2, default: "0.0", null: false
+    t.string "quantity_unit", default: "unit", null: false
+    t.jsonb "meal_types", default: []
+    t.jsonb "source_dates", default: []
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["grocery_list_id"], name: "index_grocery_list_items_on_grocery_list_id"
+  end
+
+  create_table "grocery_lists", force: :cascade do |t|
+    t.bigint "patient_id", null: false
+    t.bigint "nutrition_plan_id"
+    t.date "date_from", null: false
+    t.date "date_to", null: false
+    t.string "retailer_slug", null: false
+    t.string "country_code", null: false
+    t.string "currency", null: false
+    t.string "generated_by", default: "patient", null: false
+    t.string "status", default: "generated", null: false
+    t.jsonb "source_summary", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["nutrition_plan_id"], name: "index_grocery_lists_on_nutrition_plan_id"
+    t.index ["patient_id"], name: "index_grocery_lists_on_patient_id"
+  end
+
+  create_table "grocery_product_matches", force: :cascade do |t|
+    t.bigint "grocery_list_item_id", null: false
+    t.string "external_id"
+    t.string "retailer_slug", null: false
+    t.string "country_code", null: false
+    t.string "name", null: false
+    t.string "brand"
+    t.string "package_size"
+    t.decimal "price", precision: 10, scale: 2
+    t.string "currency"
+    t.boolean "availability", default: true, null: false
+    t.string "product_url"
+    t.integer "rank"
+    t.jsonb "metadata", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["grocery_list_item_id"], name: "index_grocery_product_matches_on_grocery_list_item_id"
+  end
+
   create_table "meal_logs", force: :cascade do |t|
     t.string "photo_url"
     t.float "ai_calories"
@@ -67,6 +117,9 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_06_214217) do
     t.float "ai_carbs"
     t.float "ai_fat"
     t.jsonb "ai_comparison"
+    t.string "analysis_status", default: "not_requested", null: false
+    t.text "analysis_error"
+    t.index ["analysis_status"], name: "index_meal_logs_on_analysis_status"
     t.index ["meal_id"], name: "index_meal_logs_on_meal_id"
   end
 
@@ -102,7 +155,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_06_214217) do
     t.float "protein"
     t.float "fat"
     t.float "carbs"
-    t.text "meal_distribution"
+    t.jsonb "meal_distribution"
     t.text "notes"
     t.text "ai_rationale"
     t.string "status"
@@ -182,6 +235,21 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_06_214217) do
     t.index ["patient_id"], name: "index_patient_histories_on_patient_id"
   end
 
+  create_table "patient_priority_snapshots", force: :cascade do |t|
+    t.bigint "patient_id", null: false
+    t.bigint "nutritionist_id", null: false
+    t.string "priority_level", null: false
+    t.float "score", default: 0.0, null: false
+    t.jsonb "reasons", default: []
+    t.text "recommended_action"
+    t.text "outreach_draft"
+    t.datetime "captured_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["nutritionist_id"], name: "index_patient_priority_snapshots_on_nutritionist_id"
+    t.index ["patient_id"], name: "index_patient_priority_snapshots_on_patient_id"
+  end
+
   create_table "patients", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -194,8 +262,14 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_06_214217) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "nutritionist_id", null: false
+    t.string "onboarding_state", default: "draft", null: false
+    t.datetime "invitation_sent_at"
+    t.datetime "invitation_accepted_at"
+    t.datetime "access_suspended_at"
+    t.datetime "last_seen_at"
     t.index ["email"], name: "index_patients_on_email", unique: true
     t.index ["nutritionist_id"], name: "index_patients_on_nutritionist_id"
+    t.index ["onboarding_state"], name: "index_patients_on_onboarding_state"
     t.index ["reset_password_token"], name: "index_patients_on_reset_password_token", unique: true
   end
 
@@ -226,6 +300,18 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_06_214217) do
     t.index ["patient_id"], name: "index_profiles_on_patient_id"
   end
 
+  create_table "user_supermarket_preferences", force: :cascade do |t|
+    t.bigint "patient_id", null: false
+    t.string "country_code", null: false
+    t.string "currency", null: false
+    t.string "retailer_slug", null: false
+    t.string "retailer_name"
+    t.jsonb "fallback_retailers", default: []
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["patient_id"], name: "index_user_supermarket_preferences_on_patient_id", unique: true
+  end
+
   create_table "weight_patients", force: :cascade do |t|
     t.bigint "patient_id", null: false
     t.date "date"
@@ -239,6 +325,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_06_214217) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "chats", "nutritionists"
   add_foreign_key "chats", "patients"
+  add_foreign_key "grocery_list_items", "grocery_lists"
+  add_foreign_key "grocery_lists", "nutrition_plans"
+  add_foreign_key "grocery_lists", "patients"
+  add_foreign_key "grocery_product_matches", "grocery_list_items"
   add_foreign_key "meal_logs", "meals"
   add_foreign_key "meals", "plans"
   add_foreign_key "messages", "chats"
@@ -251,9 +341,12 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_06_214217) do
   add_foreign_key "patient_histories", "nutrition_plans"
   add_foreign_key "patient_histories", "nutritionists"
   add_foreign_key "patient_histories", "patients"
+  add_foreign_key "patient_priority_snapshots", "nutritionists"
+  add_foreign_key "patient_priority_snapshots", "patients"
   add_foreign_key "patients", "nutritionists"
   add_foreign_key "plans", "nutrition_plans"
   add_foreign_key "profiles", "nutritionists"
   add_foreign_key "profiles", "patients"
+  add_foreign_key "user_supermarket_preferences", "patients"
   add_foreign_key "weight_patients", "patients"
 end

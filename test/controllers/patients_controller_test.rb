@@ -1,38 +1,65 @@
 require "test_helper"
 
 class PatientsControllerTest < ActionDispatch::IntegrationTest
-  test "should get index" do
-    get patients_index_url
+  setup do
+    @nutritionist = nutritionists(:owner)
+    @other_nutritionist = nutritionists(:other_owner)
+    @patient = patients(:owned_patient)
+  end
+
+  test "owner can see patient" do
+    sign_in @nutritionist
+
+    get patient_path(@patient)
+
     assert_response :success
   end
 
-  test "should get show" do
-    get patients_show_url
-    assert_response :success
+  test "other nutritionist cannot see patient" do
+    sign_in @other_nutritionist
+
+    get patient_path(@patient)
+
+    assert_response :not_found
   end
 
-  test "should get new" do
-    get patients_new_url
-    assert_response :success
+  test "other nutritionist cannot invite patient" do
+    sign_in @other_nutritionist
+
+    assert_no_changes -> { @patient.reload.invitation_sent_at } do
+      post invite_patient_path(@patient)
+    end
+
+    assert_response :not_found
   end
 
-  test "should get edit" do
-    get patients_edit_url
-    assert_response :success
+  test "other nutritionist cannot resend patient invite" do
+    sign_in @other_nutritionist
+
+    assert_no_changes -> { @patient.reload.invitation_sent_at } do
+      post resend_invite_patient_path(@patient)
+    end
+
+    assert_response :not_found
   end
 
-  test "should get create" do
-    get patients_create_url
-    assert_response :success
+  test "other nutritionist cannot suspend patient access" do
+    sign_in @other_nutritionist
+
+    assert_no_changes -> { [ @patient.reload.onboarding_state, @patient.reload.access_suspended_at ] } do
+      post suspend_access_patient_path(@patient)
+    end
+
+    assert_response :not_found
   end
 
-  test "should get update" do
-    get patients_update_url
-    assert_response :success
-  end
+  test "other nutritionist cannot reactivate patient access" do
+    sign_in @other_nutritionist
 
-  test "should get destroy" do
-    get patients_destroy_url
-    assert_response :success
+    assert_no_changes -> { [ @patient.reload.onboarding_state, @patient.reload.access_suspended_at ] } do
+      post reactivate_access_patient_path(@patient)
+    end
+
+    assert_response :not_found
   end
 end

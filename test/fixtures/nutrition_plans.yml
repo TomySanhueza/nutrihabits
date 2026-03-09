@@ -1,0 +1,47 @@
+owned_plan:
+  id: 401
+  patient_id: 201
+  nutritionist_id: 101
+  objective: Improve consistency
+  calories: 1900
+  protein: 110
+  fat: 60
+  carbs: 210
+  meal_distribution: "{}"
+  notes: Initial plan
+  ai_rationale: Baseline rationale
+  status: active
+  start_date: 2026-03-01
+  end_date: 2026-03-07
+
+sibling_plan:
+  id: 402
+  patient_id: 202
+  nutritionist_id: 101
+  objective: Maintain weight
+  calories: 2100
+  protein: 120
+  fat: 70
+  carbs: 230
+  meal_distribution: "{}"
+  notes: Sibling patient plan
+  ai_rationale: Baseline rationale
+  status: active
+  start_date: 2026-03-01
+  end_date: 2026-03-07
+
+foreign_plan:
+  id: 403
+  patient_id: 203
+  nutritionist_id: 102
+  objective: Reduce weight
+  calories: 1800
+  protein: 100
+  fat: 55
+  carbs: 190
+  meal_distribution: "{}"
+  notes: Foreign patient plan
+  ai_rationale: Baseline rationale
+  status: active
+  start_date: 2026-03-01
+  end_date: 2026-03-07
