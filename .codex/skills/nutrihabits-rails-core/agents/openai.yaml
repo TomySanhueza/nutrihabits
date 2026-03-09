@@ -1,0 +1,3 @@
+display_name: NutriHabits Rails Core
+short_description: Rails architecture, ownership, migrations, routes, and jobs for NutriHabits.
+default_prompt: Review the relevant NutriHabits domain docs, preserve ownership boundaries, and implement the requested Rails/domain change with updated tracking docs.

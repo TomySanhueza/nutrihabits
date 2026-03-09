@@ -14,36 +14,26 @@ class MealLogsController < ApplicationController
     @meal_log = MealLog.new
   end
 
+  def preflight
+    render json: ImagePreflightService.new(params[:photo]).call
+  end
+
   def create
     @meal_log = @meal.build_meal_log(meal_log_params)
     @meal_log.logged_at = Time.current
     @meal_log.meal_type = @meal.meal_type
+    @meal_log.analysis_status = "queued"
 
     if @meal_log.photo.attached?
-      # Guardar primero para obtener el signed_id
       if @meal_log.save
-        # Analizar imagen con IA
-        analysis_service = MealLogAnalysisService.new(@meal_log.photo, @meal)
-        analysis_result = analysis_service.call
-
-        # Actualizar con resultados del análisis
-        @meal_log.update(
-          ai_calories: analysis_result["ai_calories"],
-          ai_protein: analysis_result["ai_protein"],
-          ai_carbs: analysis_result["ai_carbs"],
-          ai_fat: analysis_result["ai_fat"],
-          ai_health_score: analysis_result["ai_health_score"],
-          ai_feedback: analysis_result["ai_feedback"],
-          ai_comparison: analysis_result["ai_comparison"]
-        )
-
-        redirect_to meal_meal_log_path(@meal, @meal_log), notice: 'Tu comida fue registrada y analizada exitosamente.'
+        MealLogAnalysisJob.perform_later(@meal_log.id)
+        redirect_to meal_meal_log_path(@meal, @meal_log), notice: 'Tu comida fue registrada y quedó en análisis.'
       else
-        render :new
+        render :new, status: :unprocessable_entity
       end
     else
       @meal_log.errors.add(:photo, "debe estar presente")
-      render :new
+      render :new, status: :unprocessable_entity
     end
   end
 
@@ -60,17 +50,17 @@ class MealLogsController < ApplicationController
 
   def destroy
     @meal_log.destroy
-    redirect_to meal_logs_path, notice: 'Registro eliminado exitosamente.'
+    redirect_to pats_dashboard_path, notice: 'Registro eliminado exitosamente.'
   end
 
   private
 
   def set_meal
-    @meal = Meal.find(params[:meal_id])
+    @meal = current_patient.meals.find(params[:meal_id])
   end
 
   def set_meal_log
-    @meal_log = MealLog.find(params[:id])
+    @meal_log = current_patient.meal_logs_through_plans.find(params[:id])
   end
 
   def meal_log_params

@@ -3,7 +3,7 @@
     <div class="col-12">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Mis Comidas Registradas</h1>
-        <%= link_to "Registrar Nueva Comida", new_meal_log_path, class: "btn btn-primary" %>
+        <%= link_to "Registrar Nueva Comida", pats_dashboard_path, class: "btn btn-primary" %>
       </div>
 
       <% if @meal_logs.any? %>
@@ -28,8 +28,8 @@
                   </ul>
                 </div>
                 <div class="card-footer">
-                  <%= link_to "Ver Detalle", meal_log, class: "btn btn-sm btn-outline-primary" %>
-                  <%= link_to "Eliminar", meal_log, method: :delete, data: { confirm: "¿Estás seguro?" }, class: "btn btn-sm btn-outline-danger" %>
+                  <%= link_to "Ver Detalle", meal_meal_log_path(meal_log.meal, meal_log), class: "btn btn-sm btn-outline-primary" %>
+                  <%= link_to "Eliminar", meal_meal_log_path(meal_log.meal, meal_log), data: { turbo_method: :delete, turbo_confirm: "¿Estás seguro?" }, class: "btn btn-sm btn-outline-danger" %>
                 </div>
               </div>
             </div>
@@ -37,7 +37,7 @@
         </div>
       <% else %>
         <div class="alert alert-info">
-          <p class="mb-0">Aún no has registrado ninguna comida. <%= link_to "¡Registra tu primera comida aquí!", new_meal_log_path %></p>
+          <p class="mb-0">Aún no has registrado ninguna comida. <%= link_to "¡Registra tu primera comida aquí!", pats_dashboard_path %></p>
         </div>
       <% end %>
     </div>
