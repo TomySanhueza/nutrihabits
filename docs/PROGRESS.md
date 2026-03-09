@@ -2,7 +2,7 @@
 
 Complementa DELIVERY_TRACKER.md con porcentaje por sprint y estado actual de trabajo.
 
-**Última actualización:** 2026-03-09 (serial test runner default validated)
+**Última actualización:** 2026-03-09 (Sprint 1 tasks 05/06 revalidated with PostgreSQL)
 
 ---
 
@@ -12,7 +12,7 @@ Complementa DELIVERY_TRACKER.md con porcentaje por sprint y estado actual de tra
 - Sprint 2 nutritionist UX/UI: dashboard, vista de paciente y radar integrado con datos reales
 
 ### Bloqueadores activos:
-- No hay bloqueadores de repo para Sprint 1: la migración 20251010, `db:prepare`, la suite focalizada del lado patient (`17 runs, 73 assertions, 0 failures`) y la regresión de controllers de Sprint 1 (`50 runs, 200 assertions, 0 failures`) ya fueron validadas en un entorno con acceso a PostgreSQL
+- No hay bloqueadores de repo para Sprint 1: la migración 20251010, `db:prepare`, la suite focalizada del lado patient (`17 runs, 73 assertions, 0 failures`) y la regresión de controllers de Sprint 1 (`55 runs, 229 assertions, 0 failures`) fueron revalidadas en 2026-03-09 en un entorno con acceso a PostgreSQL
 - El cleanup de Rack 3 / Devise para `422 Unprocessable Content` también quedó validado con cobertura dedicada de auth inválida y la regresión conjunta completa (`58 runs, 241 assertions, 0 failures`)
 - Restricción residual del sandbox por defecto:
   - sin permisos elevados este entorno aún no puede usar loopback ni el socket Unix local de PostgreSQL
@@ -84,7 +84,7 @@ Complementa DELIVERY_TRACKER.md con porcentaje por sprint y estado actual de tra
 | Sprint | Fecha de Cierre | Notas |
 |--------|----------------|-------|
 | Sprint 0 | 2026-03-09 | Canon docs, skills, subagent routing, .env.example |
-| Sprint 1 | 2026-03-09 | Ownership/scoping de controllers nutritionist + patient validado con PostgreSQL real |
+| Sprint 1 | 2026-03-09 | Ownership/scoping de controllers nutritionist + patient validado y revalidado con PostgreSQL real |
 
 ---
 

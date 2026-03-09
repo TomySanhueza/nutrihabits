@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-03-09 (decimoquinta sesión — sprint 1 tasks 05/06 operational revalidation)
+
+- Reejecutada la validación operativa final de Sprint 1 tareas 5 y 6 en un entorno con acceso real a PostgreSQL, sin cambios en código de aplicación.
+- Ejecutado `bundle exec rails db:prepare`; completó correctamente.
+- Ejecutada la suite focalizada patient-side:
+  - `bundle exec rails test test/controllers/meals_controller_test.rb test/controllers/meal_logs_controller_test.rb`
+  - resultado: `17 runs, 73 assertions, 0 failures, 0 errors, 0 skips`
+- Ejecutada la regresión completa de ownership/autorización de Sprint 1:
+  - `bundle exec rails test test/controllers/patients_controller_test.rb test/controllers/profiles_controller_test.rb test/controllers/nutrition_plans_controller_test.rb test/controllers/patient_histories_controller_test.rb test/controllers/nutritionists_controller_test.rb test/controllers/plans_controller_test.rb test/controllers/meals_controller_test.rb test/controllers/meal_logs_controller_test.rb`
+  - resultado: `55 runs, 229 assertions, 0 failures, 0 errors, 0 skips`
+- Confirmado de nuevo que:
+  - `current_patient` no puede leer ni mutar meals o meal_logs de otro paciente
+  - los nested mismatches `meal_id`/`meal_log.id` responden `404`
+  - la cobertura cross-tenant de nutritionist sigue verde
+  - `/plans/:id` sigue sin exposición pública
+- Actualizados `docs/DELIVERY_TRACKER.md`, `docs/WORKLOG.md` y `docs/PROGRESS.md` para dejar evidencia fresca del rerun.
+
 ## 2026-03-09 (decimocuarta sesión — serial test runner default)
 
 - Aplicada la solución permanente al residual del runner PostgreSQL/paralelización en `test/test_helper.rb`:
