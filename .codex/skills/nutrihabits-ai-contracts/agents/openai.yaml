@@ -1,0 +1,3 @@
+display_name: NutriHabits AI Contracts
+short_description: Prompt contracts, latency, retries, and safe AI interactions for NutriHabits.
+default_prompt: Harden the NutriHabits AI workflow with explicit contracts, scoped context, resilient failure handling, and updated AI docs.

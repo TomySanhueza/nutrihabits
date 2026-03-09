@@ -1,0 +1,3 @@
+display_name: NutriHabits Grocery Intelligence
+short_description: Grocery list generation and supermarket-aware product matching for NutriHabits.
+default_prompt: Implement or improve the NutriHabits grocery feature using adapter-based catalog providers, normalized list items, and graceful fallbacks.

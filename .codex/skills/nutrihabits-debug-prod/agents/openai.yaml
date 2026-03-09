@@ -1,0 +1,3 @@
+display_name: NutriHabits Debug Prod
+short_description: Production and staging debugging for uploads, jobs, and deploy/runtime issues.
+default_prompt: Investigate the NutriHabits production issue methodically, focusing on config, storage, jobs, and observable failure points before changing behavior.

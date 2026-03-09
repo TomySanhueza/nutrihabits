@@ -12,6 +12,9 @@ class Patient < ApplicationRecord
   has_many :weight_patients, dependent: :destroy
   has_many :plans, through: :nutrition_plans
   has_many :meals, through: :plans
+  has_one :user_supermarket_preference, dependent: :destroy
+  has_many :grocery_lists, dependent: :destroy
+  has_many :patient_priority_snapshots, dependent: :destroy
 
   # Obtener meal_logs a través de las meals
   def meal_logs_through_plans
@@ -21,5 +24,12 @@ class Patient < ApplicationRecord
   # Obtener meals disponibles (sin meal_log registrado)
   def available_meals
     meals.left_joins(:meal_log).where(meal_logs: { id: nil })
+  end
+
+  def active_nutrition_plan(reference_date = Date.current)
+    nutrition_plans
+      .where("start_date <= ? AND end_date >= ?", reference_date, reference_date)
+      .order(end_date: :desc)
+      .first || nutrition_plans.where(status: "active").order(end_date: :desc).first
   end
 end

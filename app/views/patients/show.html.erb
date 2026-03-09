@@ -33,14 +33,17 @@
         <h1 class="patient-name"><%= @patient.first_name %> <%= @patient.last_name %></h1>
         <div class="patient-status-bar">
           <span class="status-badge active">Plan Activo</span>
-          <span class="next-checkin">Próxima revisión: 28 Jul, 2024</span>
+          <span class="next-checkin">Acceso app: <%= @patient.onboarding_state&.humanize || "Draft" %></span>
         </div>
       </div>
       <div class="patient-actions">
-        <button class="btn btn-outline">Editar Perfil</button>
+        <%= button_to "Invitar a la app", invite_patient_path(@patient), method: :post, class: "btn btn-outline" %>
         <%= button_to "Generar Plan IA", patient_nutrition_plans_path(@patient), method: :post, class: "btn btn-primary" %>
-        <button class="btn-icon">📄</button>
-        <button class="btn-icon">🗑️</button>
+        <% if @patient.onboarding_state == "suspended" %>
+          <%= button_to "Reactivar", reactivate_access_patient_path(@patient), method: :post, class: "btn btn-outline" %>
+        <% else %>
+          <%= button_to "Suspender acceso", suspend_access_patient_path(@patient), method: :post, class: "btn btn-outline" %>
+        <% end %>
       </div>
     </div>
 

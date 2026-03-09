@@ -1,0 +1,72 @@
+- external_id: jumbo-avena-1
+  name: Avena tradicional
+  brand: Quaker
+  package_size: 700 g
+  price: 3290
+  currency: CLP
+  availability: true
+  country_code: CL
+  url: https://www.jumbo.cl/
+- external_id: jumbo-arroz-1
+  name: Arroz integral
+  brand: Tucapel
+  package_size: 1 kg
+  price: 2490
+  currency: CLP
+  availability: true
+  country_code: CL
+  url: https://www.jumbo.cl/
+- external_id: jumbo-pollo-1
+  name: Pechuga de pollo
+  brand: Super Pollo
+  package_size: 1 kg
+  price: 6990
+  currency: CLP
+  availability: true
+  country_code: CL
+  url: https://www.jumbo.cl/
+- external_id: jumbo-yogur-1
+  name: Yogur natural sin azucar
+  brand: Soprole
+  package_size: 1 kg
+  price: 3490
+  currency: CLP
+  availability: true
+  country_code: CL
+  url: https://www.jumbo.cl/
+- external_id: jumbo-huevo-1
+  name: Huevos blancos
+  brand: Jumbo
+  package_size: 12 unidades
+  price: 3190
+  currency: CLP
+  availability: true
+  country_code: CL
+  url: https://www.jumbo.cl/
+- external_id: jumbo-quinoa-1
+  name: Quinoa
+  brand: El Monte
+  package_size: 500 g
+  price: 3990
+  currency: CLP
+  availability: true
+  country_code: CL
+  url: https://www.jumbo.cl/
+- external_id: jumbo-palta-1
+  name: Palta hass
+  brand: Jumbo
+  package_size: 1 kg
+  price: 5990
+  currency: CLP
+  availability: true
+  country_code: CL
+  url: https://www.jumbo.cl/
+- external_id: jumbo-atun-1
+  name: Atun al agua
+  brand: San Jose
+  package_size: 160 g
+  price: 1790
+  currency: CLP
+  availability: true
+  country_code: CL
+  url: https://www.jumbo.cl/

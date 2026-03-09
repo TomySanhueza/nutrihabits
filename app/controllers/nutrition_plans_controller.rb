@@ -1,21 +1,26 @@
 class NutritionPlansController < ApplicationController
+  before_action :authenticate_nutritionist!
+  before_action :set_patient, only: [:index, :new, :create]
+  before_action :set_nutrition_plan, only: [:show, :edit, :update, :destroy]
+
   def index
-    @patient = Patient.find(params[:patient_id])
     @nutrition_plans = @patient.nutrition_plans
   end
 
   def show
-    @nutrition_plan = NutritionPlan.find(params[:id])
     @patient = @nutrition_plan.patient
   end
 
   def new
-    @patient = Patient.find(params[:patient_id])
     @nutrition_plan = NutritionPlan.new
   end
 
   def create
-    @patient = Patient.find(params[:patient_id])
+    unless @patient.profile.present?
+      redirect_to patient_path(@patient), alert: "Debes completar el perfil antes de generar un plan."
+      return
+    end
+
     response = NutritionPlanGeneratorService.new(@patient.profile, Date.today, Date.today + 6).call
 
     @nutrition_plan = @patient.nutrition_plans.create(
@@ -40,7 +45,7 @@ class NutritionPlansController < ApplicationController
 
       daily_meals.each do |meal_type, meal_data|
         plan.meals.create(
-          meal_type: meal_type["meal type"],
+          meal_type: normalize_meal_type(meal_type),
           ingredients: meal_data["ingredients"],
           recipe: meal_data["recipe"],
           calories: meal_data["calorias"],
@@ -56,28 +61,37 @@ class NutritionPlansController < ApplicationController
   end
 
   def edit
-    @nutrition_plan = NutritionPlan.find(params[:id])
     @patient = @nutrition_plan.patient
   end
 
   def update
-    @nutrition_plan = NutritionPlan.find(params[:id])
     @patient = @nutrition_plan.patient
     if @nutrition_plan.update(nutrition_plan_params)
       redirect_to patient_nutrition_plan_path(@patient, @nutrition_plan), notice: 'Plan nutricional actualizado exitosamente.'
     else
-      render :edit
+      render :edit, status: :unprocessable_entity
     end
   end
 
   def destroy
-    @nutrition_plan = NutritionPlan.find(params[:id])
     @patient = @nutrition_plan.patient
     @nutrition_plan.destroy
     redirect_to patient_nutrition_plans_path(@patient), notice: 'Plan nutricional eliminado exitosamente.'
   end
 
   private
+
+  def set_patient
+    @patient = current_nutritionist.patients.find(params[:patient_id])
+  end
+
+  def set_nutrition_plan
+    @nutrition_plan = current_nutritionist.nutrition_plans.find(params[:id])
+  end
+
+  def normalize_meal_type(value)
+    value.to_s.strip.downcase.singularize
+  end
 
   def nutrition_plan_params
     params.require(:nutrition_plan).permit(

@@ -1,0 +1,35 @@
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="mb-1">Radar de Pacientes</h1>
+      <p class="text-muted mb-0">Priorización automática basada en adherencia, acceso y actividad reciente.</p>
+    </div>
+    <%= link_to "Volver al dashboard", nutritionist_dashboard_path, class: "btn btn-outline-secondary" %>
+  </div>
+
+  <% if @radar_entries.any? %>
+    <div class="row g-3">
+      <% @radar_entries.each do |entry| %>
+        <div class="col-12">
+          <div class="card shadow-sm border-0">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <h2 class="h5 mb-1"><%= entry.patient.first_name %> <%= entry.patient.last_name %></h2>
+                  <p class="text-muted mb-2"><%= entry.reasons.join(" · ").presence || "Sin alertas activas" %></p>
+                </div>
+                <span class="badge text-bg-<%= entry.priority_level == 'high' ? 'danger' : (entry.priority_level == 'medium' ? 'warning' : 'success') %>">
+                  <%= entry.priority_level.upcase %> · <%= entry.score %>
+                </span>
+              </div>
+              <p class="mb-3"><strong>Acción sugerida:</strong> <%= entry.recommended_action %></p>
+              <%= link_to "Ver paciente", patient_path(entry.patient), class: "btn btn-sm btn-dark" %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="alert alert-success mb-0">No hay pacientes priorizados en este momento.</div>
+  <% end %>
+</div>

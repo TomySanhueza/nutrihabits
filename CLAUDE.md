@@ -6,6 +6,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 NutriHabits is a Rails 7.1 nutrition management platform that connects nutritionists with their patients. The application uses AI (via ruby_llm gem) to generate personalized nutrition plans and analyze meal photos.
 
+## Canonical Project Docs
+
+When this file conflicts with repository docs, align it with the canonical set under `docs/` and `AGENTS.md`.
+
+Read these first for cross-cutting work:
+
+- `AGENTS.md`
+- `docs/ROADMAP.md`
+- `docs/DELIVERY_TRACKER.md`
+- `docs/WORKLOG.md`
+- `docs/DECISIONS.md`
+- `docs/PRODUCT_SCOPE.md`
+- `docs/ARCHITECTURE.md`
+- `docs/DOMAIN_MODEL.md`
+- `docs/AI_AGENTS.md`
+- `docs/DEPLOYMENT.md`
+- `docs/QA_CHECKLIST.md`
+- `docs/SUBAGENT_ROUTING.md`
+
+Operational rule: any substantial implementation must update `docs/DELIVERY_TRACKER.md` and `docs/WORKLOG.md` in the same change.
+
 ## Key Technologies
 
 - **Rails 7.1.5** with Ruby 3.3.5
@@ -16,6 +37,19 @@ NutriHabits is a Rails 7.1 nutrition management platform that connects nutrition
 - **Bootstrap 5.3** for UI
 - **Hotwire** (Turbo + Stimulus) for frontend interactions
 - **Simple Form** with Bootstrap integration
+
+## Release Direction
+
+Current target is a **closed pilot**, not open self-serve SaaS. The scope includes:
+
+- strong nutritionist backoffice
+- robust patient app
+- AI plan generation
+- AI meal photo analysis
+- human chat
+- nutritionist and patient copilots
+- patient radar and meal-swap support
+- grocery list generation with supermarket-aware product suggestions for Chile and Spain
 
 ## Essential Commands
 

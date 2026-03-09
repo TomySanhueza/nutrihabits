@@ -1,0 +1,3 @@
+display_name: NutriHabits Testing
+short_description: Testing strategy and coverage for critical NutriHabits flows.
+default_prompt: Add high-signal coverage for the NutriHabits change, prioritizing ownership, critical path regressions, and deterministic service behavior.
