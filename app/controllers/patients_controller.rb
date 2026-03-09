@@ -18,7 +18,7 @@ class PatientsController < ApplicationController
     if @patient.save
       redirect_to @patient, notice: 'Cuenta creada exitosamente.'
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 

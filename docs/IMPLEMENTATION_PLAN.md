@@ -8,7 +8,7 @@ Desglose técnico de sprints activos y próximos. Complementa ROADMAP.md (alto n
 
 ## Próximo a Implementar
 
-**Sprint 1 — Security and Ownership** es el foco inmediato. El scaffold de dominio está en su mayoría hecho (modelos, migraciones, servicios), pero falta validar flujos en app real y cerrar gaps de autorización.
+**Sprint 2 — Nutritionist UX/UI** es el foco inmediato. Sprint 1 quedó validado con cobertura request-level en controllers de nutritionist y patient, además de regresión sobre PostgreSQL real.
 
 ---
 
@@ -35,10 +35,10 @@ Desglose técnico de sprints activos y próximos. Complementa ROADMAP.md (alto n
 |---|-------|---------------------|--------------|--------|
 | 1 | **URGENTE: eliminar `PlansController` legacy inseguro** y consolidar el acceso en `NutritionPlansController` | `app/controllers/plans_controller.rb`, `app/views/plans/show.html.erb`, `config/routes.rb`, `test/controllers/plans_controller_test.rb`, `test/controllers/nutrition_plans_controller_test.rb` | ninguna | ✅ done |
 | 2 | Auditar scoping en todos los controllers de nutritionist | `patients_controller.rb`, `nutrition_plans_controller.rb`, `profiles_controller.rb`, `patient_histories_controller.rb` | ninguna | ✅ done |
-| 3 | Auditar scoping en controllers de paciente | `meal_logs_controller.rb`, `meals_controller.rb` | ninguna | 🔄 parcial |
-| 4 | Validar que `current_nutritionist.patients.find` se use en todos los lookups | todos los controllers de nutritionist | tarea 2 | ⏳ pendiente |
-| 5 | Validar que `current_patient` no puede acceder meals de otro patient | `MealLogsController`, rutas | tarea 3 | ⏳ pendiente |
-| 6 | Tests de autorización cross-tenant | `test/controllers/` | tareas 2-5 | 🔄 parcial (lado nutritionist validado; falta lado patient) |
+| 3 | Auditar scoping en controllers de paciente | `meal_logs_controller.rb`, `meals_controller.rb` | ninguna | ✅ done |
+| 4 | Validar que `current_nutritionist.patients.find` se use en todos los lookups | todos los controllers de nutritionist | tarea 2 | ✅ done |
+| 5 | Validar que `current_patient` no puede acceder meals de otro patient | `MealLogsController`, rutas | tarea 3 | ✅ done |
+| 6 | Tests de autorización cross-tenant | `test/controllers/` | tareas 2-5 | ✅ done |
 
 **Criterio de done:** ningún request de nutritionist A puede leer datos de pacientes de nutritionist B; ningún paciente puede leer datos de otro paciente. El legado inseguro de `PlansController` fue eliminado y la superficie soportada queda en `NutritionPlansController`.
 

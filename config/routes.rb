@@ -26,8 +26,9 @@ Rails.application.routes.draw do
       post 'update_status', to: 'status#update'
     end
     post "meal_logs/preflight", to: "meal_logs#preflight", as: :meal_logs_preflight
+    resources :meal_logs, only: [:index]
     resources :meals do
-      resources :meal_logs, except: [:edit, :update]
+      resources :meal_logs, except: [:index, :edit, :update]
     end
     resources :grocery_lists, only: [] do
       collection do

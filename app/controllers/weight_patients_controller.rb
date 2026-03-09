@@ -19,7 +19,7 @@ class WeightPatientsController < ApplicationController
     if @weight_patient.save
       redirect_to weight_patients_path, notice: 'Peso registrado exitosamente.'
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -30,7 +30,7 @@ class WeightPatientsController < ApplicationController
     if @weight_patient.update(weight_patient_params)
       redirect_to @weight_patient, notice: 'Peso actualizado exitosamente.'
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

@@ -66,7 +66,7 @@ class NutritionPlansController < ApplicationController
     if @nutrition_plan.update(nutrition_plan_params)
       redirect_to patient_nutrition_plan_path(@patient, @nutrition_plan), notice: 'Plan nutricional actualizado exitosamente.'
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

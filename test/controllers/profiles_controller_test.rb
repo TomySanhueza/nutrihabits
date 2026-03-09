@@ -62,5 +62,6 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_response :not_found
+    assert_nil @patient.reload.profile
   end
 end
