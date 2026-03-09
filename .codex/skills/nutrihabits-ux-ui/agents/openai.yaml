@@ -1,0 +1,3 @@
+display_name: NutriHabits UX/UI
+short_description: UX/UI patterns for the nutritionist backoffice and patient app.
+default_prompt: Audit the current NutriHabits flow, remove demo behavior, and implement a clearer UX that stays aligned with the pilot scope.

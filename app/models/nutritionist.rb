@@ -11,4 +11,5 @@ class Nutritionist < ApplicationRecord
   has_many :patient_histories
   has_many :chats
   has_many :nutritionist_ai_chats
+  has_many :patient_priority_snapshots, dependent: :destroy
 end

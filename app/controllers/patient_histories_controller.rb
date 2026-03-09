@@ -1,4 +1,5 @@
 class PatientHistoriesController < ApplicationController
+  before_action :authenticate_nutritionist!
   before_action :set_patient
   before_action :set_patient_history, only: [:show, :edit, :update, :destroy]
 
@@ -22,7 +23,7 @@ class PatientHistoriesController < ApplicationController
       redirect_to patient_patient_history_path(@patient, @patient_history), notice: 'Registro de control creado exitosamente.'
     else
       @nutrition_plans = @patient.nutrition_plans.where(status: 'active')
-      render :new
+      render :new, status: :unprocessable_entity
     end
   end
 
@@ -35,7 +36,7 @@ class PatientHistoriesController < ApplicationController
       redirect_to patient_patient_history_path(@patient, @patient_history), notice: 'Registro de control actualizado exitosamente.'
     else
       @nutrition_plans = @patient.nutrition_plans
-      render :edit
+      render :edit, status: :unprocessable_entity
     end
   end
 
@@ -47,7 +48,7 @@ class PatientHistoriesController < ApplicationController
   private
 
   def set_patient
-    @patient = Patient.find(params[:patient_id])
+    @patient = current_nutritionist.patients.find(params[:patient_id])
   end
 
   def set_patient_history

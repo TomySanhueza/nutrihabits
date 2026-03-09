@@ -1,0 +1,72 @@
+- external_id: mercadona-avena-1
+  name: Copos de avena
+  brand: Hacendado
+  package_size: 1 kg
+  price: 1.75
+  currency: EUR
+  availability: true
+  country_code: ES
+  url: https://www.mercadona.es/
+- external_id: mercadona-arroz-1
+  name: Arroz integral
+  brand: Hacendado
+  package_size: 1 kg
+  price: 1.95
+  currency: EUR
+  availability: true
+  country_code: ES
+  url: https://www.mercadona.es/
+- external_id: mercadona-pollo-1
+  name: Pechuga de pollo fileteada
+  brand: Mercadona
+  package_size: 600 g
+  price: 5.85
+  currency: EUR
+  availability: true
+  country_code: ES
+  url: https://www.mercadona.es/
+- external_id: mercadona-yogur-1
+  name: Yogur natural
+  brand: Hacendado
+  package_size: 6 unidades
+  price: 1.60
+  currency: EUR
+  availability: true
+  country_code: ES
+  url: https://www.mercadona.es/
+- external_id: mercadona-huevo-1
+  name: Huevos frescos
+  brand: Mercadona
+  package_size: 12 unidades
+  price: 2.35
+  currency: EUR
+  availability: true
+  country_code: ES
+  url: https://www.mercadona.es/
+- external_id: mercadona-quinoa-1
+  name: Quinoa cocida
+  brand: Hacendado
+  package_size: 250 g
+  price: 1.50
+  currency: EUR
+  availability: true
+  country_code: ES
+  url: https://www.mercadona.es/
+- external_id: mercadona-aguacate-1
+  name: Aguacate
+  brand: Mercadona
+  package_size: 2 unidades
+  price: 2.90
+  currency: EUR
+  availability: true
+  country_code: ES
+  url: https://www.mercadona.es/
+- external_id: mercadona-atun-1
+  name: Atun al natural
+  brand: Hacendado
+  package_size: 3 latas
+  price: 2.10
+  currency: EUR
+  availability: true
+  country_code: ES
+  url: https://www.mercadona.es/
