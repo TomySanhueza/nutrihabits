@@ -37,6 +37,5 @@ Rails.application.routes.draw do
     end
     resources :weight_patients
     # get "dashboard", to: "patients#dashboard"
-    # get "plans/:id", to: "plans#show", as: :plan
   end
 end

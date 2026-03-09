@@ -1,5 +1,82 @@
 # Worklog
 
+## 2026-03-09 (décima sesión — validación final con PostgreSQL real)
+
+- Ejecutado `bundle exec rails db:prepare` con acceso real a PostgreSQL; completó correctamente.
+- Ejecutada la suite focalizada:
+  - `bundle exec rails test test/controllers/patients_controller_test.rb test/controllers/profiles_controller_test.rb test/controllers/nutrition_plans_controller_test.rb test/controllers/patient_histories_controller_test.rb test/controllers/plans_controller_test.rb`
+  - resultado: `24 runs, 73 assertions, 0 failures, 0 errors`
+- Cerrado el bloqueo de repo para PostgreSQL/Bundler: el residual actual es solo la limitación del sandbox por defecto cuando no tiene permisos elevados.
+- Actualizados `docs/LESSONS.md`, `docs/IMPLEMENTATION_PLAN.md`, `docs/PROGRESS.md` y `docs/DELIVERY_TRACKER.md` para reflejar que Sprint 1 Task 01/02 ya quedó validado con base real.
+
+## 2026-03-09 (novena sesión — schema repair y cierre de Sprint 1 Task 02)
+
+- Creada la rama `codex/sprint-01-task-02-test-db-schema-repair` sobre el trabajo ya existente de Task 02 para aislar la remediación operativa.
+- Añadida en `docs/LESSONS.md` la lección explícita del bloqueo de `rails test` por acceso a PostgreSQL y `schema.rb` atrasado, incluyendo la causa adicional detectada en `meal_distribution`.
+- Confirmado con acceso a DB que el bloqueo ya no era solo el sandbox: la migración `20251010101000_restore_meal_distribution_and_add_grocery_domains.rb` fallaba porque había filas de `nutrition_plans.meal_distribution` serializadas con formato hash de Ruby (`=>`) en lugar de JSON válido.
+- Endurecida la migración `20251010101000` para normalizar `meal_distribution` a JSON antes de convertir la columna a `jsonb`; tras eso `bundle exec rails db:migrate` completó correctamente.
+- Ejecutado `bundle exec rails db:schema:dump`; `db/schema.rb` quedó en versión `2025_10_10_101000` con `patients.onboarding_state`, `meal_logs.analysis_status`, `nutrition_plans.meal_distribution: jsonb` y tablas grocery/radar.
+- La base de test estaba inconsistente (`PG::DuplicateColumn` en `nutritionist_ai_chats` durante `RAILS_ENV=test db:prepare`); se resolvió recreándola desde cero con `env RAILS_ENV=test bundle exec rails db:drop db:create db:schema:load`.
+- Ajustadas las pruebas de integración para validar `404` manejado por Rails en lugar de excepciones propagadas, corregido el smoke test legado de `/plans/:id`, aislado el delete de `NutritionPlan` de fixtures con FK activas y reemplazado el stub del generador por un override controlado del constructor.
+- Verificaciones ejecutadas con éxito:
+  - `bundle exec rails runner "puts ActiveRecord::Base.connection.migration_context.current_version"` => `20251010101000`
+  - `bundle exec rails runner "puts Patient.column_names.grep(/onboarding|invitation|access/).inspect"` => columnas operacionales presentes
+  - `bundle exec rails runner "puts NutritionPlan.columns_hash['meal_distribution'].sql_type"` => `jsonb`
+  - `bundle exec rails test test/controllers/patients_controller_test.rb test/controllers/profiles_controller_test.rb test/controllers/nutrition_plans_controller_test.rb test/controllers/patient_histories_controller_test.rb test/controllers/plans_controller_test.rb` => `24 runs, 73 assertions, 0 failures, 0 errors`
+- Residual menor detectado: Rails/Rack 3 emite warnings por `:unprocessable_entity`; no bloquea la suite, pero conviene migrar a `:unprocessable_content` en una pasada separada.
+
+## 2026-03-09 (octava sesión — postgresql connectivity hardening)
+
+- Confirmado por diagnóstico por capas que PostgreSQL sí estaba escuchando en `127.0.0.1:5432`, pero el sandbox no podía alcanzarlo ni por socket Unix ni por TCP loopback.
+- Actualizado `config/database.yml` para que development/test usen TCP por defecto mediante `PGHOST`/`PGPORT` y credenciales opcionales por entorno.
+- Actualizado `.env.example` para reflejar `DATABASE_URL` en `127.0.0.1:5432` y variables `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`.
+- Enriquecidos `docs/DEPLOYMENT.md` y `docs/LESSONS.md` con diagnóstico operativo, comandos de verificación y la distinción entre fallo del repo y restricción del sandbox.
+- Actualizados `docs/DELIVERY_TRACKER.md` y `docs/PROGRESS.md` para reflejar que el siguiente paso ya no es arreglar Bundler sino validar PostgreSQL en un entorno con acceso real a DB.
+
+## 2026-03-09 (séptima sesión — bundler corregido, nuevo bloqueo DB)
+
+- Aplicado fix global en `~/.zprofile` para cargar `rbenv` también en shells login no interactivas.
+- Verificación posterior al fix:
+  - `ruby -v` => `3.3.5`
+  - `which ruby` => `~/.rbenv/shims/ruby`
+  - `which bundle` => `~/.rbenv/shims/bundle`
+  - `bundle -v` => `2.7.1`
+  - `bundle exec rails about` ejecuta correctamente
+- Reintentada la suite focalizada de Sprint 1 Task 01; el bloqueo cambió de Bundler a acceso a PostgreSQL:
+  - `connection to server on socket "/tmp/.s.PGSQL.5432" failed: Operation not permitted`
+- Actualizados `docs/LESSONS.md` y `docs/DELIVERY_TRACKER.md` para reflejar que el problema de Bundler quedó resuelto y que el siguiente bloqueo real es el acceso al socket local de PostgreSQL desde el sandbox.
+
+## 2026-03-09 (sexta sesión — bundler/rbenv activación global)
+
+- Confirmado que el bloqueo de `bundle exec ...` no era ausencia real de Bundler: `rbenv` ya tenía Ruby `3.3.5` y Bundler `2.7.1` instalados.
+- Aislada la causa raíz operativa:
+  - `ruby -v` resolvía a `2.6.10` del sistema.
+  - `bundle` resolvía a `/usr/bin/bundle`.
+  - `rbenv exec ruby -v` y `rbenv exec bundle _2.7.1_ -v` funcionaban correctamente.
+- Confirmado que `.zshrc` cargaba `rbenv`, pero `.zprofile` no; esto dejaba shells login no interactivas sin activación correcta.
+- Actualizados `docs/LESSONS.md`, `docs/DEPLOYMENT.md` y `docs/DELIVERY_TRACKER.md` con el diagnóstico real, fallback temporal y criterio de verificación.
+
+## 2026-03-09 (quinta sesión — sprint 1 task 02 scoping)
+
+- Creada la rama `codex/sprint-01-task-02-nutritionist-controller-scoping` desde `main` para aislar la auditoría de ownership en controllers de nutritionist.
+- Endurecido `NutritionPlansController`: todas las acciones nested ahora cargan `@patient` vía `current_nutritionist.patients.find(params[:patient_id])` y resuelven el plan con `@patient.nutrition_plans.find(params[:id])`, cerrando el hueco de inconsistencia entre `patient_id` y `nutrition_plan.id`.
+- Endurecido `PatientHistoriesController`: `nutrition_plan_id` ya no se acepta ciegamente desde params; se re-scopea contra `@patient.nutrition_plans` y se rechaza con `unprocessable_entity` si intenta enlazar un plan de otro paciente.
+- Reemplazados tests scaffold vacíos por integration tests con autenticación Devise para `PatientsController`, `ProfilesController`, `NutritionPlansController` y nuevo `PatientHistoriesControllerTest`.
+- Añadidas fixtures mínimas reales para `nutritionists`, `patients`, `profiles`, `nutrition_plans`, `plans`, `meals` y `patient_histories`, con dos nutritionists y pacientes separados para validar cross-tenant access y nested-route mismatch.
+- Actualizado `test/test_helper.rb` para habilitar `Devise::Test::IntegrationHelpers` en integration tests.
+- Actualizados `docs/DELIVERY_TRACKER.md` y `docs/IMPLEMENTATION_PLAN.md` para reflejar que la tarea pasó de implementación parcial a revisión con bloqueo residual de validación local.
+- Verificación pendiente: no se pudo ejecutar la suite focalizada de Rails en este sandbox porque el entorno no tiene acceso operativo al socket local de PostgreSQL; además, si el entorno de pruebas usa `db/schema.rb`, puede requerir migrar primero porque el schema sigue desactualizado respecto a `patients.onboarding_state`.
+
+## 2026-03-09 (cuarta sesión — sprint 1 task 01)
+
+- Eliminado `PlansController` legacy inseguro junto con su vista placeholder `app/views/plans/show.html.erb`.
+- Removida la referencia comentada a `GET /plans/:id` en `config/routes.rb` para evitar reactivación accidental del endpoint.
+- Añadida cobertura mínima de seguridad:
+  - `test/controllers/plans_controller_test.rb` ahora verifica que `/plans/:id` no está expuesto.
+  - `test/controllers/nutrition_plans_controller_test.rb` ahora cubre acceso válido del nutritionist dueño y bloqueo cross-tenant vía `ActiveRecord::RecordNotFound`.
+- Registrada la decisión arquitectónica en `docs/DECISIONS.md`: el detalle soportado de planes vive en `NutritionPlansController`; cualquier detalle diario futuro para paciente será un endpoint nuevo y scoped.
+- Actualizados `docs/IMPLEMENTATION_PLAN.md` y `docs/DELIVERY_TRACKER.md` para marcar Sprint 1 Task 01 como resuelta.
+
 ## 2026-03-09 (tercera sesión — code review arquitectónico)
 
 - Revisión completa del código (models, controllers, services, jobs, migrations, schema, routes) contra la documentación creada.

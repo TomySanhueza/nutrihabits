@@ -1,0 +1,11 @@
+owned_breakfast:
+  id: 701
+  plan_id: 501
+  meal_type: breakfast
+  calories: 350
+  status: pending
+  ingredients: Oats and yogurt
+  recipe: Mix and serve
+  protein: 20
+  carbs: 45
+  fat: 10

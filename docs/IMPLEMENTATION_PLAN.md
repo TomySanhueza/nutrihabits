@@ -33,14 +33,14 @@ Desglose técnico de sprints activos y próximos. Complementa ROADMAP.md (alto n
 
 | # | Tarea | Archivos a modificar | Precondición | Estado |
 |---|-------|---------------------|--------------|--------|
-| 1 | **URGENTE: Añadir auth a PlansController** (agujero de seguridad confirmado) | `app/controllers/plans_controller.rb` | ninguna | 🔴 pendiente crítico |
-| 2 | Auditar scoping en todos los controllers de nutritionist | `patients_controller.rb`, `nutrition_plans_controller.rb`, `profiles_controller.rb`, `patient_histories_controller.rb` | ninguna | 🔄 parcial |
+| 1 | **URGENTE: eliminar `PlansController` legacy inseguro** y consolidar el acceso en `NutritionPlansController` | `app/controllers/plans_controller.rb`, `app/views/plans/show.html.erb`, `config/routes.rb`, `test/controllers/plans_controller_test.rb`, `test/controllers/nutrition_plans_controller_test.rb` | ninguna | ✅ done |
+| 2 | Auditar scoping en todos los controllers de nutritionist | `patients_controller.rb`, `nutrition_plans_controller.rb`, `profiles_controller.rb`, `patient_histories_controller.rb` | ninguna | ✅ done |
 | 3 | Auditar scoping en controllers de paciente | `meal_logs_controller.rb`, `meals_controller.rb` | ninguna | 🔄 parcial |
 | 4 | Validar que `current_nutritionist.patients.find` se use en todos los lookups | todos los controllers de nutritionist | tarea 2 | ⏳ pendiente |
 | 5 | Validar que `current_patient` no puede acceder meals de otro patient | `MealLogsController`, rutas | tarea 3 | ⏳ pendiente |
-| 6 | Tests de autorización cross-tenant | `test/controllers/` | tareas 2-5 | ⏳ pendiente |
+| 6 | Tests de autorización cross-tenant | `test/controllers/` | tareas 2-5 | 🔄 parcial (lado nutritionist validado; falta lado patient) |
 
-**Criterio de done:** ningún request de nutritionist A puede leer datos de pacientes de nutritionist B; ningún paciente puede leer datos de otro paciente. PlansController tiene auth.
+**Criterio de done:** ningún request de nutritionist A puede leer datos de pacientes de nutritionist B; ningún paciente puede leer datos de otro paciente. El legado inseguro de `PlansController` fue eliminado y la superficie soportada queda en `NutritionPlansController`.
 
 ## Deuda Técnica — Refactors Pendientes (no bloqueantes para piloto)
 
@@ -49,7 +49,6 @@ Desglose técnico de sprints activos y próximos. Complementa ROADMAP.md (alto n
 | DT-1 | Mover creación de Plans/Meals a `NutritionPlanGeneratorService` + transaction | `nutrition_plans_controller.rb`, `nutrition_plan_generator_service.rb` | Riesgo de plan incompleto si LLM response es parcial | Media |
 | DT-2 | Eliminar `Profile#belongs_to :nutritionist` (FK derivable) | `profile.rb`, migración | Riesgo de inconsistencia si paciente cambia de nutricionista | Media |
 | DT-3 | Eliminar `MealLog#meal_type` o añadir validación de consistencia | `meal_log.rb`, migración | Datos duplicados sin garantía de coherencia | Baja |
-| DT-4 | Regenerar `schema.rb` con todas las migraciones aplicadas | `db/schema.rb` | `db:schema:load` roto para nuevos entornos | Alta (bloqueante para onboarding de devs) |
 
 ---
 
@@ -140,7 +139,7 @@ Desglose técnico de sprints activos y próximos. Complementa ROADMAP.md (alto n
 
 | # | Tarea | Archivos | Precondición | Estado |
 |---|-------|----------|--------------|--------|
-| 1 | Ejecutar migraciones pendientes de grocery domain | `db/migrate/20251010*` | Rails boot OK | ⏳ pendiente (bloqueado por Ruby/Bundler mismatch local) |
+| 1 | Ejecutar migraciones pendientes de grocery domain | `db/migrate/20251010*` | Rails boot OK | 🔄 parcial (migraciones 20251010 validadas y `schema.rb` alineado; falta validar flujo grocery end-to-end) |
 | 2 | Validar modelos GroceryList, GroceryListItem, GroceryProductMatch | `app/models/grocery_*.rb` | migración 1 | 🔄 modelos OK |
 | 3 | ShoppingListGeneratorService completo | `app/services/shopping_list_generator_service.rb` | tarea 2 | 🔄 scaffold OK |
 | 4 | UI de lista de compras para paciente | `app/views/grocery_lists/` | tarea 3 | 🔄 scaffold OK |
@@ -154,7 +153,7 @@ Desglose técnico de sprints activos y próximos. Complementa ROADMAP.md (alto n
 
 ## Notas de Dependencias Globales
 
-- **Ruby 3.3.5 + Bundler 2.7.1** requeridos para `bin/rails`. Validar entorno antes de ejecutar migraciones.
+- **Ruby 3.3.5 + Bundler 2.7.1** requeridos para `bin/rails`. El toolchain quedó validado; usar terminal/CI con acceso real a PostgreSQL para tareas DB.
 - **Sidekiq + Redis** requeridos antes de Sprint 5 (jobs de análisis de foto).
 - **Cloudinary credentials** en `bin/rails credentials:edit` antes de Sprint 5 (uploads en producción).
 - **OPENAI_API_KEY** requerido para Sprints 5 y 6.

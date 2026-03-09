@@ -1,0 +1,26 @@
+owned_patient:
+  id: 201
+  email: owned-patient@example.com
+  encrypted_password: <%= Devise::Encryptor.digest(Patient, "password123") %>
+  first_name: Alice
+  last_name: Owner
+  phone: "5551000"
+  nutritionist_id: 101
+
+owned_patient_sibling:
+  id: 202
+  email: sibling-patient@example.com
+  encrypted_password: <%= Devise::Encryptor.digest(Patient, "password123") %>
+  first_name: Bob
+  last_name: Owner
+  phone: "5552000"
+  nutritionist_id: 101
+
+foreign_patient:
+  id: 203
+  email: foreign-patient@example.com
+  encrypted_password: <%= Devise::Encryptor.digest(Patient, "password123") %>
+  first_name: Charlie
+  last_name: Foreign
+  phone: "5553000"
+  nutritionist_id: 102

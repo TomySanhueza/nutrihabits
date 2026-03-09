@@ -2,19 +2,20 @@
 
 Complementa DELIVERY_TRACKER.md con porcentaje por sprint y estado actual de trabajo.
 
-**Última actualización:** 2026-03-09
+**Última actualización:** 2026-03-09 (postgres + focused suite validated)
 
 ---
 
 ## Estado Actual
 
 ### En progreso ahora:
-- Mejora de documentación de arquitectura (este conjunto de archivos)
+- Auditoría de scoping en controllers de paciente
 
 ### Bloqueadores activos:
-- Rails boot local bloqueado: entorno requiere Ruby 3.3.5 + Bundler 2.7.1
-  - Impacta: ejecución de migraciones pendientes (grocery domain, onboarding_state)
-  - Impacta: validación end-to-end de flujos async (MealLogAnalysisJob)
+- No hay bloqueadores de repo para Sprint 1 Task 01/02: la migración 20251010, `db:prepare` y la suite focalizada ya fueron validadas en un entorno con acceso a PostgreSQL
+- Restricción residual del sandbox por defecto:
+  - sin permisos elevados este entorno aún no puede usar loopback ni el socket Unix local de PostgreSQL
+  - para ejecutar `rails test` o `db:*` desde aquí hay que usar una terminal/CI con acceso real a DB o permisos aprobados
 
 ---
 
@@ -23,7 +24,7 @@ Complementa DELIVERY_TRACKER.md con porcentaje por sprint y estado actual de tra
 | Sprint | Nombre | Tareas Done | Total | % | Estado |
 |--------|--------|-------------|-------|---|--------|
 | 0 | Base and Canon | 4 | 4 | 100% | ✅ done |
-| 1 | Security and Ownership | 2 | 5 | 40% | 🔄 in_progress |
+| 1 | Security and Ownership | 4 | 6 | 67% | 🔄 in_progress |
 | 2 | Nutritionist UX/UI | 1 | 5 | 20% | 🔄 parcial |
 | 3 | Patient Access Flow | 0 | 6 | 0% | ⏳ planned |
 | 4 | Patient App Hardening | 2 | 5 | 40% | 🔄 parcial |
@@ -44,7 +45,7 @@ Complementa DELIVERY_TRACKER.md con porcentaje por sprint y estado actual de tra
 - Autenticación dual Devise (Nutritionist + Patient)
 - Modelos core: Patient, Profile, NutritionPlan, Plan, Meal, MealLog, WeightPatient
 - Modelos de chat: Chat, Message, NutritionistAiChat, PatientAiChat
-- Modelos de grocery: GroceryList, GroceryListItem, GroceryProductMatch (migraciones pendientes de ejecutar)
+- Modelos de grocery: GroceryList, GroceryListItem, GroceryProductMatch (migraciones 20251010 ejecutadas; falta validar flujo end-to-end)
 - PatientRadarService (scoring funcional, sin persistencia de snapshots)
 - MealLogAnalysisJob (scaffold completo, falta retry config y validación staging)
 - ImagePreflightService (scaffold)
@@ -54,7 +55,8 @@ Complementa DELIVERY_TRACKER.md con porcentaje por sprint y estado actual de tra
 - Routes completas (nutritionist + patient namespaces)
 
 ### 🔄 Parcialmente implementado
-- Scoping de controllers (auditoría en progreso)
+- Scoping de controllers de nutritionist auditado y validado con tests
+- `PlansController` legacy inseguro eliminado; cobertura mínima de route regression y ownership agregada
 - Dashboard de nutritionist
 - Dashboard de paciente
 - Vista de paciente (show) con info básica
@@ -63,13 +65,13 @@ Complementa DELIVERY_TRACKER.md con porcentaje por sprint y estado actual de tra
 - Vista patient_radar (existe pero no integrada en dashboard)
 
 ### ⏳ Pendiente de implementar
-- onboarding_state en Patient (migración + enum + flujo de invitación)
+- onboarding_state en Patient (columnas migradas; falta enum + flujo de invitación)
 - UI de análisis async con Turbo Streams (estados queued/processing/completed)
 - Registro de peso (WeightPatient UI)
 - Edición inline de meals generadas
 - UserSupermarketPreference UI
 - PatientPrioritySnapshot persistencia
-- Tests de autorización cross-tenant
+- Tests de autorización cross-tenant del lado patient
 - Tests de servicios
 
 ---
@@ -84,8 +86,8 @@ Complementa DELIVERY_TRACKER.md con porcentaje por sprint y estado actual de tra
 
 ## Próximas Prioridades
 
-1. Resolver entorno local (Ruby/Bundler) para poder ejecutar `bin/rails` y validar migraciones
-2. Completar auditoría de scoping (Sprint 1) — crítico para seguridad del piloto
-3. Ejecutar migraciones pendientes de grocery domain (20251010*)
+1. Completar auditoría de scoping en controllers de paciente (Sprint 1)
+2. Expandir tests de autorización cross-tenant al lado paciente
+3. Continuar con dashboard y flujos de nutritionist sobre el schema ya alineado
 4. Integrar Patient Radar en dashboard nutritionist
 5. Configurar retry en MealLogAnalysisJob y validar en staging

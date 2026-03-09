@@ -69,3 +69,10 @@
 - Context: Cada retailer (Jumbo, Líder, Mercadona, etc.) tiene una fuente de datos distinta: algunos tienen API, otros requieren scraping, otros usan catálogos estáticos CSV/JSON.
 - Decision: `SupermarketCatalogProvider` define la interfaz. Cada retailer tiene su adapter en `app/services/supermarket_catalog_providers/`. Catálogos estáticos en `config/grocery_catalogs/`.
 - Consequence: Agregar un nuevo retailer = crear un adapter, sin cambios en el dominio ni en `ShoppingListGeneratorService`. Catálogos estáticos permiten funcionar sin APIs externas en el piloto.
+
+## ADR-011: Eliminar `PlansController` legacy inseguro
+
+- Status: accepted
+- Context: `app/controllers/plans_controller.rb` exponía `Plan.find(params[:id])` sin autenticación ni scoping. La ruta pública estaba comentada, la vista era placeholder y el flujo real de detalle de planes ya vive en `NutritionPlansController`.
+- Decision: Eliminar `PlansController` y su vista legacy en vez de endurecer un endpoint que no forma parte del producto soportado.
+- Consequence: La superficie de planes queda consolidada en `NutritionPlansController`. Si más adelante se necesita un detalle diario de `Plan` para pacientes, se implementará como endpoint nuevo con `authenticate_patient!` y `current_patient.plans.find`, no reactivando el legado.

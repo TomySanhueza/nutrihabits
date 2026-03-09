@@ -1,6 +1,6 @@
 class NutritionPlansController < ApplicationController
   before_action :authenticate_nutritionist!
-  before_action :set_patient, only: [:index, :new, :create]
+  before_action :set_patient
   before_action :set_nutrition_plan, only: [:show, :edit, :update, :destroy]
 
   def index
@@ -8,7 +8,6 @@ class NutritionPlansController < ApplicationController
   end
 
   def show
-    @patient = @nutrition_plan.patient
   end
 
   def new
@@ -61,11 +60,9 @@ class NutritionPlansController < ApplicationController
   end
 
   def edit
-    @patient = @nutrition_plan.patient
   end
 
   def update
-    @patient = @nutrition_plan.patient
     if @nutrition_plan.update(nutrition_plan_params)
       redirect_to patient_nutrition_plan_path(@patient, @nutrition_plan), notice: 'Plan nutricional actualizado exitosamente.'
     else
@@ -74,7 +71,6 @@ class NutritionPlansController < ApplicationController
   end
 
   def destroy
-    @patient = @nutrition_plan.patient
     @nutrition_plan.destroy
     redirect_to patient_nutrition_plans_path(@patient), notice: 'Plan nutricional eliminado exitosamente.'
   end
@@ -86,7 +82,7 @@ class NutritionPlansController < ApplicationController
   end
 
   def set_nutrition_plan
-    @nutrition_plan = current_nutritionist.nutrition_plans.find(params[:id])
+    @nutrition_plan = @patient.nutrition_plans.find(params[:id])
   end
 
   def normalize_meal_type(value)
