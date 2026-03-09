@@ -17,7 +17,7 @@ class GroceryListsController < ApplicationController
 
     unless @preference.save
       load_current_state
-      render :current, status: :unprocessable_entity
+      render :current, status: :unprocessable_content
       return
     end
 
@@ -31,7 +31,7 @@ class GroceryListsController < ApplicationController
   rescue ShoppingListGeneratorService::Error => e
     load_current_state
     flash.now[:alert] = e.message
-    render :current, status: :unprocessable_entity
+    render :current, status: :unprocessable_content
   end
 
   private

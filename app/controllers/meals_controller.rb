@@ -20,13 +20,13 @@ class MealsController < ApplicationController
       redirect_to @meal, notice: 'Comida creada exitosamente.'
     else
       @plans = current_patient.plans.order(date: :desc)
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   rescue ActiveRecord::RecordNotFound
     @meal = Meal.new(meal_params.except(:plan_id))
     @meal.errors.add(:plan, "no es válido para este paciente")
     @plans = current_patient.plans.order(date: :desc)
-    render :new, status: :unprocessable_entity
+    render :new, status: :unprocessable_content
   end
 
   def edit
@@ -44,12 +44,12 @@ class MealsController < ApplicationController
       redirect_to @meal, notice: 'Comida actualizada exitosamente.'
     else
       @plans = current_patient.plans.order(date: :desc)
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   rescue ActiveRecord::RecordNotFound
     @meal.errors.add(:plan, "no es válido para este paciente")
     @plans = current_patient.plans.order(date: :desc)
-    render :edit, status: :unprocessable_entity
+    render :edit, status: :unprocessable_content
   end
 
   def destroy

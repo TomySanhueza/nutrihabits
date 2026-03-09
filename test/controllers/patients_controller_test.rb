@@ -5,6 +5,30 @@ class PatientsControllerTest < ActionDispatch::IntegrationTest
     @nutritionist = nutritionists(:owner)
     @other_nutritionist = nutritionists(:other_owner)
     @patient = patients(:owned_patient)
+    @sibling_patient = patients(:owned_patient_sibling)
+    @foreign_patient = patients(:foreign_patient)
+  end
+
+  test "index only lists patients owned by the signed in nutritionist" do
+    sign_in @nutritionist
+
+    get patients_path
+
+    assert_response :success
+    assert_includes response.body, "#{@patient.first_name} #{@patient.last_name}"
+    assert_includes response.body, "#{@sibling_patient.first_name} #{@sibling_patient.last_name}"
+    refute_includes response.body, "#{@foreign_patient.first_name} #{@foreign_patient.last_name}"
+  end
+
+  test "index for other nutritionist excludes patients owned by someone else" do
+    sign_in @other_nutritionist
+
+    get patients_path
+
+    assert_response :success
+    assert_includes response.body, "#{@foreign_patient.first_name} #{@foreign_patient.last_name}"
+    refute_includes response.body, "#{@patient.first_name} #{@patient.last_name}"
+    refute_includes response.body, "#{@sibling_patient.first_name} #{@sibling_patient.last_name}"
   end
 
   test "owner can see patient" do

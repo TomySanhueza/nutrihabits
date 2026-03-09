@@ -6,6 +6,7 @@ class PatientHistoriesControllerTest < ActionDispatch::IntegrationTest
     @other_nutritionist = nutritionists(:other_owner)
     @patient = patients(:owned_patient)
     @history = patient_histories(:owned_history)
+    @sibling_history = patient_histories(:sibling_history)
     @plan = nutrition_plans(:owned_plan)
     @sibling_plan = nutrition_plans(:sibling_plan)
     @foreign_plan = nutrition_plans(:foreign_plan)
@@ -60,7 +61,7 @@ class PatientHistoriesControllerTest < ActionDispatch::IntegrationTest
       }
     end
 
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
   end
 
   test "owner cannot create patient history with a foreign nutritionist plan" do
@@ -78,7 +79,7 @@ class PatientHistoriesControllerTest < ActionDispatch::IntegrationTest
       }
     end
 
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
   end
 
   test "owner can update and destroy owned patient history" do
@@ -110,7 +111,7 @@ class PatientHistoriesControllerTest < ActionDispatch::IntegrationTest
       }
     }
 
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
     assert_equal @plan.id, @history.reload.nutrition_plan_id
   end
 
@@ -119,6 +120,76 @@ class PatientHistoriesControllerTest < ActionDispatch::IntegrationTest
 
     get patient_patient_history_path(@patient, @history)
 
+    assert_response :not_found
+  end
+
+  test "other nutritionist cannot access foreign patient history index or new form" do
+    sign_in @other_nutritionist
+
+    get patient_patient_histories_path(@patient)
+    assert_response :not_found
+
+    sign_in @other_nutritionist
+
+    get new_patient_patient_history_path(@patient)
+    assert_response :not_found
+  end
+
+  test "other nutritionist cannot edit update or destroy foreign patient history" do
+    sign_in @other_nutritionist
+
+    get edit_patient_patient_history_path(@patient, @history)
+    assert_response :not_found
+
+    sign_in @other_nutritionist
+
+    assert_no_changes -> { @history.reload.notes } do
+      patch patient_patient_history_path(@patient, @history), params: {
+        patient_history: {
+          notes: "Foreign update"
+        }
+      }
+    end
+    assert_response :not_found
+
+    sign_in @other_nutritionist
+
+    assert_no_difference("PatientHistory.count") do
+      delete patient_patient_history_path(@patient, @history)
+    end
+    assert_response :not_found
+  end
+
+  test "owner cannot access sibling patient history through another patient route" do
+    sign_in @nutritionist
+
+    get patient_patient_history_path(@patient, @sibling_history)
+    assert_response :not_found
+
+    sign_in @nutritionist
+
+    get edit_patient_patient_history_path(@patient, @sibling_history)
+    assert_response :not_found
+  end
+
+  test "owner cannot update or destroy sibling history through another patient route" do
+    sign_in @nutritionist
+
+    assert_no_changes -> { @sibling_history.reload.notes } do
+      patch patient_patient_history_path(@patient, @sibling_history), params: {
+        patient_history: {
+          notes: "Wrong nested route",
+          nutrition_plan_id: @sibling_plan.id
+        }
+      }
+    end
+    assert_response :not_found
+
+    sign_in @nutritionist
+
+    assert_no_difference("PatientHistory.count") do
+      delete patient_patient_history_path(@patient, @sibling_history)
+    end
     assert_response :not_found
   end
 end

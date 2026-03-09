@@ -24,7 +24,7 @@ class PatientHistoriesController < ApplicationController
       redirect_to patient_patient_history_path(@patient, @patient_history), notice: 'Registro de control creado exitosamente.'
     else
       @nutrition_plans = @patient.nutrition_plans.where(status: 'active')
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -39,7 +39,7 @@ class PatientHistoriesController < ApplicationController
       redirect_to patient_patient_history_path(@patient, @patient_history), notice: 'Registro de control actualizado exitosamente.'
     else
       @nutrition_plans = @patient.nutrition_plans
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

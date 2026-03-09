@@ -14,7 +14,7 @@ class ProfilesController < ApplicationController
     if @profile.save
       redirect_to patient_path(@patient), notice: 'Perfil creado exitosamente.'
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 

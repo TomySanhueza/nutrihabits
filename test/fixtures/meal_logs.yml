@@ -1,0 +1,44 @@
+owned_breakfast_log:
+  id: 801
+  meal_id: 701
+  logged_at: 2026-03-01 08:30:00
+  meal_type: breakfast
+  ai_calories: 360
+  ai_protein: 21
+  ai_carbs: 46
+  ai_fat: 11
+  ai_health_score: 8.1
+  ai_feedback: Balanced breakfast
+  ai_comparison: {}
+  analysis_status: completed
+  analysis_error:
+
+sibling_dinner_log:
+  id: 802
+  meal_id: 703
+  logged_at: 2026-03-01 20:15:00
+  meal_type: dinner
+  ai_calories: 550
+  ai_protein: 25
+  ai_carbs: 70
+  ai_fat: 17
+  ai_health_score: 7.4
+  ai_feedback: Solid dinner
+  ai_comparison: {}
+  analysis_status: completed
+  analysis_error:
+
+foreign_snack_log:
+  id: 803
+  meal_id: 704
+  logged_at: 2026-03-01 16:45:00
+  meal_type: snack
+  ai_calories: 290
+  ai_protein: 11
+  ai_carbs: 36
+  ai_fat: 9
+  ai_health_score: 6.8
+  ai_feedback: Better with more protein
+  ai_comparison: {}
+  analysis_status: completed
+  analysis_error:

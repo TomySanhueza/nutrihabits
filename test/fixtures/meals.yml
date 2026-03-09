@@ -9,3 +9,39 @@ owned_breakfast:
   protein: 20
   carbs: 45
   fat: 10
+
+owned_lunch:
+  id: 702
+  plan_id: 501
+  meal_type: lunch
+  calories: 620
+  status: pending
+  ingredients: Chicken bowl
+  recipe: Assemble and serve
+  protein: 38
+  carbs: 54
+  fat: 18
+
+sibling_dinner:
+  id: 703
+  plan_id: 502
+  meal_type: dinner
+  calories: 540
+  status: pending
+  ingredients: Pasta and vegetables
+  recipe: Cook and plate
+  protein: 24
+  carbs: 68
+  fat: 16
+
+foreign_snack:
+  id: 704
+  plan_id: 503
+  meal_type: snack
+  calories: 280
+  status: pending
+  ingredients: Yogurt and fruit
+  recipe: Open and combine
+  protein: 12
+  carbs: 34
+  fat: 8

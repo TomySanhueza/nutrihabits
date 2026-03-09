@@ -7,6 +7,7 @@ class NutritionPlansControllerTest < ActionDispatch::IntegrationTest
     @patient = patients(:owned_patient)
     @sibling_patient = patients(:owned_patient_sibling)
     @plan = nutrition_plans(:owned_plan)
+    @foreign_plan = nutrition_plans(:foreign_plan)
   end
 
   test "owner can access index and new" do
@@ -103,6 +104,64 @@ class NutritionPlansControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to patient_nutrition_plans_path(@patient)
   end
 
+  test "other nutritionist cannot create a plan for a foreign patient" do
+    sign_in @other_nutritionist
+
+    response_payload = {
+      "plan" => {
+        "objective" => "Blocked plan",
+        "calories" => 1800.0,
+        "protein" => 100.0,
+        "fat" => 55.0,
+        "carbs" => 200.0,
+        "meal_distribution" => {
+          Date.current.to_s => {
+            "breakfast" => {
+              "ingredients" => "Toast",
+              "recipe" => "Serve",
+              "calorias" => 250.0,
+              "protein" => 10.0,
+              "carbs" => 30.0,
+              "fat" => 8.0
+            }
+          }
+        },
+        "notes" => "Should not be created"
+      },
+      "criteria_explanation" => "Cross-tenant request"
+    }
+
+    assert_no_difference("NutritionPlan.count") do
+      assert_no_difference("Plan.count") do
+        assert_no_difference("Meal.count") do
+          with_stubbed_plan_generator(response_payload) do
+            post patient_nutrition_plans_path(@patient)
+          end
+        end
+      end
+    end
+
+    assert_response :not_found
+  end
+
+  test "other nutritionist cannot update or destroy a foreign plan" do
+    sign_in @other_nutritionist
+
+    assert_no_changes -> { @plan.reload.notes } do
+      patch patient_nutrition_plan_path(@patient, @plan), params: {
+        nutrition_plan: { notes: "Hijacked notes" }
+      }
+    end
+    assert_response :not_found
+
+    sign_in @other_nutritionist
+
+    assert_no_difference("NutritionPlan.count") do
+      delete patient_nutrition_plan_path(@patient, @plan)
+    end
+    assert_response :not_found
+  end
+
   test "other nutritionist cannot access foreign patient plans" do
     sign_in @other_nutritionist
 
@@ -116,6 +175,40 @@ class NutritionPlansControllerTest < ActionDispatch::IntegrationTest
 
     get patient_nutrition_plan_path(@sibling_patient, @plan)
 
+    assert_response :not_found
+  end
+
+  test "nested route cannot update or destroy a plan through another owned patient" do
+    sign_in @nutritionist
+
+    assert_no_changes -> { @plan.reload.notes } do
+      patch patient_nutrition_plan_path(@sibling_patient, @plan), params: {
+        nutrition_plan: { notes: "Wrong nested route" }
+      }
+    end
+    assert_response :not_found
+
+    sign_in @nutritionist
+
+    assert_no_difference("NutritionPlan.count") do
+      delete patient_nutrition_plan_path(@sibling_patient, @plan)
+    end
+    assert_response :not_found
+  end
+
+  test "foreign nutritionist plan is not accessible through current nutritionist patient route" do
+    sign_in @nutritionist
+
+    get patient_nutrition_plan_path(@patient, @foreign_plan)
+    assert_response :not_found
+
+    sign_in @nutritionist
+
+    assert_no_changes -> { @foreign_plan.reload.notes } do
+      patch patient_nutrition_plan_path(@patient, @foreign_plan), params: {
+        nutrition_plan: { notes: "Should stay foreign" }
+      }
+    end
     assert_response :not_found
   end
 

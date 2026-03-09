@@ -1,5 +1,87 @@
 # Worklog
 
+## 2026-03-09 (decimocuarta sesión — serial test runner default)
+
+- Aplicada la solución permanente al residual del runner PostgreSQL/paralelización en `test/test_helper.rb`:
+  - ejecución serial por defecto
+  - paralelización solo vía `PARALLELIZE_TESTS=1`
+  - `PARALLEL_WORKERS` y `PARALLEL_THRESHOLD` quedan disponibles como override explícito
+- La motivación fue operativa, no funcional: evitar el segfault observado de `pg` cuando Rails paralelizaba automáticamente suites grandes con PostgreSQL real.
+- Validación ejecutada con acceso real a PostgreSQL sobre la misma corrida conjunta que antes disparaba el crash:
+  - `bundle exec rails test test/controllers/patients_controller_test.rb test/controllers/profiles_controller_test.rb test/controllers/nutrition_plans_controller_test.rb test/controllers/patient_histories_controller_test.rb test/controllers/nutritionists_controller_test.rb test/controllers/plans_controller_test.rb test/controllers/meals_controller_test.rb test/controllers/meal_logs_controller_test.rb`
+  - resultado: `55 runs, 229 assertions, 0 failures, 0 errors, 0 skips`
+- Validación final ampliada del stack actual, ya incluyendo `test/controllers/devise_responder_status_test.rb`:
+  - `bundle exec rails test test/controllers/devise_responder_status_test.rb test/controllers/patients_controller_test.rb test/controllers/profiles_controller_test.rb test/controllers/nutrition_plans_controller_test.rb test/controllers/patient_histories_controller_test.rb test/controllers/nutritionists_controller_test.rb test/controllers/plans_controller_test.rb test/controllers/meals_controller_test.rb test/controllers/meal_logs_controller_test.rb`
+  - resultado: `58 runs, 241 assertions, 0 failures, 0 errors, 0 skips`
+- Actualizados `docs/DELIVERY_TRACKER.md`, `docs/WORKLOG.md`, `docs/PROGRESS.md` y `docs/LESSONS.md` para reflejar que el workaround manual ya fue reemplazado por un default estable en el repo.
+
+## 2026-03-09 (decimotercera sesión — rack 3 unprocessable-content cleanup)
+
+- Migrados todos los renders residuales de `:unprocessable_entity` a `:unprocessable_content` en controllers request-level de nutritionist y patient (`PatientsController`, `ProfilesController`, `NutritionPlansController`, `PatientHistoriesController`, `MealsController`, `MealLogsController`, `WeightPatientsController`, `GroceryListsController`).
+- Migradas las assertions de tests afectadas para esperar `:unprocessable_content` en vez de `:unprocessable_entity`.
+- Corregido el punto global que seguía emitiendo el warning: `config/initializers/devise.rb` ahora usa `config.responder.error_status = :unprocessable_content`.
+- Añadida cobertura dedicada en `test/controllers/devise_responder_status_test.rb` para:
+  - `POST /patients/sign_in` inválido
+  - `POST /nutritionists/sign_in` inválido
+  - `POST /nutritionists` inválido
+  Todas las respuestas ahora quedan verificadas con `422 Unprocessable Content`.
+- Auditoría posterior al cambio:
+  - `rg -uuu -n ":unprocessable_entity|unprocessable_entity" app config test lib` => 0 hits
+  - sintaxis Ruby validada en controllers modificados clave
+- Primer intento de validación conjunta sobre 55 tests disparó paralelización y expuso un problema del runner/stack:
+  - `bundle exec rails test ...` => `pg` segfault al abrir workers en paralelo
+  - workaround operativo adoptado: ejecutar las suites en grupos por debajo del threshold de paralelización
+- Validación final ejecutada con acceso real a PostgreSQL y sin warnings deprecados de Rack 3:
+  - `bundle exec rails test test/controllers/devise_responder_status_test.rb` => `3 runs, 12 assertions, 0 failures, 0 errors`
+  - `bundle exec rails test test/controllers/devise_responder_status_test.rb test/controllers/patients_controller_test.rb test/controllers/profiles_controller_test.rb test/controllers/nutrition_plans_controller_test.rb test/controllers/patient_histories_controller_test.rb test/controllers/meals_controller_test.rb test/controllers/meal_logs_controller_test.rb` => `53 runs, 212 assertions, 0 failures, 0 errors`
+  - `bundle exec rails test test/controllers/patients_controller_test.rb test/controllers/profiles_controller_test.rb test/controllers/nutrition_plans_controller_test.rb test/controllers/patient_histories_controller_test.rb test/controllers/nutritionists_controller_test.rb test/controllers/plans_controller_test.rb` => `38 runs, 156 assertions, 0 failures, 0 errors`
+  - `bundle exec rails test test/controllers/meals_controller_test.rb test/controllers/meal_logs_controller_test.rb` => `17 runs, 73 assertions, 0 failures, 0 errors`
+- Actualizados `docs/DELIVERY_TRACKER.md`, `docs/WORKLOG.md`, `docs/PROGRESS.md` y `docs/LESSONS.md` para dejar el cleanup resuelto y documentar el segfault de `pg` en validaciones paralelas.
+
+## 2026-03-09 (duodécima sesión — sprint 1 task 03 patient controller scoping)
+
+- Creada la rama `codex/sprint-01-task-03-patient-controller-scoping` desde `main` para aislar la auditoría del lado patient.
+- Actualizado el contrato de rutas patient:
+  - añadido `GET /meal_logs` como historial global autenticado
+  - removido `GET /meals/:meal_id/meal_logs` para evitar el blind spot de index nested sin scoping por `meal_id`
+- Endurecido `MealLogsController`:
+  - `show` y `destroy` ahora cargan primero `@meal` vía `current_patient.meals.find(params[:meal_id])`
+  - `set_meal_log` se resuelve desde `@meal.meal_log` y rechaza con `404` cualquier mismatch entre `meal_id` y `meal_log.id`
+- Reauditado `MealsController`; el scoping existente con `current_patient.meals.find` y `current_patient.plans.find` se mantuvo porque ya cerraba los lookups críticos del CRUD.
+- Ampliados fixtures patient-side:
+  - nuevas meals propias/ajenas en `test/fixtures/meals.yml`
+  - nuevo `test/fixtures/meal_logs.yml`
+  - fixture mínimo de upload en `test/fixtures/files/meal-photo.jpg`
+- Reemplazado el scaffold vacío de `MealLogsControllerTest` y añadido `MealsControllerTest` con cobertura request-level para:
+  - listados scoped al paciente autenticado
+  - `404` sobre meals/logs ajenos
+  - edge case de nested-route mismatch (`/meals/:other_owned_meal_id/meal_logs/:owned_log_id`)
+  - `create` con foto, `create` sin foto y enqueue de `MealLogAnalysisJob`
+- Detectado y confirmado que el gotcha previo de Devise/Warden tras una `404` también aplica al bloque `authenticate :patient`; las pruebas quedaron estabilizadas dejando una sola request protegida fallida por ejemplo.
+- Validación ejecutada con acceso real a PostgreSQL:
+  - `bundle exec rails test test/controllers/meals_controller_test.rb test/controllers/meal_logs_controller_test.rb` => `17 runs, 73 assertions, 0 failures, 0 errors`
+  - `bundle exec rails test test/controllers/patients_controller_test.rb test/controllers/profiles_controller_test.rb test/controllers/nutrition_plans_controller_test.rb test/controllers/patient_histories_controller_test.rb test/controllers/meals_controller_test.rb test/controllers/meal_logs_controller_test.rb` => `50 runs, 200 assertions, 0 failures, 0 errors`
+- Actualizados `docs/IMPLEMENTATION_PLAN.md`, `docs/PROGRESS.md`, `docs/DELIVERY_TRACKER.md` y `docs/LESSONS.md` para dejar Sprint 1 cerrado y mover el foco de ejecución a Sprint 2.
+
+## 2026-03-09 (undécima sesión — sprint 1 task 04 lookup validation)
+
+- Creada la rama `codex/sprint-01-task-04-nutritionist-lookup-validation` para aislar la ejecución de Sprint 1 Task 04.
+- Ejecutada la auditoría estática de ownership en controllers de nutritionist:
+  - `rg -n "current_nutritionist\\.patients\\.find" app/controllers` => 4 hits válidos (`PatientsController`, `ProfilesController`, `NutritionPlansController`, `PatientHistoriesController`)
+  - `rg -n "Patient\\.(find|find_by)\\(" ...controllers de nutritionist...` => 0 hits
+- Expandida la cobertura request-level:
+  - `PatientsControllerTest`: listados scoped al nutritionist autenticado
+  - `ProfilesControllerTest`: side effects explícitamente bloqueados sobre paciente ajeno
+  - `NutritionPlansControllerTest`: create/update/destroy cross-tenant y nested mismatch
+  - `PatientHistoriesControllerTest`: index/new/edit/update/destroy cross-tenant y nested mismatch
+  - `NutritionistsControllerTest`: dashboard y patient_radar solo muestran colecciones del nutritionist autenticado
+- Detectado y resuelto un gotcha de test con Devise/Warden: después de una request que devuelve `404` bajo rutas protegidas por `authenticate :nutritionist`, la siguiente request del mismo ejemplo podía redirigir a sign-in; las pruebas se estabilizaron reautenticando antes de la siguiente request protegida y la lección quedó documentada en `docs/LESSONS.md`.
+- Ejecutado `bundle exec rails db:prepare` con acceso real a PostgreSQL; completó correctamente.
+- Ejecutada la suite focalizada:
+  - `bundle exec rails test test/controllers/patients_controller_test.rb test/controllers/profiles_controller_test.rb test/controllers/nutrition_plans_controller_test.rb test/controllers/patient_histories_controller_test.rb test/controllers/nutritionists_controller_test.rb test/controllers/plans_controller_test.rb`
+  - resultado final: `38 runs, 156 assertions, 0 failures, 0 errors`
+- Actualizados `docs/IMPLEMENTATION_PLAN.md`, `docs/PROGRESS.md`, `docs/DELIVERY_TRACKER.md` y `docs/LESSONS.md`; reconciliado Sprint 1 a `3/6` tareas `done` (50%) porque el conteo previo estaba inflado respecto al estado real de las tareas.
+
 ## 2026-03-09 (décima sesión — validación final con PostgreSQL real)
 
 - Ejecutado `bundle exec rails db:prepare` con acceso real a PostgreSQL; completó correctamente.

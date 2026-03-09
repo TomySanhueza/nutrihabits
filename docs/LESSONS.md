@@ -6,6 +6,36 @@ Registro de errores, soluciones y patrones encontrados durante el desarrollo. Ca
 
 ## Errores Recurrentes
 
+### 2026-03-09 — Devise integration tests tras una `404` pueden perder sesión efectiva
+
+**Contexto:** request specs de ownership para controllers de nutritionist y patient bajo rutas declaradas con `authenticate`
+**Error:** una segunda request protegida dentro del mismo test podía responder `302` a la pantalla de sign-in aunque la primera request del ejemplo ya hubiese estado autenticada y hubiese devuelto `404`
+**Causa:** en esta configuración de integración, encadenar múltiples requests fallidas bajo el bloque `authenticate` no siempre preserva el estado efectivo de Warden/Devise entre requests del mismo ejemplo
+**Solución adoptada:** en pruebas de acceso rechazado, usar una sola request protegida por ejemplo o volver a ejecutar `sign_in` antes de la siguiente request protegida
+**Lección:** cuando se validan `404` de ownership con Devise integration helpers, no asumir que una sola autenticación al inicio del test alcanza para múltiples requests rechazadas encadenadas
+
+---
+
+### 2026-03-09 — Warnings de Rack 3 por `:unprocessable_entity`
+
+**Contexto:** suites request-level de Sprint 1 en controllers nutritionist y patient
+**Error:** Rails/Rack 3 emiten warnings deprecando `:unprocessable_entity` en favor de `:unprocessable_content`
+**Causa:** varios controllers legacy siguen renderizando con `status: :unprocessable_entity`
+**Solución adoptada:** migrar todos los renders y assertions afectados a `:unprocessable_content`, corregir también `config.responder.error_status` de Devise y añadir tests de auth inválida para ambos scopes antes de cerrar la pasada
+**Lección:** cuando Rack 3 marca un status como deprecado, no alcanza con cambiar controllers; hay que revisar configuraciones globales del stack y cubrir explícitamente los flujos framework-managed
+
+---
+
+### 2026-03-09 — `pg` puede fallar al paralelizar suites grandes en este runner
+
+**Contexto:** validación conjunta de controllers Rails con PostgreSQL real
+**Error:** al correr una suite de 55 tests, Rails entró en paralelización y el adapter `pg` terminó en segfault durante la apertura de workers
+**Causa:** combinación inestable del runner actual con `pg`/PostgreSQL bajo ejecución paralela; no se manifestó en corridas seriales o por lotes más pequeños
+**Solución adoptada:** cambiar `test/test_helper.rb` para que la suite corra serial por defecto y habilite paralelización solo con `PARALLELIZE_TESTS=1`; tras ese cambio, la corrida conjunta de 55 tests validó correctamente en una sola invocación
+**Lección:** en este repo, la paralelización de tests debe ser opt-in y solo usarse cuando el runner y PostgreSQL hayan sido revalidados explícitamente
+
+---
+
 ### 2026-03-09 — JSON::ParserError en respuesta de LLM
 
 **Contexto:** `NutritionPlanGeneratorService` y `MealLogAnalysisService`
@@ -78,6 +108,7 @@ NutritionPlanGeneratorService.new(patient.profile, start_date, end_date)
 - Los helpers `current_nutritionist` y `current_patient` son independientes — en un controller de nutritionist, `current_patient` retorna `nil` (no hay sesión de paciente activa)
 - Los filtros `authenticate :nutritionist` y `authenticate :patient` son exclusivos — no mezclar en el mismo controller
 - El sign_out de un tipo no afecta al otro: `sign_out :nutritionist` no cierra sesión del paciente
+- En integration tests, una request protegida que termina en `404` bajo rutas declaradas con `authenticate` puede requerir `sign_in` nuevamente antes de la siguiente request del mismo ejemplo
 
 ### Shell / Tooling con rbenv
 
