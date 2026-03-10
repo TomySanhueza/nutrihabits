@@ -58,12 +58,8 @@ class NutritionPlansControllerTest < ActionDispatch::IntegrationTest
     }
 
     assert_difference("NutritionPlan.count", 1) do
-      assert_difference("Plan.count", 1) do
-        assert_difference("Meal.count", 1) do
-          with_stubbed_plan_generator(response_payload) do
-            post patient_nutrition_plans_path(@patient)
-          end
-        end
+      with_stubbed_plan_generator(response_payload) do
+        post patient_nutrition_plans_path(@patient)
       end
     end
 
@@ -71,6 +67,23 @@ class NutritionPlansControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to edit_patient_nutrition_plan_path(@patient, created_plan)
     assert_equal @patient.id, created_plan.patient_id
     assert_equal @nutritionist.id, created_plan.nutritionist_id
+  end
+
+  test "invalid generator response does not persist a partial plan" do
+    sign_in @nutritionist
+
+    assert_no_difference("NutritionPlan.count") do
+      assert_no_difference("Plan.count") do
+        assert_no_difference("Meal.count") do
+          with_stubbed_plan_generator(error: NutritionPlanGeneratorService::GenerationError.new("invalid payload")) do
+            post patient_nutrition_plans_path(@patient)
+          end
+        end
+      end
+    end
+
+    assert_response :unprocessable_content
+    assert_select ".alert", text: /No se pudo generar el plan nutricional/i
   end
 
   test "owner can update and destroy an owned plan" do
@@ -214,13 +227,42 @@ class NutritionPlansControllerTest < ActionDispatch::IntegrationTest
 
   private
 
-  def with_stubbed_plan_generator(response_payload)
-    fake_service = Struct.new(:call).new(response_payload)
+  def with_stubbed_plan_generator(response_payload = nil, error: nil)
     singleton = NutritionPlanGeneratorService.singleton_class
 
     singleton.send(:alias_method, :__codex_original_new, :new)
-    singleton.send(:define_method, :new) do |*_args|
-      fake_service
+    singleton.send(:define_method, :new) do |*_, **kwargs|
+      if error
+        Struct.new(:error) do
+          def call
+            raise error
+          end
+        end.new(error)
+      else
+        patient = kwargs.fetch(:patient)
+        nutritionist = kwargs.fetch(:nutritionist)
+        start_date = kwargs.fetch(:start_date)
+        end_date = kwargs.fetch(:end_date)
+
+        Struct.new(:patient, :nutritionist, :start_date, :end_date, :payload) do
+          def call
+            patient.nutrition_plans.create!(
+              objective: payload["plan"]["objective"],
+              calories: payload["plan"]["calories"],
+              protein: payload["plan"]["protein"],
+              fat: payload["plan"]["fat"],
+              carbs: payload["plan"]["carbs"],
+              meal_distribution: payload["plan"]["meal_distribution"],
+              notes: payload["plan"]["notes"],
+              ai_rationale: payload["criteria_explanation"],
+              nutritionist: nutritionist,
+              status: "active",
+              start_date: start_date,
+              end_date: end_date
+            )
+          end
+        end.new(patient, nutritionist, start_date, end_date, response_payload)
+      end
     end
 
     yield

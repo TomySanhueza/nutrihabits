@@ -27,6 +27,12 @@
 
   <!-- Main Content -->
   <main class="main-content">
+    <% if flash.now[:alert].present? || flash[:alert].present? %>
+      <div class="alert alert-danger" role="alert">
+        <%= flash.now[:alert] || flash[:alert] %>
+      </div>
+    <% end %>
+
     <!-- Header -->
     <div class="page-header">
       <div class="breadcrumb">

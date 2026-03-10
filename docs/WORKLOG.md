@@ -1,5 +1,35 @@
 # Worklog
 
+## 2026-03-10 (decimosexta sesión — pre-pilot refactors dt-1/dt-2/dt-3)
+
+- Reconciliado el drift documental detectado durante la planificación:
+  - `docs/ARCHITECTURE.md` ya no mantiene como deuda activa el `PlansController` resuelto.
+  - `docs/IMPLEMENTATION_PLAN.md` y `docs/PROGRESS.md` quedaron alineados respecto a `patients.onboarding_state`.
+- Refactorizado `NutritionPlanGeneratorService` para que:
+  - reciba `patient:` y `nutritionist:`
+  - limpie wrappers markdown antes de `JSON.parse`
+  - valide el payload AI
+  - persista `NutritionPlan -> Plan -> Meal` dentro de una transacción
+  - levante `NutritionPlanGeneratorService::GenerationError` en fallo sin dejar datos parciales
+- Adelgazado `NutritionPlansController#create`; ahora delega al servicio y renderiza `new` con `422 Unprocessable Content` si la generación falla.
+- Eliminada la FK redundante `profiles.nutritionist_id`:
+  - nueva migración con reemplazo del índice `profiles.patient_id` por uno único
+  - `Profile` ahora deriva `nutritionist` a través de `patient`
+  - `ProfilesController` crea perfiles con `@patient.build_profile`
+- Eliminada la columna redundante `meal_logs.meal_type`; `MealLog` ahora delega `meal_type` a `meal`.
+- Añadida cobertura:
+  - `test/services/nutrition_plan_generator_service_test.rb`
+  - error path en `NutritionPlansControllerTest`
+  - bloqueo de segundo perfil en `ProfilesControllerTest`
+- Validación ejecutada con PostgreSQL real:
+  - `bundle exec rails db:migrate`
+  - `bundle exec rails test test/services/nutrition_plan_generator_service_test.rb test/controllers/nutrition_plans_controller_test.rb test/controllers/profiles_controller_test.rb test/controllers/meal_logs_controller_test.rb`
+  - resultado focalizado: `28 runs, 123 assertions, 0 failures, 0 errors`
+  - regresión ampliada final:
+    - `bundle exec rails test test/services/nutrition_plan_generator_service_test.rb test/controllers/patients_controller_test.rb test/controllers/profiles_controller_test.rb test/controllers/nutrition_plans_controller_test.rb test/controllers/patient_histories_controller_test.rb test/controllers/nutritionists_controller_test.rb test/controllers/plans_controller_test.rb test/controllers/meals_controller_test.rb test/controllers/meal_logs_controller_test.rb`
+    - resultado: `60 runs, 260 assertions, 0 failures, 0 errors`
+- Actualizados `docs/ARCHITECTURE.md`, `docs/DOMAIN_MODEL.md`, `docs/AI_AGENTS.md`, `docs/IMPLEMENTATION_PLAN.md`, `docs/PROGRESS.md`, `docs/DELIVERY_TRACKER.md`, `docs/WORKLOG.md` y `docs/LESSONS.md` para dejar el repo y la narrativa en el mismo estado, incluyendo los edge cases y correcciones descubiertos durante la ejecución.
+
 ## 2026-03-09 (decimoquinta sesión — sprint 1 tasks 05/06 operational revalidation)
 
 - Reejecutada la validación operativa final de Sprint 1 tareas 5 y 6 en un entorno con acceso real a PostgreSQL, sin cambios en código de aplicación.

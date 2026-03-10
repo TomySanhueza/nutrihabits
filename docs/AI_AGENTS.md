@@ -20,12 +20,14 @@
 
 **Modelo:** configurado en `config/initializers/ruby_llm.rb` (default GPT-4o o similar)
 **Inicialización:** `RubyLLM.chat`
+**Contrato de servicio:** `NutritionPlanGeneratorService.new(patient:, nutritionist:, start_date:, end_date:).call -> NutritionPlan`
 **Idioma del prompt:** español
 **Input context:**
-- `profile` (objeto completo: peso, talla, objetivos, condiciones, diagnóstico, lifestyle)
+- `patient` y `nutritionist` (objetos completos del dominio)
+- `profile` derivado de `patient.profile`
 - `start_date`, `end_date`
-- Historial de planes anteriores del paciente
-- Datos clínicos del `PatientHistory` más reciente
+- Historial reciente de planes anteriores del paciente
+- Historial clínico reciente desde `PatientHistory`
 
 **Guidelines referenciadas en system prompt:** WHO, ADA, ESPEN
 
@@ -61,11 +63,11 @@
 
 **Manejo de respuesta:**
 ```ruby
-response.gsub(/```json\n?/, '').gsub(/```\n?/, '').strip
+cleaned_response = response.gsub(/```json\s*/i, '').gsub(/```\s*/i, '').strip
 JSON.parse(cleaned_response)
 ```
 
-**Creación en DB:** `NutritionPlan` + `Plan`s + `Meal`s en una transacción.
+**Creación en DB:** `NutritionPlan` + `Plan`s + `Meal`s en una transacción. Si falla el parseo, la validación del payload o cualquier `create!`, el servicio levanta `NutritionPlanGeneratorService::GenerationError` y no deja datos parciales.
 
 ---
 
@@ -168,6 +170,7 @@ Entry = Struct.new(:patient, :score, :priority_level, :reasons, :recommended_act
 4. Timeout de LLM: manejar `Timeout::Error` en jobs con retry
 5. Máximo 3 intentos de retry por job (configurar en adapter de cola)
 6. `analysis_error` almacena el mensaje truncado a 500 chars para diagnóstico
+7. En servicios síncronos como `NutritionPlanGeneratorService`, errores del cliente LLM o de persistencia deben envolverse en una excepción de dominio controlada para no dejar estados parciales ni responder `500` al nutritionist
 
 ## Performance Strategy
 

@@ -29,7 +29,6 @@
 | Campo | Tipo | Notas |
 |-------|------|-------|
 | patient_id | bigint | FK |
-| nutritionist_id | bigint | FK — denormalización: derivable de patient.nutritionist_id. Riesgo de inconsistencia si paciente cambia de nutricionista. |
 | weight | float | kg actual |
 | height | float | cm |
 | goals | text | objetivos clínicos del paciente (plural) |
@@ -85,7 +84,6 @@
 | analysis_status | string | not_requested / queued / processing / completed / failed (default: "not_requested") |
 | analysis_error | text | mensaje de error si failed, truncado a 500 chars |
 | logged_at | datetime | cuándo se registró (seteado en controller) |
-| meal_type | string | denormalizado de Meal#meal_type — riesgo de inconsistencia |
 | ai_calories | float | kcal detectadas por LLM |
 | ai_protein | float | g detectados |
 | ai_carbs | float | g detectados |
@@ -93,6 +91,8 @@
 | ai_health_score | float | 1.0-10.0 (tipo float, no integer) |
 | ai_feedback | string | <280 chars |
 | ai_comparison | jsonb | Ver esquema abajo |
+
+`MealLog#meal_type` se resuelve via asociación (`meal.meal_type`) y no se persiste en la tabla.
 
 ### WeightPatient
 | Campo | Tipo | Notas |

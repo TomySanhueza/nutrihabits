@@ -6,6 +6,46 @@ Registro de errores, soluciones y patrones encontrados durante el desarrollo. Ca
 
 ## Errores Recurrentes
 
+### 2026-03-10 — Cambiar el contrato de un servicio rompe dobles de test viejos
+
+**Contexto:** refactor de `NutritionPlanGeneratorService` para que retorne `NutritionPlan` persistido en vez de un `Hash`
+**Error:** `NutritionPlansControllerTest` empezó a fallar con `UrlGenerationError` porque el helper de stub seguía devolviendo el payload crudo del LLM y el controller intentaba usarlo como si fuese un modelo persistido
+**Causa:** el test seguía acoplado al contrato anterior del servicio aunque el flujo real ya hubiese migrado a persistencia dentro del service object
+**Solución adoptada:** actualizar el doble para que respete el contrato nuevo (`call -> NutritionPlan`) y mover la validación de creación de `Plan`/`Meal` al test de servicio, no al request test
+**Lección:** cuando un service object cambia su output, revisar inmediatamente todos los stubs/mocks que lo emulan; si no, los tests fallan por un contrato ficticio, no por un bug real del flujo
+
+---
+
+### 2026-03-10 — `has_one` puede ocultar un segundo create inválido
+
+**Contexto:** `ProfilesController#create` después de pasar a `@patient.build_profile(...)`
+**Error:** el edge case “crear un segundo perfil para el mismo paciente” respondía `302` en vez de `422`
+**Causa:** `has_one` permite reemplazar en memoria la asociación y, sin un guard explícito en el controller, el flujo no quedaba alineado con la unicidad de dominio esperada
+**Solución adoptada:** añadir guard clause en `ProfilesController#create`, mantener `validates :patient_id, uniqueness: true` y reforzar el schema con índice único por `patient_id`
+**Lección:** para relaciones `has_one` con valor clínico o sensible, no confiar solo en la asociación Rails; hay que defender la unicidad en controller, modelo y DB
+
+---
+
+### 2026-03-10 — Las migraciones de cleanup deben validar precondiciones de datos antes de endurecer índices
+
+**Contexto:** migración para eliminar `profiles.nutritionist_id` y convertir `profiles.patient_id` en índice único
+**Error:** la primera ejecución falló con `PG::DuplicateTable` porque `profiles.patient_id` ya tenía un índice previo no único
+**Causa:** la migración asumió que podía crear el nuevo índice directamente sin reemplazar el existente ni inspeccionar duplicados de datos
+**Solución adoptada:** reemplazar explícitamente el índice previo y añadir una verificación temprana que aborta con mensaje claro si existen múltiples perfiles para un mismo paciente
+**Lección:** en migrations de refactor, revisar primero índices y cardinalidad real de la tabla; endurecer constraints sin ese preflight vuelve opaco el fallo y dificulta la recuperación
+
+---
+
+### 2026-03-10 — Errores del cliente LLM deben envolverse en una excepción de dominio
+
+**Contexto:** `NutritionPlanGeneratorService`
+**Error:** un fallo de `chat.ask` podía escapar como excepción cruda y terminar en `500` en vez de degradar a `422` en el formulario del nutritionist
+**Causa:** el servicio solo envolvía errores de parseo y persistencia, no fallos runtime del cliente LLM
+**Solución adoptada:** envolver también errores runtime del cliente como `GenerationError` y añadir cobertura específica con timeout simulado
+**Lección:** en flujos síncronos con integraciones externas, el contrato del servicio debe proteger a la capa HTTP tanto de payload inválido como de fallos del proveedor
+
+---
+
 ### 2026-03-09 — Devise integration tests tras una `404` pueden perder sesión efectiva
 
 **Contexto:** request specs de ownership para controllers de nutritionist y patient bajo rutas declaradas con `authenticate`
@@ -88,7 +128,12 @@ JSON.parse(cleaned)
 # MAL
 NutritionPlanGeneratorService.new(patient_id: 123, ...)
 # BIEN
-NutritionPlanGeneratorService.new(patient.profile, start_date, end_date)
+NutritionPlanGeneratorService.new(
+  patient: patient,
+  nutritionist: nutritionist,
+  start_date: start_date,
+  end_date: end_date
+)
 ```
 
 ---
