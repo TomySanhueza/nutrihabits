@@ -5,6 +5,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     @nutritionist = nutritionists(:owner)
     @other_nutritionist = nutritionists(:other_owner)
     @patient = patients(:owned_patient_sibling)
+    @patient_with_profile = patients(:owned_patient)
   end
 
   test "owner can access new profile form" do
@@ -34,7 +35,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to patient_path(@patient)
     profile = Profile.order(:id).last
     assert_equal @patient.id, profile.patient_id
-    assert_equal @nutritionist.id, profile.nutritionist_id
+    assert_equal @nutritionist, profile.nutritionist
   end
 
   test "other nutritionist cannot access new profile form" do
@@ -63,5 +64,24 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :not_found
     assert_nil @patient.reload.profile
+  end
+
+  test "owner cannot create a second profile for the same patient" do
+    sign_in @nutritionist
+
+    assert_no_difference("Profile.count") do
+      post patient_profiles_path(@patient_with_profile), params: {
+        profile: {
+          weight: 72.0,
+          height: 176,
+          goals: "Maintain",
+          conditions: "None",
+          lifestyle: "Active",
+          diagnosis: "Stable"
+        }
+      }
+    end
+
+    assert_response :unprocessable_content
   end
 end

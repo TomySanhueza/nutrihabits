@@ -1,103 +1,191 @@
 class NutritionPlanGeneratorService
-  require "json"
+  class GenerationError < StandardError; end
 
-  def initialize(profile, start_date, end_date)
-    @profile = profile
+  def initialize(patient:, nutritionist:, start_date:, end_date:, chat: RubyLLM.chat)
+    @patient = patient
+    @nutritionist = nutritionist
+    @profile = patient.profile
     @start_date = start_date
     @end_date = end_date
-    @chat = RubyLLM.chat
+    @chat = chat
   end
-  
+
   def call
-    system_prompt = <<-PROMPT
-        Actúas como un Nutricionista Clínico Certificado, con experiencia en nutrición basada en evidencia científica
-        (incluyendo guías de la OMS, ADA, ESPEN y consensos internacionales actualizados). 
-        Tu especialidad es la alimentación saludable, el manejo de la obesidad, el control de enfermedades crónicas
-        y la prevención a través de planes nutricionales personalizados.
+    raise GenerationError, "Patient profile is required" unless @profile
 
-        Recibirás información estructurada desde la base de datos del sistema, proveniente de estas fuentes:
-        - Profile: datos básicos del paciente (#{@profile.weight},#{@profile.height},#{@profile.goals},#{@profile.conditions},#{@profile.lifestyle},#{@profile.diagnosis}).
-        - Nutrition Plans (historial): planes nutricionales previos, incluyendo calorías, macros, objetivos, fechas y nivel de adherencia.
-        - Patient Histories: registros de evolución en visitas anteriores (notas, métricas, peso, progresión clínica).
+    payload = parse_payload(@chat.ask(build_prompt).content)
+    persist_plan!(payload)
+  rescue GenerationError
+    raise
+  rescue JSON::ParserError, ActiveRecord::RecordInvalid, KeyError, Date::Error => error
+    raise GenerationError, error.message
+  rescue StandardError => error
+    raise GenerationError, error.message
+  end
 
-        Tu tarea:
-          1. Generar un plan nutricional seguro y realista si el paciente es nuevo (sin planes previos).
-          2. Ajustar o actualizar el plan si existen registros previos, considerando evolución y adherencia.
-          3. Desarrolla un plan con alcance desde la fecha inicial **#{@start_date}** hasta la fecha final **#{@end_date}**, incluyéndolas ambas.
-          4. Siempre entregar **dos outputs diferenciados**:
-            - Un **plan estructurado en formato JSON válido** con la siguiente plantilla exacta:
+  private
+
+  def build_prompt
+    <<~PROMPT
+      Actuas como un Nutricionista Clinico Certificado, con experiencia en nutricion basada en evidencia cientifica
+      (incluyendo guias de la OMS, ADA, ESPEN y consensos internacionales actualizados).
+      Tu especialidad es la alimentacion saludable, el manejo de la obesidad, el control de enfermedades cronicas
+      y la prevencion a traves de planes nutricionales personalizados.
+
+      Recibiras informacion estructurada desde la base de datos del sistema, proveniente de estas fuentes:
+      - Paciente: #{patient_summary}
+      - Profile: datos basicos del paciente (#{@profile.weight}, #{@profile.height}, #{@profile.goals}, #{@profile.conditions}, #{@profile.lifestyle}, #{@profile.diagnosis}).
+      - Nutrition Plans (historial): #{previous_plans_summary}
+      - Patient Histories: #{patient_histories_summary}
+
+      Tu tarea:
+        1. Generar un plan nutricional seguro y realista si el paciente es nuevo (sin planes previos).
+        2. Ajustar o actualizar el plan si existen registros previos, considerando evolucion y adherencia.
+        3. Desarrolla un plan con alcance desde la fecha inicial #{@start_date} hasta la fecha final #{@end_date}, incluyendolas ambas.
+        4. Siempre entregar dos outputs diferenciados:
+          - Un plan estructurado en formato JSON valido con esta estructura:
+          {
             "plan": {
-              {
-                  "objective": "string (ej: Pérdida de peso, Control glucémico, Ganancia muscular)",
-                  "calories": "integer (ej: 1800)",
-                  "protein": "float (en gramos/día, ej: 130)",
-                  "fat": "float (en gramos/día, ej: 60)",
-                  "carbs": "float (en gramos/día, ej: 200)",
-                  "meal_distribution": {
-                      "YYYY-MM-DD": {
-                          "breakfast": { 
-                                "ingredients": "Lista clara de los distintos ingredientes del desayuno, separados por comas, indicando sus porciones en medidas sencillas y cotidianas (ej: 200 g, 1 palma de pollo, 1 taza de quinoa, ½ plátano).",
-                                "recipe": "Breve receta con pasos enumerados y separados por coma, describiendo cómo preparar o cocinar el desayuno. Cada paso debe incluir un número al inicio (ej: 1. Cocina el pollo, 2. Corta las verduras, 3. Mezcla los ingredientes).",
-                                "calorias": "float que representa las calorías totales del desayuno, proporcional a las calorías diarias del plan.",
-                                "protein": "float que indica los gramos de proteína presentes en la receta.",
-                                "carbs": "float que indica los gramos de carbohidratos presentes en la receta.",
-                                "fat": "float que indica los gramos de grasa presentes en la receta."
-                          },
-                          "lunch": { 
-                                "ingredients": "Lista clara de los distintos ingredientes del almuerzo, separados por comas, indicando sus porciones en medidas sencillas y cotidianas (ej: 150 g de pollo, 1 taza de arroz integral, ½ palta, 1 taza de vegetales salteados).",
-                                "recipe": "Breve receta con pasos numerados y separados por coma, explicando cómo preparar o cocinar el almuerzo. Cada paso debe comenzar con un número (ej: 1. Cocina el arroz, 2. Saltea los vegetales, 3. Mezcla todo y sirve).",
-                                "calorias": "float que representa las calorías totales del almuerzo, proporcional a las calorías diarias del plan.",
-                                "protein": "float que indica los gramos de proteína presentes en la receta.",
-                                "carbs": "float que indica los gramos de carbohidratos presentes en la receta.",
-                                "fat": "float que indica los gramos de grasa presentes en la receta."
-                          },
-                          "dinner": { 
-                                "ingredients": "Lista de los distintos ingredientes de la cena, separados por comas, con sus porciones expresadas en medidas sencillas y visuales (ej: 120 g de pescado, 1 taza de puré de calabaza, 1 taza de brócoli al vapor, 1 cucharadita de aceite de oliva).",
-                                "recipe": "Breve receta con pasos numerados y separados por coma, explicando la preparación o cocción de la cena. Cada paso debe comenzar con un número (ej: 1. Cocina el pescado al horno, 2. Prepara el puré de calabaza, 3. Cocina el brócoli al vapor, 4. Sirve y agrega aceite de oliva).",
-                                "calorias": "float que representa las calorías totales de la cena, proporcional a las calorías diarias del plan.",
-                                "protein": "float que indica los gramos de proteína contenidos en la receta.",
-                                "carbs": "float que indica los gramos de carbohidratos contenidos en la receta.",
-                                "fat": "float que indica los gramos de grasa contenidos en la receta."
-                          },
-                          "snacks": { 
-                                "ingredients": "Lista de los distintos ingredientes o alimentos que componen el snack, separados por comas, con porciones expresadas en medidas sencillas y visuales (ej: 1 yogur natural, 10 almendras, ½ manzana, 1 cucharadita de semillas de lino).",
-                                "recipe": "Breve descripción numerada con los pasos simples para preparar o combinar el snack si aplica. Cada paso debe comenzar con un número (ej: 1. Coloca el yogur en un bol, 2. Agrega las almendras y la manzana en trozos, 3. Espolvorea las semillas de lino por encima).",
-                                "calorias": "float que representa las calorías totales del snack, proporcional a las calorías diarias del plan.",
-                                "protein": "float que indica los gramos de proteína contenidos en el snack.",
-                                "carbs": "float que indica los gramos de carbohidratos contenidos en el snack.",
-                                "fat": "float que indica los gramos de grasa contenidos en el snack."
-                          }
-                      },
-                      "YYYY-MM-DD": { ... repetir la misma estructura ... },
-                      "YYYY-MM-DD": { ... repetir la misma estructura ... }
+              "objective": "string",
+              "calories": 1800.0,
+              "protein": 130.0,
+              "fat": 60.0,
+              "carbs": 200.0,
+              "meal_distribution": {
+                "YYYY-MM-DD": {
+                  "breakfast": {
+                    "ingredients": "string",
+                    "recipe": "string",
+                    "calorias": 400.0,
+                    "protein": 20.0,
+                    "carbs": 50.0,
+                    "fat": 10.0
                   },
-                  "notes": "Recomendaciones generales adaptadas al estilo de vida y condiciones del paciente, en lenguaje sencillo."
-              }
-            } 
+                  "lunch": { "...": "..." },
+                  "dinner": { "...": "..." },
+                  "snacks": { "...": "..." }
+                }
+              },
+              "notes": "string"
+            },
+            "criteria_explanation": "string"
+          }
 
-        ATENCIÓN: Instrucción clave: Debes **generar automáticamente un bloque de `meal_distribution` para cada día del rango de fechas** entre `#{@start_date}` y `#{@end_date}`, sin omitir días. Cada fecha debe estar en formato `YYYY-MM-DD` y contener desayuno, almuerzo, cena y snack.
+      Atencion: debes generar automaticamente un bloque de meal_distribution para cada dia del rango de fechas, sin omitir dias.
+      Cada fecha debe estar en formato YYYY-MM-DD y contener desayuno, almuerzo, cena y snack cuando corresponda.
 
-        - Un **texto explicativo separado** en formato string, llamado `criteria_explanation`, que detalle los criterios profesionales y científicos aplicados al plan, incluyendo:
-          - Por qué se eligieron esas calorías y macronutrientes.
-          - Cómo el plan responde a las condiciones clínicas del paciente.
-          - Ajustes hechos respecto a planes anteriores.
-          - Evidencia científica o guías clínicas consideradas.
-
-        El output final debe ser con esta estructura:
-
-        {
-          "plan": { ...estructura anterior... },
-          "criteria_explanation": "texto explicativo con la lógica profesional y científica del plan"
-        }
-
-        Reglas:
-        - Usa cantidades claras y realistas en calorías y macros.
-        - Prioriza prevención y control de riesgos clínicos.
-        - El plan debe ser comprensible para el paciente.
-        - El campo `criteria_explanation` está dirigido al nutricionista, debe ser breve pero profesional.
-
+      Reglas:
+      - Usa cantidades claras y realistas en calorias y macros.
+      - Prioriza prevencion y control de riesgos clinicos.
+      - El plan debe ser comprensible para el paciente.
+      - criteria_explanation debe ser breve pero profesional.
     PROMPT
+  end
 
-    JSON.parse((@chat.ask(system_prompt)).content)
+  def patient_summary
+    [@patient.first_name, @patient.last_name].compact.join(" ").strip.presence || @patient.email
+  end
+
+  def previous_plans_summary
+    plans = @patient.nutrition_plans.order(start_date: :desc).limit(3)
+    return "Sin planes previos" if plans.empty?
+
+    plans.map do |plan|
+      [
+        "objective=#{plan.objective}",
+        "dates=#{plan.start_date}-#{plan.end_date}",
+        "status=#{plan.status}",
+        "calories=#{plan.calories}"
+      ].join(", ")
+    end.join(" | ")
+  end
+
+  def patient_histories_summary
+    histories = @patient.patient_histories.order(created_at: :desc).limit(3)
+    return "Sin historial clinico registrado" if histories.empty?
+
+    histories.map do |history|
+      [
+        history.visit_date,
+        history.notes,
+        history.metrics
+      ].compact.join(" | ")
+    end.join(" | ")
+  end
+
+  def parse_payload(raw_content)
+    cleaned_content = raw_content.to_s.gsub(/```json\s*/i, "").gsub(/```\s*/i, "").strip
+    payload = JSON.parse(cleaned_content)
+
+    validate_payload!(payload)
+    payload
+  end
+
+  def validate_payload!(payload)
+    plan_data = payload.fetch("plan")
+    meal_distribution = plan_data.fetch("meal_distribution")
+    raise GenerationError, "meal_distribution must be a Hash" unless meal_distribution.is_a?(Hash)
+
+    expected_dates = (@start_date..@end_date).map(&:to_s)
+    missing_dates = expected_dates - meal_distribution.keys
+    raise GenerationError, "meal_distribution is missing dates: #{missing_dates.join(', ')}" if missing_dates.any?
+
+    meal_distribution.each do |date_str, daily_meals|
+      Date.iso8601(date_str)
+      raise GenerationError, "daily meals must be a Hash for #{date_str}" unless daily_meals.is_a?(Hash)
+
+      daily_meals.each do |meal_type, meal_data|
+        raise GenerationError, "meal data must be a Hash for #{date_str}/#{meal_type}" unless meal_data.is_a?(Hash)
+
+        %w[ingredients recipe calorias protein carbs fat].each do |field|
+          raise GenerationError, "missing #{field} for #{date_str}/#{meal_type}" if meal_data[field].blank?
+        end
+      end
+    end
+  end
+
+  def persist_plan!(payload)
+    plan_data = payload.fetch("plan")
+    meal_distribution = plan_data.fetch("meal_distribution")
+
+    NutritionPlan.transaction do
+      nutrition_plan = @patient.nutrition_plans.create!(
+        objective: plan_data.fetch("objective"),
+        calories: plan_data.fetch("calories"),
+        protein: plan_data.fetch("protein"),
+        fat: plan_data.fetch("fat"),
+        carbs: plan_data.fetch("carbs"),
+        meal_distribution: meal_distribution,
+        notes: plan_data["notes"],
+        ai_rationale: payload["criteria_explanation"],
+        nutritionist: @nutritionist,
+        status: "active",
+        start_date: @start_date,
+        end_date: @end_date
+      )
+
+      meal_distribution.each do |date_str, daily_meals|
+        plan = nutrition_plan.plans.create!(date: Date.iso8601(date_str))
+
+        daily_meals.each do |meal_type, meal_data|
+          plan.meals.create!(
+            meal_type: normalize_meal_type(meal_type),
+            ingredients: meal_data.fetch("ingredients"),
+            recipe: meal_data.fetch("recipe"),
+            calories: meal_data.fetch("calorias"),
+            protein: meal_data.fetch("protein"),
+            carbs: meal_data.fetch("carbs"),
+            fat: meal_data.fetch("fat"),
+            status: "pending"
+          )
+        end
+      end
+
+      nutrition_plan
+    end
+  end
+
+  def normalize_meal_type(value)
+    value.to_s.strip.downcase.singularize
   end
 end

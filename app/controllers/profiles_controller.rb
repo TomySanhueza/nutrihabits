@@ -8,9 +8,14 @@ class ProfilesController < ApplicationController
   end
 
   def create
-    @profile = Profile.new(profile_params)
-    @profile.patient_id = @patient.id
-    @profile.nutritionist_id = current_nutritionist.id
+    if @patient.profile.present?
+      @profile = Profile.new(profile_params)
+      @profile.errors.add(:base, "El paciente ya tiene un perfil.")
+      render :new, status: :unprocessable_content
+      return
+    end
+
+    @profile = @patient.build_profile(profile_params)
     if @profile.save
       redirect_to patient_path(@patient), notice: 'Perfil creado exitosamente.'
     else

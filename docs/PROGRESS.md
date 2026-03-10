@@ -2,7 +2,7 @@
 
 Complementa DELIVERY_TRACKER.md con porcentaje por sprint y estado actual de trabajo.
 
-**Última actualización:** 2026-03-09 (Sprint 1 tasks 05/06 revalidated with PostgreSQL)
+**Última actualización:** 2026-03-10 (pre-pilot refactors DT-1/DT-2/DT-3)
 
 ---
 
@@ -27,7 +27,7 @@ Complementa DELIVERY_TRACKER.md con porcentaje por sprint y estado actual de tra
 | 0 | Base and Canon | 4 | 4 | 100% | ✅ done |
 | 1 | Security and Ownership | 6 | 6 | 100% | ✅ done |
 | 2 | Nutritionist UX/UI | 1 | 5 | 20% | 🔄 parcial |
-| 3 | Patient Access Flow | 0 | 6 | 0% | ⏳ planned |
+| 3 | Patient Access Flow | 1 | 6 | 17% | 🔄 parcial |
 | 4 | Patient App Hardening | 2 | 5 | 40% | 🔄 parcial |
 | 5 | Images and Meal Logs | 2 | 6 | 33% | 🔄 parcial |
 | 6 | Core Clinical AI | 1 | 4 | 25% | 🔄 parcial |
@@ -45,6 +45,9 @@ Complementa DELIVERY_TRACKER.md con porcentaje por sprint y estado actual de tra
 ### ✅ Implementado y funcional
 - Autenticación dual Devise (Nutritionist + Patient)
 - Modelos core: Patient, Profile, NutritionPlan, Plan, Meal, MealLog, WeightPatient
+- `NutritionPlanGeneratorService` con parseo tolerante a markdown, validación de payload y persistencia transaccional del árbol `NutritionPlan -> Plan -> Meal`
+- `Profile` alineado al dominio one-to-one vía `patient`; removida FK redundante a `nutritionist`
+- `MealLog` alineado a `Meal` como source of truth para `meal_type`
 - Modelos de chat: Chat, Message, NutritionistAiChat, PatientAiChat
 - Modelos de grocery: GroceryList, GroceryListItem, GroceryProductMatch (migraciones 20251010 ejecutadas; falta validar flujo end-to-end)
 - PatientRadarService (scoring funcional, sin persistencia de snapshots)

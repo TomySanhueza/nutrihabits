@@ -42,13 +42,13 @@ Desglose técnico de sprints activos y próximos. Complementa ROADMAP.md (alto n
 
 **Criterio de done:** ningún request de nutritionist A puede leer datos de pacientes de nutritionist B; ningún paciente puede leer datos de otro paciente. El legado inseguro de `PlansController` fue eliminado y la superficie soportada queda en `NutritionPlansController`.
 
-## Deuda Técnica — Refactors Pendientes (no bloqueantes para piloto)
+## Deuda Técnica — Refactors Resueltos (no bloqueantes para piloto)
 
-| # | Deuda | Archivo | Impacto | Prioridad |
-|---|-------|---------|---------|-----------|
-| DT-1 | Mover creación de Plans/Meals a `NutritionPlanGeneratorService` + transaction | `nutrition_plans_controller.rb`, `nutrition_plan_generator_service.rb` | Riesgo de plan incompleto si LLM response es parcial | Media |
-| DT-2 | Eliminar `Profile#belongs_to :nutritionist` (FK derivable) | `profile.rb`, migración | Riesgo de inconsistencia si paciente cambia de nutricionista | Media |
-| DT-3 | Eliminar `MealLog#meal_type` o añadir validación de consistencia | `meal_log.rb`, migración | Datos duplicados sin garantía de coherencia | Baja |
+| # | Deuda | Archivo | Impacto | Prioridad | Estado |
+|---|-------|---------|---------|-----------|--------|
+| DT-1 | Mover creación de Plans/Meals a `NutritionPlanGeneratorService` + transaction | `nutrition_plans_controller.rb`, `nutrition_plan_generator_service.rb` | Riesgo de plan incompleto si LLM response es parcial | Media | ✅ done (2026-03-10) |
+| DT-2 | Eliminar `Profile#belongs_to :nutritionist` (FK derivable) | `profile.rb`, migración | Riesgo de inconsistencia si paciente cambia de nutricionista | Media | ✅ done (2026-03-10) |
+| DT-3 | Eliminar `MealLog#meal_type` o añadir validación de consistencia | `meal_log.rb`, migración | Datos duplicados sin garantía de coherencia | Baja | ✅ done (2026-03-10) |
 
 ---
 
@@ -74,7 +74,7 @@ Desglose técnico de sprints activos y próximos. Complementa ROADMAP.md (alto n
 
 | # | Tarea | Archivos | Precondición | Estado |
 |---|-------|----------|--------------|--------|
-| 1 | Migración: agregar `onboarding_state`, `invitation_*_at` a patients | `db/migrate/` | ninguna | ⏳ pendiente (campos definidos en plan pero migración no ejecutada) |
+| 1 | Migración: agregar `onboarding_state`, `invitation_*_at` a patients | `db/migrate/` | ninguna | ✅ done (`20251010100000_add_operational_state_to_patients_and_meal_logs.rb` ya reflejado en `schema.rb`) |
 | 2 | Patient#onboarding_state enum en modelo | `app/models/patient.rb` | migración 1 | ⏳ pendiente |
 | 3 | Acción de invitación en PatientsController | `app/controllers/patients_controller.rb` | tarea 2 | ⏳ pendiente |
 | 4 | Email de invitación (Devise invitation o custom mailer) | `app/mailers/` | tarea 3 | ⏳ pendiente |

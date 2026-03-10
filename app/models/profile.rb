@@ -1,4 +1,6 @@
 class Profile < ApplicationRecord
-  belongs_to :nutritionist
   belongs_to :patient
+  has_one :nutritionist, through: :patient
+
+  validates :patient_id, uniqueness: true
 end

@@ -126,17 +126,10 @@ end
 
 ## Deudas Técnicas Conocidas
 
-### 🔴 `PlansController` sin autenticación (seguridad)
-`app/controllers/plans_controller.rb` expone `Plan.find(params[:id])` sin ningún filtro de auth. Cualquier request no autenticado puede acceder a planes de pacientes. Debe añadirse `before_action :authenticate_nutritionist!` o eliminarse el controller si no se usa en rutas activas.
-
-### 🟡 Lógica de dominio en `NutritionPlansController#create`
-La creación de `Plans` y `Meals` desde `meal_distribution` vive en el controller (20+ líneas), no en el service. Viola ADR-007. La migración correcta es mover esa lógica a `NutritionPlanGeneratorService` y envolverla en un `transaction` block. Sin transacción, una falla parcial deja el plan sin todas sus comidas.
-
-### 🟡 `Profile#nutritionist_id` — FK derivable
-`Profile` tiene `belongs_to :nutritionist` directamente, cuando `nutritionist_id` es derivable de `profile.patient.nutritionist_id`. Si un paciente cambia de nutricionista, el perfil puede quedar inconsistente. La FK directa debería eliminarse en favor de acceso a través del paciente.
-
-### 🟡 `MealLog#meal_type` — denormalización sin garantía de consistencia
-El campo `meal_type` en `meal_logs` se copia del `Meal` en el controller (`@meal_log.meal_type = @meal.meal_type`). Es redundante con `meal_log.meal.meal_type` y puede quedar desfasado. No hay validación a nivel de modelo que garantice coherencia.
+- Refactors DT-1, DT-2 y DT-3 cerrados el 2026-03-10:
+  - `NutritionPlanGeneratorService` ahora parsea y persiste `NutritionPlan -> Plan -> Meal` dentro de una transacción.
+  - `Profile` deriva `nutritionist` a través de `patient`; la FK redundante fue eliminada.
+  - `MealLog` ya no persiste `meal_type`; lo resuelve desde `meal`.
 
 ## Patrón de Adapter (Catálogos)
 

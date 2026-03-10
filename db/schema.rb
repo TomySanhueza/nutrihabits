@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_10_10_101000) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_10_111000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -112,7 +112,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_10_101000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "meal_id"
-    t.string "meal_type"
     t.float "ai_protein"
     t.float "ai_carbs"
     t.float "ai_fat"
@@ -292,12 +291,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_10_101000) do
     t.text "conditions"
     t.text "lifestyle"
     t.text "diagnosis"
-    t.bigint "nutritionist_id", null: false
     t.bigint "patient_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["nutritionist_id"], name: "index_profiles_on_nutritionist_id"
-    t.index ["patient_id"], name: "index_profiles_on_patient_id"
+    t.index ["patient_id"], name: "index_profiles_on_patient_id", unique: true
   end
 
   create_table "user_supermarket_preferences", force: :cascade do |t|
@@ -345,7 +342,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_10_101000) do
   add_foreign_key "patient_priority_snapshots", "patients"
   add_foreign_key "patients", "nutritionists"
   add_foreign_key "plans", "nutrition_plans"
-  add_foreign_key "profiles", "nutritionists"
   add_foreign_key "profiles", "patients"
   add_foreign_key "user_supermarket_preferences", "patients"
   add_foreign_key "weight_patients", "patients"

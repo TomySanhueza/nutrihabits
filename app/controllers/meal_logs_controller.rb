@@ -21,7 +21,6 @@ class MealLogsController < ApplicationController
   def create
     @meal_log = @meal.build_meal_log(meal_log_params)
     @meal_log.logged_at = Time.current
-    @meal_log.meal_type = @meal.meal_type
     @meal_log.analysis_status = "queued"
 
     if @meal_log.photo.attached?
