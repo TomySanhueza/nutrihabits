@@ -1,0 +1,31 @@
+owned_recent_weight:
+  id: 901
+  patient_id: 201
+  date: 2026-03-09
+  weight: 70.4
+  created_at: 2026-03-09 08:00:00
+  updated_at: 2026-03-09 08:00:00
+
+planless_recent_weight:
+  id: 902
+  patient_id: 204
+  date: 2026-03-07
+  weight: 68.2
+  created_at: 2026-03-07 08:00:00
+  updated_at: 2026-03-07 08:00:00
+
+foreign_recent_weight:
+  id: 903
+  patient_id: 203
+  date: 2026-03-08
+  weight: 81.4
+  created_at: 2026-03-08 08:00:00
+  updated_at: 2026-03-08 08:00:00
+
+owned_old_weight:
+  id: 904
+  patient_id: 201
+  date: 2026-02-25
+  weight: 71.1
+  created_at: 2026-02-25 08:00:00
+  updated_at: 2026-02-25 08:00:00

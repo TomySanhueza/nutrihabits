@@ -13,3 +13,11 @@ other_owner:
   first_name: Owner
   last_name: Two
   phone: "222222222"
+
+empty_owner:
+  id: 103
+  email: empty-owner@example.com
+  encrypted_password: <%= Devise::Encryptor.digest(Nutritionist, "password123") %>
+  first_name: Empty
+  last_name: State
+  phone: "333333333"

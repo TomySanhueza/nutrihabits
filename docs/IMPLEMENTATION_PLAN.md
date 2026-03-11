@@ -58,10 +58,10 @@ Desglose técnico de sprints activos y próximos. Complementa ROADMAP.md (alto n
 
 | # | Tarea | Archivos | Precondición | Estado |
 |---|-------|----------|--------------|--------|
-| 1 | Dashboard del nutritionist con resumen de pacientes | `app/views/nutritionists/`, controller | Sprint 1 done | ⏳ pendiente |
-| 2 | Vista de paciente con historial de planes y pesos | `app/views/patients/show.html.erb` | ninguna | 🔄 parcial |
-| 3 | Patient Radar integrado en dashboard nutritionist | `app/views/nutritionists/`, `PatientRadarService` | servicio OK | 🔄 servicio OK, falta integración dashboard |
-| 4 | Generación de plan via formulario (UI completa) | `app/views/nutrition_plans/` | Sprint 1 | ⏳ pendiente |
+| 1 | Dashboard del nutritionist con resumen de pacientes | `app/views/nutritionists/`, controller | Sprint 1 done | ✅ done (2026-03-11) |
+| 2 | Vista de paciente con historial de planes y pesos | `app/views/patients/show.html.erb`, `app/views/patients/index.html.erb`, `app/views/profiles/_form.html.erb` | ninguna | ✅ done (2026-03-11) |
+| 3 | Patient Radar integrado en dashboard nutritionist | `app/views/nutritionists/`, `PatientRadarService` | servicio OK | in_progress (dashboard deja teaser/enlace y el radar ya comparte shell; la integración inline sigue pendiente) |
+| 4 | Generación de plan via formulario (UI completa) | `app/views/nutrition_plans/` | Sprint 1 | in_progress (index/show/new/edit/form ya usan shell real y sin placeholders; sigue pendiente cerrar un flujo de creación manual además del borrador IA) |
 | 5 | Edición manual de meals generadas | `app/views/meals/`, nested forms | tarea 4 | ⏳ pendiente |
 
 **Criterio de done:** nutritionist puede ver pacientes, generar plan, ver radar, todo con datos reales.

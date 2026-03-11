@@ -1,940 +1,169 @@
-<div class="nutrition-plan-show-layout">
-  <!-- Left Sidebar -->
-  <aside class="left-sidebar">
-    <nav class="sidebar-nav">
-      <%= link_to nutritionist_dashboard_path, class: "nav-item" do %>
-        <span class="nav-icon">📊</span>
-        <span>Dashboard</span>
-      <% end %>
-      <%= link_to patients_path, class: "nav-item active" do %>
-        <span class="nav-icon">👥</span>
-        <span>Pacientes</span>
-      <% end %>
-      <a href="#" class="nav-item">
-        <span class="nav-icon">🍎</span>
-        <span>Planes Nutricionales</span>
-      </a>
-      <a href="#" class="nav-item">
-        <span class="nav-icon">🤖</span>
-        <span>Copiloto IA</span>
-      </a>
-      <a href="#" class="nav-item">
-        <span class="nav-icon">⚙️</span>
-        <span>Configuraciones</span>
-      </a>
-    </nav>
+<div class="nh-backoffice nh-nutrition-plan-show">
+  <%= render "shared/nutritionist_sidebar", active: :plans, patient: @patient %>
 
-    <div class="sidebar-footer">
-      <%= image_tag "https://kitt.lewagon.com/placeholder/users/ssaunier",
-                    class: "user-avatar",
-                    alt: "Nutritionist" %>
-      <div class="user-info">
-        <div class="user-name"><%= current_nutritionist&.first_name || "Nutritionist" %> <%= current_nutritionist&.last_name || "" %></div>
-        <div class="user-role">Nutritionist</div>
-      </div>
-    </div>
-  </aside>
+  <main class="nh-backoffice__page">
+    <div class="nh-page">
+      <%= render "shared/nutritionist_page_header",
+        eyebrow: "Detalle de plan",
+        title: @nutrition_plan.objective.presence || "Plan sin objetivo",
+        description: "#{@patient.first_name} #{@patient.last_name} · #{nutritionist_backoffice_date_range(@nutrition_plan.start_date, @nutrition_plan.end_date)}",
+        primary_action: { label: "Editar plan", path: edit_patient_nutrition_plan_path(@patient, @nutrition_plan) },
+        secondary_action: { label: "Volver a planes", path: patient_nutrition_plans_path(@patient) } %>
 
-  <!-- Main Content -->
-  <main class="main-content-show">
-    <!-- Header -->
-    <div class="plan-show-header">
-      <div class="header-left">
-        <%= link_to patient_nutrition_plans_path(@patient), class: "back-button-show" do %>
-          ←
-        <% end %>
-        <div class="header-info">
-          <h1 class="plan-main-title"><%= @nutrition_plan.objective || "Plan Pérdida de Peso Verano" %></h1>
-          <p class="plan-main-subtitle">para <%= @patient.first_name %> <%= @patient.last_name %></p>
-        </div>
-      </div>
-      <div class="header-actions-show">
-        <%= link_to edit_patient_nutrition_plan_path(@patient, @nutrition_plan), class: "action-link-show" do %>
-          ✏️ Editar Plan
-        <% end %>
-        <%= link_to "#", class: "action-link-show" do %>
-          📋 Duplicar Plan
-        <% end %>
-        <%= link_to "#", class: "action-link-show action-link-primary" do %>
-          🔗 Compartir
-        <% end %>
-      </div>
-    </div>
+      <section class="nh-stat-grid" aria-label="Resumen del plan">
+        <article class="nh-stat-card">
+          <p class="nh-stat-card__label">Estado</p>
+          <p class="nh-stat-card__value"><%= nutrition_plan_status_name(@nutrition_plan.status) %></p>
+          <p class="nh-stat-card__hint">Estado operativo actual del plan.</p>
+        </article>
+        <article class="nh-stat-card">
+          <p class="nh-stat-card__label">Vigencia</p>
+          <p class="nh-stat-card__value"><%= nutritionist_backoffice_date_range(@nutrition_plan.start_date, @nutrition_plan.end_date) %></p>
+          <p class="nh-stat-card__hint"><%= pluralize(@daily_plans.size, "día", "días") %> programados.</p>
+        </article>
+        <article class="nh-stat-card">
+          <p class="nh-stat-card__label">Calorías</p>
+          <p class="nh-stat-card__value"><%= formatted_quantity(@nutrition_plan.calories, unit: "kcal") %></p>
+          <p class="nh-stat-card__hint">Objetivo energético diario.</p>
+        </article>
+        <article class="nh-stat-card">
+          <p class="nh-stat-card__label">Macros</p>
+          <p class="nh-stat-card__value"><%= nutrition_plan_macro_summary(@nutrition_plan) %></p>
+          <p class="nh-stat-card__hint">Distribución global del plan.</p>
+        </article>
+      </section>
 
-    <!-- Plan Overview Section -->
-    <div class="plan-overview-unified-card">
-      <div class="overview-top-row">
-        <div class="overview-unified-item">
-          <div class="overview-unified-label">Objetivo</div>
-          <div class="overview-unified-value"><%= @nutrition_plan.objective || "Control de peso, mejora metabólica y recuperación neurológica" %></div>
-        </div>
-        <div class="overview-unified-item">
-          <div class="overview-unified-label">Vigente</div>
-          <div class="overview-unified-value">
-            <%= @nutrition_plan.start_date&.strftime("%d %b %Y") || "06 Oct 2025" %> - <%= @nutrition_plan.end_date&.strftime("%d %b %Y") || "06 Oct 2025" %>
+      <section class="nh-grid nh-grid--content">
+        <section class="nh-panel">
+          <div class="nh-section-header">
+            <div>
+              <p class="nh-section__eyebrow">Plan diario</p>
+              <h2 class="nh-section__title">Distribución de comidas</h2>
+              <p class="nh-section__description">Vista diaria con comidas, estado y macros por cada bloque.</p>
+            </div>
           </div>
-        </div>
-        <div class="overview-unified-item">
-          <div class="overview-unified-label">Estado</div>
-          <div class="plan-status-badge-show">
-            <%= (@nutrition_plan.status || 'Active').capitalize %>
-          </div>
-        </div>
-      </div>
 
-      <div class="overview-bottom-row">
-        <div class="overview-unified-item">
-          <div class="overview-unified-label">Calorías diarias</div>
-          <div class="overview-unified-value"><%= @nutrition_plan.calories || 2200 %>.0 kcal</div>
-        </div>
-        <div class="overview-unified-item">
-          <div class="overview-unified-label">Macros</div>
-          <div class="overview-unified-value">P: <%= @nutrition_plan.protein || 110 %>.0g / G: <%= @nutrition_plan.fat || 70 %>.0g / C: <%= @nutrition_plan.carbs || 280 %>.0g</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Meal Distribution Section -->
-    <div class="meal-distribution-section">
-      <h2 class="section-title-show">Distribución de Comidas</h2>
-
-      <% if @nutrition_plan.plans.present? %>
-        <div class="accordion" id="mealPlansAccordion">
-          <% @nutrition_plan.plans.each_with_index do |plan, plan_index| %>
-            <div class="accordion-item plan-accordion-item">
-              <h2 class="accordion-header">
-                <button class="accordion-button plan-accordion-button <%= 'collapsed' unless plan_index == 0 %>"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#plan-<%= plan.id %>"
-                        aria-expanded="<%= plan_index == 0 ? 'true' : 'false' %>"
-                        aria-controls="plan-<%= plan.id %>">
-                  <div class="plan-header-content">
-                    <div class="plan-date-info">
-                      <span class="plan-day-name"><%= I18n.l(plan.date, format: '%A') %></span>
-                      <span class="plan-date-detail"><%= plan.date.strftime('%d %b %Y') %></span>
+          <% if @daily_plans.any? %>
+            <div class="nh-plan-show__days">
+              <% @daily_plans.each do |daily_plan| %>
+                <article class="nh-plan-show__day">
+                  <header class="nh-plan-show__day-header">
+                    <div>
+                      <p class="nh-list__title"><%= l(daily_plan.date, format: :long) %></p>
+                      <p class="nh-list__meta">
+                        <% if daily_plan.mood.present? %>
+                          Estado de ánimo: <%= daily_plan.mood %>
+                        <% end %>
+                        <% if daily_plan.energy_level.present? %>
+                          <% if daily_plan.mood.present? %> · <% end %>
+                          Energía: <%= daily_plan.energy_level %>
+                        <% end %>
+                        <% if daily_plan.activity.present? %>
+                          · Actividad: <%= daily_plan.activity %>
+                        <% end %>
+                      </p>
                     </div>
-                    <div class="plan-meals-count">
-                      <span class="badge bg-purple-soft"><%= plan.meals.count %> comidas</span>
-                    </div>
-                  </div>
-                </button>
-              </h2>
-              <div id="plan-<%= plan.id %>"
-                   class="accordion-collapse collapse <%= 'show' if plan_index == 0 %>"
-                   data-bs-parent="#mealPlansAccordion">
-                <div class="accordion-body plan-accordion-body">
-                  <% if plan.meals.any? %>
-                    <div class="meals-grid">
-                      <% plan.meals.each do |meal| %>
-                        <div class="meal-card-modern">
-                          <div class="meal-card-header">
-                            <div class="meal-type-info">
-                              <span class="meal-icon"><%= meal_type_icon(meal.meal_type) %></span>
-                              <h4 class="meal-type-title"><%= meal_type_name(meal.meal_type) %></h4>
+                    <span class="nh-badge nh-badge--muted"><%= pluralize(daily_plan.meals.size, "comida", "comidas") %></span>
+                  </header>
+
+                  <% if daily_plan.meals.any? %>
+                    <div class="nh-plan-show__meals">
+                      <% daily_plan.meals.each do |meal| %>
+                        <article class="nh-plan-show__meal">
+                          <div class="nh-plan-show__meal-header">
+                            <div>
+                              <p class="nh-list__title"><%= meal_type_icon(meal.meal_type) %> <%= meal_type_name(meal.meal_type) %></p>
+                              <p class="nh-list__meta"><%= meal.ingredients.presence || "Sin ingredientes cargados" %></p>
                             </div>
-                            <span class="meal-status-badge meal-status-<%= meal.status&.downcase || 'pending' %>">
+                            <span class="<%= nutritionist_backoffice_badge_class(meal_status_modifier(meal.status)) %>">
                               <%= meal_status_name(meal.status) %>
                             </span>
                           </div>
 
-                          <div class="meal-card-body">
-                            <div class="meal-ingredients">
-                              <h5 class="meal-section-title">Ingredientes</h5>
-                              <p class="meal-text"><%= meal.ingredients %></p>
-                            </div>
+                          <% if meal.recipe.present? %>
+                            <p class="nh-body-copy"><strong>Preparación:</strong> <%= meal.recipe %></p>
+                          <% end %>
 
-                            <% if meal.recipe.present? %>
-                              <div class="meal-recipe">
-                                <h5 class="meal-section-title">Preparación</h5>
-                                <p class="meal-text"><%= meal.recipe %></p>
-                              </div>
-                            <% end %>
-
-                            <div class="meal-nutrition">
-                              <h5 class="meal-section-title">Información Nutricional</h5>
-                              <div class="nutrition-badges">
-                                <span class="nutrition-badge calories">
-                                  <span class="nutrition-icon">🔥</span>
-                                  <span class="nutrition-value"><%= meal.calories %></span>
-                                  <span class="nutrition-unit">kcal</span>
-                                </span>
-                                <span class="nutrition-badge protein">
-                                  <span class="nutrition-icon">💪</span>
-                                  <span class="nutrition-value"><%= meal.protein %></span>
-                                  <span class="nutrition-unit">g Prot</span>
-                                </span>
-                                <span class="nutrition-badge carbs">
-                                  <span class="nutrition-icon">🌾</span>
-                                  <span class="nutrition-value"><%= meal.carbs %></span>
-                                  <span class="nutrition-unit">g Carb</span>
-                                </span>
-                                <span class="nutrition-badge fat">
-                                  <span class="nutrition-icon">🥑</span>
-                                  <span class="nutrition-value"><%= meal.fat %></span>
-                                  <span class="nutrition-unit">g Gras</span>
-                                </span>
-                              </div>
+                          <dl class="nh-detail-grid nh-plan-show__meal-macros">
+                            <div>
+                              <dt>Calorías</dt>
+                              <dd><%= formatted_quantity(meal.calories, unit: "kcal") %></dd>
                             </div>
-                          </div>
-                        </div>
+                            <div>
+                              <dt>Proteína</dt>
+                              <dd><%= formatted_quantity(meal.protein, unit: "g") %></dd>
+                            </div>
+                            <div>
+                              <dt>Carbohidratos</dt>
+                              <dd><%= formatted_quantity(meal.carbs, unit: "g") %></dd>
+                            </div>
+                            <div>
+                              <dt>Grasas</dt>
+                              <dd><%= formatted_quantity(meal.fat, unit: "g") %></dd>
+                            </div>
+                          </dl>
+                        </article>
                       <% end %>
                     </div>
                   <% else %>
-                    <div class="empty-meals-state">
-                      <p class="text-muted">No hay comidas programadas para este día</p>
-                    </div>
+                    <%= render "shared/nutritionist_empty_state",
+                      title: "Sin comidas programadas.",
+                      body: "Este día aún no tiene comidas cargadas dentro del plan." %>
                   <% end %>
-                </div>
+                </article>
+              <% end %>
+            </div>
+          <% else %>
+            <%= render "shared/nutritionist_empty_state",
+              title: "No hay días programados.",
+              body: "Este plan todavía no tiene estructura diaria cargada." %>
+          <% end %>
+        </section>
+
+        <aside class="nh-stack">
+          <section class="nh-panel">
+            <div class="nh-section-header">
+              <div>
+                <p class="nh-section__eyebrow">Notas</p>
+                <h2 class="nh-section__title">Contexto clínico</h2>
               </div>
             </div>
-          <% end %>
-        </div>
-      <% else %>
-        <div class="empty-plans-state">
-          <div class="empty-icon">📅</div>
-          <p class="empty-title">No hay planes diarios programados</p>
-          <p class="empty-description">Comienza agregando días al plan nutricional</p>
-        </div>
-      <% end %>
-    </div>
 
-    <!-- Nutritionist Notes Section -->
-    <div class="notes-section">
-      <h2 class="section-title-show">Notas del Nutricionista</h2>
-      <div class="notes-content-show">
-        <p><%= simple_format(@nutrition_plan.notes || "Hola Ana, hemos diseñado este plan para ayudarte a alcanzar tu objetivo de pérdida de peso de forma sostenible. Recuerda mantener bien hidratada y hacer todo tu plan, bebiendo agua en cada comida. No dudes en intercambiar el pollo por pavo o pescado blanco para variar.
+            <% if @nutrition_plan.notes.present? %>
+              <div class="nh-body-copy"><%= simple_format(@nutrition_plan.notes) %></div>
+            <% else %>
+              <%= render "shared/nutritionist_empty_state",
+                title: "Sin notas clínicas.",
+                body: "Este plan no tiene observaciones adicionales del nutricionista." %>
+            <% end %>
+          </section>
 
-Es importante que realices los entrenamientos de fuerza 3 veces por semana 2 días de cardio. Esto ayudará para mantener la masa muscular. ¡Mucho ánimo!") %></p>
-      </div>
-    </div>
+          <section class="nh-panel">
+            <div class="nh-section-header">
+              <div>
+                <p class="nh-section__eyebrow">Paciente</p>
+                <h2 class="nh-section__title">Acciones relacionadas</h2>
+              </div>
+            </div>
 
-    <!-- Key Tips Section -->
-    <div class="tips-section">
-      <h2 class="section-title-show">Consejos Clave</h2>
-      <div class="tips-list">
-        <div class="tip-card">
-          <div class="tip-icon-check">✓</div>
-          <div class="tip-content-show">
-            <h4 class="tip-title-show">Hidratación constante</h4>
-            <p class="tip-description-show">Bebe al menos 8 vasos de agua al día</p>
-          </div>
-        </div>
-        <div class="tip-card">
-          <div class="tip-icon-check">✓</div>
-          <div class="tip-content-show">
-            <h4 class="tip-title-show">Prioriza la Proteína</h4>
-            <p class="tip-description-show">Asegúrate de incluir una fuente de proteína en cada comida principal.</p>
-          </div>
-        </div>
-        <div class="tip-card">
-          <div class="tip-icon-check">✓</div>
-          <div class="tip-content-show">
-            <h4 class="tip-title-show">Escucha a tu Cuerpo</h4>
-            <p class="tip-description-show">Come cuando tengas hambre y detente cuando estés satisfecho.</p>
-          </div>
-        </div>
-      </div>
+            <dl class="nh-detail-list">
+              <div>
+                <dt>Paciente</dt>
+                <dd><%= @patient.first_name %> <%= @patient.last_name %></dd>
+              </div>
+              <div>
+                <dt>Acceso app</dt>
+                <dd><%= onboarding_state_name(@patient.onboarding_state) %></dd>
+              </div>
+            </dl>
+
+            <div class="nh-inline-actions">
+              <%= link_to "Ver paciente", patient_path(@patient), class: "nh-button nh-button--secondary" %>
+              <%= link_to "Editar plan", edit_patient_nutrition_plan_path(@patient, @nutrition_plan), class: "nh-button nh-button--ghost" %>
+            </div>
+          </section>
+        </aside>
+      </section>
     </div>
   </main>
 </div>
-
-<style>
-/* Layout */
-.nutrition-plan-show-layout {
-  display: flex;
-  min-height: 100vh;
-  background-color: #f8fafc;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-}
-
-/* Left Sidebar */
-.left-sidebar {
-  width: 260px;
-  background: white;
-  border-right: 1px solid #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 24px 0;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-}
-
-.sidebar-nav {
-  padding: 24px 24px 0 24px;
-  flex: 1;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  margin-bottom: 4px;
-  color: #6b7280;
-  text-decoration: none;
-  border-radius: 8px;
-  transition: all 0.15s ease;
-  font-weight: 500;
-}
-
-.nav-item:hover {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.nav-item.active {
-  background: #ede9fe;
-  color: #7c3aed;
-}
-
-.nav-icon {
-  font-size: 18px;
-  width: 20px;
-  text-align: center;
-}
-
-.sidebar-footer {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 24px;
-  border-top: 1px solid #f3f4f6;
-}
-
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
-}
-
-.user-name {
-  font-weight: 600;
-  color: #1f2937;
-  font-size: 14px;
-}
-
-.user-role {
-  font-size: 13px;
-  color: #6b7280;
-}
-
-/* Main Content */
-.main-content-show {
-  flex: 1;
-  padding: 32px 48px;
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-/* Header */
-.plan-show-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.back-button-show {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  color: #6b7280;
-  text-decoration: none;
-  transition: all 0.15s ease;
-  font-size: 20px;
-}
-
-.back-button-show:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
-  color: #374151;
-}
-
-.plan-main-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 4px 0;
-  line-height: 1.2;
-}
-
-.plan-main-subtitle {
-  color: #6b7280;
-  margin: 0;
-  font-size: 14px;
-}
-
-.header-actions-show {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.action-link-show {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  text-decoration: none;
-  border: 1px solid transparent;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  min-height: 36px;
-  background: #ffffff;
-  border-color: #e2e8f0;
-  color: #64748b;
-}
-
-.action-link-show:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-  color: #475569;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
-}
-
-.action-link-show.action-link-primary {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  color: #ffffff;
-  border: none;
-  box-shadow: 0 2px 4px -1px rgba(139, 92, 246, 0.25);
-}
-
-.action-link-show.action-link-primary:hover {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px -2px rgba(139, 92, 246, 0.4);
-}
-
-/* Plan Overview Unified Card */
-.plan-overview-unified-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 24px;
-}
-
-.overview-top-row {
-  display: grid;
-  grid-template-columns: 2fr 1.5fr 1fr;
-  gap: 32px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #f3f4f6;
-  margin-bottom: 24px;
-}
-
-.overview-bottom-row {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 32px;
-}
-
-.overview-unified-item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.overview-unified-label {
-  font-size: 14px;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.overview-unified-value {
-  font-size: 15px;
-  color: #1f2937;
-  font-weight: 600;
-  line-height: 1.5;
-}
-
-.plan-status-badge-show {
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  background: #dcfce7;
-  color: #166534;
-  width: fit-content;
-}
-
-/* Section Titles */
-.section-title-show {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 20px 0;
-}
-
-/* Meal Distribution Section */
-.meal-distribution-section {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 24px;
-}
-
-/* Accordion Styling */
-.plan-accordion-item {
-  border: 1px solid #e5e7eb;
-  border-radius: 12px !important;
-  margin-bottom: 12px;
-  overflow: hidden;
-  transition: all 0.2s ease;
-}
-
-.plan-accordion-item:hover {
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.1);
-  border-color: #d8b4fe;
-}
-
-.plan-accordion-button {
-  background: linear-gradient(135deg, #faf5ff 0%, #f5f3ff 100%);
-  border: none;
-  padding: 20px 24px;
-  font-weight: 600;
-  color: #1f2937;
-  transition: all 0.2s ease;
-}
-
-.plan-accordion-button:not(.collapsed) {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  color: white;
-  box-shadow: none;
-}
-
-.plan-accordion-button:focus {
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
-  border-color: transparent;
-}
-
-.plan-accordion-button::after {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%236b7280'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
-  transition: transform 0.3s ease;
-}
-
-.plan-accordion-button:not(.collapsed)::after {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
-  transform: rotate(-180deg);
-}
-
-.plan-header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  gap: 16px;
-}
-
-.plan-date-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.plan-day-name {
-  font-size: 16px;
-  font-weight: 700;
-  text-transform: capitalize;
-}
-
-.plan-date-detail {
-  font-size: 13px;
-  opacity: 0.8;
-}
-
-.plan-meals-count {
-  display: flex;
-  gap: 8px;
-}
-
-.bg-purple-soft {
-  background-color: rgba(139, 92, 246, 0.15);
-  color: #7c3aed;
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 8px;
-}
-
-.plan-accordion-button:not(.collapsed) .bg-purple-soft {
-  background-color: rgba(255, 255, 255, 0.25);
-  color: white;
-}
-
-.plan-accordion-body {
-  padding: 24px;
-  background: #fafafa;
-}
-
-/* Meals Grid */
-.meals-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* Meal Card Modern */
-.meal-card-modern {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  overflow: hidden;
-  transition: all 0.2s ease;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.meal-card-modern:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
-  border-color: #d8b4fe;
-}
-
-.meal-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 20px;
-  background: linear-gradient(135deg, #faf5ff 0%, #f5f3ff 100%);
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.meal-type-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.meal-icon {
-  font-size: 24px;
-}
-
-.meal-type-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0;
-}
-
-.meal-status-badge {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 5px 10px;
-  border-radius: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.meal-status-pending {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.meal-status-completed {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.meal-status-skipped {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.meal-card-body {
-  padding: 20px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.meal-section-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: #7c3aed;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 0 0 8px 0;
-}
-
-.meal-text {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #6b7280;
-  margin: 0;
-}
-
-.meal-ingredients,
-.meal-recipe,
-.meal-nutrition {
-  padding-bottom: 16px;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.meal-nutrition {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-/* Nutrition Badges */
-.nutrition-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.nutrition-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.nutrition-badge.calories {
-  background: #fff7ed;
-  color: #9a3412;
-  border: 1px solid #fed7aa;
-}
-
-.nutrition-badge.protein {
-  background: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
-}
-
-.nutrition-badge.carbs {
-  background: #fffbeb;
-  color: #92400e;
-  border: 1px solid #fde68a;
-}
-
-.nutrition-badge.fat {
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-}
-
-.nutrition-badge:hover {
-  transform: scale(1.05);
-}
-
-.nutrition-icon {
-  font-size: 14px;
-}
-
-.nutrition-value {
-  font-weight: 700;
-}
-
-.nutrition-unit {
-  font-size: 11px;
-  opacity: 0.8;
-}
-
-/* Empty States */
-.empty-meals-state,
-.empty-plans-state {
-  text-align: center;
-  padding: 40px 20px;
-  color: #9ca3af;
-}
-
-.empty-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
-}
-
-.empty-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #6b7280;
-  margin: 0 0 8px 0;
-}
-
-.empty-description {
-  font-size: 14px;
-  color: #9ca3af;
-  margin: 0;
-}
-
-/* Nutritionist Notes */
-.notes-section {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 24px;
-}
-
-.notes-content-show {
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  border-radius: 8px;
-  padding: 20px;
-}
-
-.notes-content-show p {
-  margin: 0;
-  color: #78350f;
-  line-height: 1.6;
-  font-size: 14px;
-}
-
-/* Key Tips Section */
-.tips-section {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 24px;
-}
-
-.tips-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.tip-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 16px;
-  background: #ecfdf5;
-  border: 1px solid #d1fae5;
-  border-radius: 8px;
-  transition: all 0.15s ease;
-}
-
-.tip-card:hover {
-  background: #d1fae5;
-  border-color: #a7f3d0;
-}
-
-.tip-icon-check {
-  font-size: 14px;
-  color: #10b981;
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-  background: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-}
-
-.tip-content-show {
-  flex: 1;
-}
-
-.tip-title-show {
-  font-size: 14px;
-  font-weight: 600;
-  color: #166534;
-  margin: 0 0 4px 0;
-}
-
-.tip-description-show {
-  font-size: 13px;
-  color: #15803d;
-  margin: 0;
-  line-height: 1.5;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-  .overview-top-row {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .overview-bottom-row {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-}
-
-@media (max-width: 768px) {
-  .nutrition-plan-show-layout {
-    flex-direction: column;
-  }
-
-  .left-sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-  }
-
-  .main-content-show {
-    padding: 24px 16px;
-  }
-
-  .plan-show-header {
-    flex-direction: column;
-    gap: 16px;
-    align-items: stretch;
-  }
-
-  .header-actions-show {
-    flex-direction: column;
-  }
-
-  .btn-header-action,
-  .btn-header-share {
-    width: 100%;
-    text-align: center;
-    justify-content: center;
-  }
-
-  .plan-accordion-button {
-    padding: 16px;
-  }
-
-  .plan-header-content {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .plan-accordion-body {
-    padding: 16px;
-  }
-
-  .nutrition-badges {
-    flex-direction: column;
-  }
-
-  .nutrition-badge {
-    justify-content: space-between;
-  }
-}
-</style>

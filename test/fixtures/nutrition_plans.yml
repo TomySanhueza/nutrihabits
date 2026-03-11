@@ -2,7 +2,7 @@ owned_plan:
   id: 401
   patient_id: 201
   nutritionist_id: 101
-  objective: Improve consistency
+  objective: Plan reciente Alice
   calories: 1900
   protein: 110
   fat: 60
@@ -11,14 +11,34 @@ owned_plan:
   notes: Initial plan
   ai_rationale: Baseline rationale
   status: active
-  start_date: 2026-03-01
-  end_date: 2026-03-07
+  start_date: 2026-03-10
+  end_date: 2026-03-16
+  created_at: 2026-03-10 08:30:00
+  updated_at: 2026-03-10 10:15:00
+
+owned_previous_plan:
+  id: 404
+  patient_id: 201
+  nutritionist_id: 101
+  objective: Plan previo Alice
+  calories: 2000
+  protein: 115
+  fat: 62
+  carbs: 225
+  meal_distribution: "{}"
+  notes: Older plan for history
+  ai_rationale: Previous rationale
+  status: completed
+  start_date: 2026-02-20
+  end_date: 2026-02-26
+  created_at: 2026-02-20 08:30:00
+  updated_at: 2026-02-26 10:15:00
 
 sibling_plan:
   id: 402
   patient_id: 202
   nutritionist_id: 101
-  objective: Maintain weight
+  objective: Plan base Bob
   calories: 2100
   protein: 120
   fat: 70
@@ -29,12 +49,14 @@ sibling_plan:
   status: active
   start_date: 2026-03-01
   end_date: 2026-03-07
+  created_at: 2026-03-01 09:00:00
+  updated_at: 2026-03-07 09:00:00
 
 foreign_plan:
   id: 403
   patient_id: 203
   nutritionist_id: 102
-  objective: Reduce weight
+  objective: Plan externo Charlie
   calories: 1800
   protein: 100
   fat: 55
@@ -43,5 +65,25 @@ foreign_plan:
   notes: Foreign patient plan
   ai_rationale: Baseline rationale
   status: active
-  start_date: 2026-03-01
-  end_date: 2026-03-07
+  start_date: 2026-03-08
+  end_date: 2026-03-14
+  created_at: 2026-03-08 07:45:00
+  updated_at: 2026-03-08 12:00:00
+
+planless_completed_plan:
+  id: 405
+  patient_id: 204
+  nutritionist_id: 101
+  objective: Plan cerrado Diana
+  calories: 1750
+  protein: 105
+  fat: 58
+  carbs: 180
+  meal_distribution: "{}"
+  notes: Completed plan kept as history
+  ai_rationale: Closing rationale
+  status: completed
+  start_date: 2026-02-10
+  end_date: 2026-02-16
+  created_at: 2026-02-10 07:30:00
+  updated_at: 2026-02-16 09:45:00

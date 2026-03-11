@@ -1,5 +1,128 @@
 # Worklog
 
+## 2026-03-11 (decimonovena sesion — sprint 2 ux recovery backoffice nutritionist)
+
+- Unificado el shell del backoffice nutritionist con componentes compartidos:
+  - `app/views/shared/_nutritionist_sidebar.html.erb`
+  - `app/views/shared/_nutritionist_page_header.html.erb`
+  - `app/views/shared/_nutritionist_empty_state.html.erb`
+  - `app/assets/stylesheets/components/_nutritionist_backoffice.scss`
+- Rehechas las vistas nutritionist-facing cubiertas por Sprint 2 sobre el mismo sistema visual:
+  - dashboard y radar
+  - `patients/index`
+  - `patients/show`
+  - `profiles/new` + `_form`
+  - `nutrition_plans/index`, `show`, `new`, `edit`, `_form`, `_plan_fields`, `_meal_fields`
+- Eliminados `<style>` inline y `href="#"` en las pantallas cubiertas; el backoffice ahora usa superficies opacas, CTAs mas compactos, menos badges y acciones visibles limitadas por fila.
+- Durante la pasada UX se detecto friccion visual con el palette nuevo; se hizo rollback parcial del color system para volver al lenguaje cromatico frio del dashboard previo y se redujo la escala de botones y tipografia para mantener una interfaz mas elegante sin romper la nueva jerarquia.
+- `PatientsController#index` ahora precarga datos reales y soporta filtro de busqueda simple sobre pacientes propios.
+- `NutritionPlansController#index/show/new` ahora precargan mejor el contexto para las nuevas vistas; `new` expone un launchpad honesto para borrador IA y `edit` concentra la edicion manual del plan y nested meals.
+- `NutritionPlansHelper` ahora resume macros y traduce mejor estados de comidas; `_meal_fields` deja valores canonicos en ingles para `meal_type` y `status`.
+- `NutritionistsHelper` y `PatientsHelper` ahora centralizan initials, rangos de fechas, badges y acciones primarias/secundarias del backoffice.
+- Validacion ejecutada con PostgreSQL real:
+  - `bundle exec rails test test/controllers/nutritionists_controller_test.rb test/controllers/patients_controller_test.rb test/controllers/nutrition_plans_controller_test.rb`
+  - resultado: `32 runs, 218 assertions, 0 failures, 0 errors`
+  - `bundle exec rails test:system test/system/nutritionist_dashboard_smoke_test.rb test/system/patient_show_smoke_test.rb`
+  - resultado: `2 runs, 30 assertions, 0 failures, 0 errors`
+- Durante la validacion aparecieron dos gotchas:
+  - un deadlock de fixtures al correr request + system suites en paralelo sobre PostgreSQL
+  - un smoke de system test que necesitaba esperar el redirect post-login con `assert_current_path`
+- Actualizados `docs/DELIVERY_TRACKER.md`, `docs/IMPLEMENTATION_PLAN.md`, `docs/WORKLOG.md` y `docs/LESSONS.md` para dejar el cierre UX alineado con codigo, tests y learnings.
+
+## 2026-03-11 (decimoctava sesion — sprint 2 task 02 patient show history and weights)
+
+- Creada la rama `codex/sprint-02-task-02-patient-show-history-weights` sobre el estado actual de `main`.
+- Rehecho `PatientsController#show` para cargar datos reales del backoffice nutritionist:
+  - `@profile`
+  - `@active_plan`
+  - `@nutrition_plans`
+  - `@recent_patient_histories`
+  - `@weight_entries`
+  - `@current_weight`
+  - `@previous_weight`
+  - `@weight_change`
+  - `@bmi`
+  - `@latest_meal_log_at`
+- Añadido `app/helpers/patients_helper.rb` con:
+  - labels traducidos de `onboarding_state` y `nutrition_plan.status`
+  - clases visuales para badges y tendencia de peso
+  - formateo reusable de peso/cantidades
+  - geometría SVG para la gráfica de peso
+- Reemplazada por completo `app/views/patients/show.html.erb`:
+  - eliminados placeholders clínicos, métricas inventadas y enlaces muertos
+  - navegación por anchors reales (`#summary`, `#plans`, `#weights`, `#controls`)
+  - resumen clínico con peso actual, cambio reciente, IMC y último control
+  - plan vigente real con empty state si no existe
+  - historial de planes ordenado por fechas reales
+  - evolución de peso a partir de una timeline unificada de `PatientHistory` + `WeightPatient`
+  - controles recientes y ficha del perfil con empty states explícitos
+- Expandidos fixtures para cubrir edge cases de la pantalla:
+  - plan histórico adicional para paciente con historial
+  - paciente con historial de planes pero sin plan activo vigente
+  - conflicto de peso en la misma fecha resuelto a favor de `PatientHistory`
+  - peso antiguo adicional para timeline multi-punto
+- Ampliada la cobertura en `test/controllers/patients_controller_test.rb` para:
+  - render real de planes y pesos
+  - deduplicación de peso por fecha
+  - fallback al `profile.weight`
+  - empty state sin perfil/plan/pesos
+  - historial sin plan activo
+  - estados `active`, `invited`, `suspended` y `draft`
+- Añadido `test/system/patient_show_smoke_test.rb` como smoke visual del flujo nutritionist -> ficha de paciente -> estado vacío.
+- Validación estática ejecutada:
+  - `ruby -c app/controllers/patients_controller.rb`
+  - `ruby -c app/helpers/patients_helper.rb`
+  - `ruby -c test/controllers/patients_controller_test.rb`
+  - `ruby -c test/system/patient_show_smoke_test.rb`
+  - `rg -n "Ana|Dries Vincent|95%|Pérdida de Peso|Plan Activo|href=\"#\"|@patient\.weight_patients\.last" app/views/patients/show.html.erb -S`
+- Validación runtime reintentada y aún bloqueada en este sandbox:
+  - `bundle exec rails test test/controllers/patients_controller_test.rb`
+  - resultado: fallo antes de correr la suite por `ActiveRecord::DatabaseConnectionError` al conectar con PostgreSQL en `127.0.0.1`
+- Detectado un falso negativo adicional en validación de templates:
+  - `erb -x -T - app/views/patients/show.html.erb | ruby -c`
+  - el checker de stdlib falló con bloques `link_to ... do` aunque la plantilla Rails sea válida; la lección quedó documentada en `docs/LESSONS.md`
+- Actualizados `docs/DELIVERY_TRACKER.md`, `docs/IMPLEMENTATION_PLAN.md`, `docs/PROGRESS.md`, `docs/WORKLOG.md` y `docs/LESSONS.md` para dejar la task 02 en `review` pendiente de rerun DB-backed.
+
+## 2026-03-11 (decimoseptima sesion — sprint 2 task 01 nutritionist dashboard summary)
+
+- Creada la rama `codex/sprint-02-task-01-nutritionist-dashboard-summary`.
+- Rehecho `NutritionistsController#dashboard` para cargar datos reales scoped al `current_nutritionist` con `includes`, evitando N+1 y exponiendo:
+  - `@dashboard_stats`
+  - `@patient_summaries`
+  - `@recent_nutrition_plans`
+  - `@dashboard_attention`
+- Eliminados placeholders y links muertos del dashboard de nutritionist:
+  - saludo real
+  - metricas reales
+  - resumen de pacientes con CTA accionable
+  - planes recientes con acciones validas
+  - aside de atencion rapida con grupos reales
+  - teaser del radar como enlace separado, sin absorber Sprint 2 Task 3
+- Extraido el dashboard en piezas mantenibles:
+  - parciales `app/views/nutritionists/_dashboard_patient_row.html.erb` y `app/views/nutritionists/_dashboard_plan_row.html.erb`
+  - helper `app/helpers/nutritionists_helper.rb`
+  - stylesheet dedicado `app/assets/stylesheets/pages/_nutritionist_dashboard.scss`
+- Expandidos fixtures para cubrir los edge cases del tablero:
+  - nutritionist sin pacientes
+  - paciente propio sin plan activo
+  - paciente propio sin perfil
+  - pesos recientes para fallback de actividad/resumen
+- Ampliada la cobertura request-level en `test/controllers/nutritionists_controller_test.rb` para:
+  - aislamiento por nutritionist
+  - empty state
+  - CTA correcta para falta de perfil
+  - CTA correcta para falta de plan activo
+  - orden y scoping de planes recientes
+  - teaser del radar
+- Añadido smoke visual en `test/system/nutritionist_dashboard_smoke_test.rb` verificando dashboard, ficha de paciente, detalle de plan y CTA del radar.
+- Validacion ejecutada con acceso real a PostgreSQL:
+  - `bundle exec rails test test/controllers/nutritionists_controller_test.rb`
+  - resultado: `8 runs, 71 assertions, 0 failures, 0 errors`
+  - `bundle exec rails test:system test/system/nutritionist_dashboard_smoke_test.rb`
+  - resultado: `1 runs, 10 assertions, 0 failures, 0 errors`
+- Durante la validacion aparecieron dos gotchas de testing del dashboard (selectores ambiguos por texto repetido y click interceptado en el CTA del radar); quedaron estabilizados y documentados en `docs/LESSONS.md`.
+- Actualizados `docs/DELIVERY_TRACKER.md`, `docs/IMPLEMENTATION_PLAN.md`, `docs/WORKLOG.md` y `docs/LESSONS.md` para dejar Sprint 2 Task 1 alineada entre codigo, tests y narrativa.
+
 ## 2026-03-10 (decimosexta sesión — pre-pilot refactors dt-1/dt-2/dt-3)
 
 - Reconciliado el drift documental detectado durante la planificación:

@@ -1,0 +1,44 @@
+<article class="nh-dashboard__row">
+  <div class="nh-identity">
+    <div class="nh-avatar"><%= patient_initials(summary[:patient]) %></div>
+    <div>
+      <h3 class="nh-identity__title">
+        <%= link_to "#{summary[:patient].first_name} #{summary[:patient].last_name}", patient_path(summary[:patient]), class: "nh-dashboard__row-link" %>
+      </h3>
+      <p class="nh-identity__copy"><%= summary[:patient].email %></p>
+      <p class="nh-small-copy"><%= nutritionist_dashboard_activity_label(summary[:last_activity_at]) %></p>
+    </div>
+  </div>
+
+  <div>
+    <div class="nh-pill-list">
+      <span class="<%= nutritionist_backoffice_badge_class(nutritionist_dashboard_access_tone(summary[:onboarding_state])) %>">
+        <%= nutritionist_dashboard_access_label(summary[:onboarding_state]) %>
+      </span>
+      <span class="<%= nutritionist_backoffice_badge_class(nutritionist_dashboard_plan_tone(summary[:active_plan])) %>">
+        <%= nutritionist_dashboard_plan_label(summary[:active_plan]) %>
+      </span>
+    </div>
+    <p class="nh-small-copy">
+      <%= summary[:profile_complete] ? "Perfil completo" : "Perfil pendiente" %>
+      <% if summary[:last_weight].present? %>
+        · Último peso <%= number_with_precision(summary[:last_weight], precision: 1, strip_insignificant_zeros: true) %> kg
+      <% end %>
+    </p>
+  </div>
+
+  <div>
+    <% if summary[:active_plan].present? %>
+      <p class="nh-list__title"><%= summary[:active_plan].objective.presence || "Plan sin objetivo definido" %></p>
+      <p class="nh-list__meta"><%= nutritionist_backoffice_date_range(summary[:active_plan].start_date, summary[:active_plan].end_date) %></p>
+    <% else %>
+      <p class="nh-list__title">Sin plan activo</p>
+      <p class="nh-list__meta">Conviene revisar el perfil y preparar el siguiente plan.</p>
+    <% end %>
+  </div>
+
+  <div class="nh-inline-actions">
+    <%= link_to summary[:primary_cta_label], summary[:primary_cta_path], class: "nh-button nh-button--primary nh-button--small" %>
+    <%= link_to "Ver paciente", summary[:secondary_cta_path], class: "nh-button nh-button--secondary nh-button--small" %>
+  </div>
+</article>

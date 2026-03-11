@@ -6,6 +6,40 @@ Registro de errores, soluciones y patrones encontrados durante el desarrollo. Ca
 
 ## Errores Recurrentes
 
+### 2026-03-11 — `erb -x` puede dar falsos negativos en vistas Rails con block helpers
+
+**Contexto:** validación estática de `app/views/patients/show.html.erb`
+**Error:** `erb -x -T - ... | ruby -c` reportó `syntax error` alrededor de `link_to ..., do`
+**Causa:** el extractor estándar de ERB no entiende de forma fiable algunos helpers de Rails que reciben argumentos y bloque a la vez; la plantilla puede ser válida en Action View aunque el checker falle
+**Solución adoptada:** usar `ruby -c` en controller/helper/tests Ruby puros, búsquedas `rg` sobre placeholders/enlaces muertos y dejar la validación real del template para request/system tests ejecutados por Rails
+**Lección:** no usar `erb -x` como fuente única de verdad para plantillas Rails con block helpers; si falla, confirmar antes con render real o tests de vista/request
+
+### 2026-03-11 — Los dashboards con texto repetido y cards densas necesitan selectores de test mas especificos
+
+**Contexto:** request test + system smoke del nuevo dashboard de nutritionist en Sprint 2 Task 1
+**Error:** el test de orden de planes fallaba porque el mismo objetivo aparecia tanto en el resumen de pacientes como en la lista de planes recientes; despues, Selenium lanzo `ElementClickInterceptedError` al pulsar el CTA del radar aunque el enlace fuese correcto
+**Causa:** el dashboard reutiliza texto de dominio en varias secciones y el layout del aside concentra cards densas; apoyarse en `response.body.index(texto)` o en `click_on` generico vuelve los tests demasiado sensibles a la composicion visual
+**Solucion adoptada:** en request tests validar el orden usando URLs unicas de detalle; en el smoke visual, scopear los asserts a `#patient-summary-list` y `#recent-plans-list`, comprobar `href` reales para paciente/plan y usar click via JS solo para el CTA del radar
+**Leccion:** en dashboards con varias superficies que repiten nombres y objetivos, construir la validacion alrededor de contenedores y anchors unicos antes que sobre texto repetido o clics genericos
+
+### 2026-03-11 — Mezclar request y system suites en paralelo puede deadlockear fixtures en PostgreSQL
+
+**Contexto:** validacion final del backoffice nutritionist despues de unificar dashboard, pacientes y planes
+**Error:** al ejecutar request tests y system tests en paralelo aparecio `PG::TRDeadlockDetected` durante `insert_fixtures_set`
+**Causa:** ambas corridas intentaron resetear y cargar fixtures al mismo tiempo sobre la misma base PostgreSQL local; el problema no venia de la UI sino del patron de validacion concurrente
+**Solucion adoptada:** reejecutar request y system suites por separado; ambas pasaron en serie sin errores
+**Leccion:** para este repo, correr request/integration y system suites secuencialmente cuando comparten PostgreSQL local y fixtures completas; la paralelizacion entre procesos aumenta el riesgo de deadlocks aunque la suite sea serial por defecto dentro de Rails
+
+### 2026-03-11 — En system tests con Devise + Turbo conviene esperar el redirect post-login antes de navegar a otra pantalla
+
+**Contexto:** `patient_show_smoke_test` despues del rediseño del backoffice
+**Error:** el smoke caia de vuelta en la pantalla de login al visitar una ruta protegida inmediatamente despues de `click_button "Iniciar sesión"`
+**Causa:** el test no esperaba explicitamente a que el redirect de Devise/Turbo aterrizara en `nutritionist_dashboard_path` antes de forzar la siguiente navegacion
+**Solucion adoptada:** añadir `assert_current_path nutritionist_dashboard_path` justo despues del login en el smoke
+**Leccion:** en system tests con login real, esperar la ruta final tras autenticacion evita falsos negativos por navegacion prematura
+
+---
+
 ### 2026-03-10 — Cambiar el contrato de un servicio rompe dobles de test viejos
 
 **Contexto:** refactor de `NutritionPlanGeneratorService` para que retorne `NutritionPlan` persistido en vez de un `Hash`

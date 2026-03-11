@@ -1,7 +1,7 @@
 owned_plan_day:
   id: 501
   nutrition_plan_id: 401
-  date: 2026-03-01
+  date: 2026-03-10
   mood: good
   energy_level: high
   activity: walk
@@ -19,7 +19,7 @@ sibling_plan_day:
 foreign_plan_day:
   id: 503
   nutrition_plan_id: 403
-  date: 2026-03-01
+  date: 2026-03-08
   mood: good
   energy_level: medium
   activity: bike

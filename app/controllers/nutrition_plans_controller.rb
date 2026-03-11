@@ -5,13 +5,24 @@ class NutritionPlansController < ApplicationController
 
   def index
     @nutrition_plans = @patient.nutrition_plans
+      .includes(:patient, plans: :meals)
+      .order(start_date: :desc, created_at: :desc)
+
+    @nutrition_plan_stats = {
+      total: @nutrition_plans.size,
+      active: @nutrition_plans.count { |plan| plan.status == "active" },
+      draft: @nutrition_plans.count { |plan| plan.status == "draft" },
+      completed: @nutrition_plans.count { |plan| plan.status == "completed" }
+    }
   end
 
   def show
+    @daily_plans = @nutrition_plan.plans.includes(:meals).order(date: :asc)
   end
 
   def new
     @nutrition_plan = NutritionPlan.new
+    prepare_new_plan_context
   end
 
   def create
@@ -30,6 +41,7 @@ class NutritionPlansController < ApplicationController
     redirect_to edit_patient_nutrition_plan_path(@patient, @nutrition_plan)
   rescue NutritionPlanGeneratorService::GenerationError
     @nutrition_plan = NutritionPlan.new
+    prepare_new_plan_context
     flash.now[:alert] = "No se pudo generar el plan nutricional."
     render :new, status: :unprocessable_content
   end
@@ -57,7 +69,7 @@ class NutritionPlansController < ApplicationController
   end
 
   def set_nutrition_plan
-    @nutrition_plan = @patient.nutrition_plans.find(params[:id])
+    @nutrition_plan = @patient.nutrition_plans.includes(plans: :meals).find(params[:id])
   end
 
   def nutrition_plan_params
@@ -70,5 +82,13 @@ class NutritionPlansController < ApplicationController
         ]
       ]
     )
+  end
+
+  def prepare_new_plan_context
+    @recent_histories = @patient.patient_histories
+      .includes(:nutrition_plan)
+      .order(visit_date: :desc, created_at: :desc)
+      .limit(3)
+    @latest_plan = @patient.nutrition_plans.order(start_date: :desc, created_at: :desc).first
   end
 end

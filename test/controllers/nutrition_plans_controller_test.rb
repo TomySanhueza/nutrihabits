@@ -15,9 +15,13 @@ class NutritionPlansControllerTest < ActionDispatch::IntegrationTest
 
     get patient_nutrition_plans_path(@patient)
     assert_response :success
+    assert_includes response.body, "Listado de planes"
+    assert_includes response.body, @plan.objective
 
     get new_patient_nutrition_plan_path(@patient)
     assert_response :success
+    assert_includes response.body, "Nuevo plan para #{@patient.first_name} #{@patient.last_name}"
+    assert_includes response.body, "Generar borrador con IA"
   end
 
   test "owner can show and edit an owned plan" do
@@ -25,9 +29,13 @@ class NutritionPlansControllerTest < ActionDispatch::IntegrationTest
 
     get patient_nutrition_plan_path(@patient, @plan)
     assert_response :success
+    assert_includes response.body, "Distribución de comidas"
+    assert_includes response.body, @plan.objective
 
     get edit_patient_nutrition_plan_path(@patient, @plan)
     assert_response :success
+    assert_includes response.body, "Planes diarios"
+    assert_includes response.body, "Guardar plan"
   end
 
   test "owner can create a nutrition plan for an owned patient" do
