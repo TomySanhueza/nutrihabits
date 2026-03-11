@@ -1,0 +1,14 @@
+<div class="nh-empty-state <%= local_assigns[:modifier] %>">
+  <h3 class="nh-empty-state__title"><%= title %></h3>
+  <p class="nh-empty-state__body"><%= body %></p>
+
+  <% if local_assigns[:action].present? %>
+    <div class="nh-empty-state__actions">
+      <% if action[:method].present? %>
+        <%= button_to action[:label], action[:path], method: action[:method], class: "nh-button nh-button--primary", form: { class: "nh-inline-form" } %>
+      <% else %>
+        <%= link_to action[:label], action[:path], class: "nh-button nh-button--primary" %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

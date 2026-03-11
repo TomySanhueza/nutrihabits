@@ -1,0 +1,40 @@
+<aside class="nh-backoffice__sidebar">
+  <div class="nh-sidebar__brand">
+    <div class="nh-sidebar__brand-mark">NH</div>
+    <div>
+      <p class="nh-sidebar__brand-title">NutriHabits</p>
+      <p class="nh-sidebar__brand-copy">Backoffice clínico</p>
+    </div>
+  </div>
+
+  <nav class="nh-sidebar__nav" aria-label="Navegación principal">
+    <%= link_to nutritionist_dashboard_path, class: "nh-sidebar__item #{'is-active' if active == :dashboard}" do %>
+      <span>Dashboard</span>
+    <% end %>
+    <%= link_to patients_path, class: "nh-sidebar__item #{'is-active' if active == :patients}" do %>
+      <span>Pacientes</span>
+    <% end %>
+
+    <% if local_assigns[:patient].present? %>
+      <%= link_to patient_nutrition_plans_path(patient), class: "nh-sidebar__item #{'is-active' if active == :plans}" do %>
+        <span>Planes</span>
+      <% end %>
+    <% else %>
+      <span class="nh-sidebar__item is-disabled">Planes</span>
+    <% end %>
+
+    <%= link_to nutritionist_patient_radar_path, class: "nh-sidebar__item #{'is-active' if active == :radar}" do %>
+      <span>Radar</span>
+    <% end %>
+    <span class="nh-sidebar__item is-disabled">Copiloto IA</span>
+    <span class="nh-sidebar__item is-disabled">Configuración</span>
+  </nav>
+
+  <div class="nh-sidebar__footer">
+    <div class="nh-sidebar__avatar"><%= nutritionist_backoffice_initials(current_nutritionist) %></div>
+    <div>
+      <p class="nh-sidebar__user"><%= current_nutritionist.first_name %> <%= current_nutritionist.last_name %></p>
+      <p class="nh-sidebar__role">Nutricionista</p>
+    </div>
+  </div>
+</aside>

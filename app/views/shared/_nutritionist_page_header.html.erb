@@ -1,0 +1,26 @@
+<header class="nh-page-header">
+  <div class="nh-page-header__body">
+    <% if local_assigns[:eyebrow].present? %>
+      <p class="nh-page-header__eyebrow"><%= eyebrow %></p>
+    <% end %>
+    <h1 class="nh-page-header__title"><%= title %></h1>
+    <% if local_assigns[:description].present? %>
+      <p class="nh-page-header__description"><%= description %></p>
+    <% end %>
+  </div>
+
+  <% if local_assigns[:primary_action].present? || local_assigns[:secondary_action].present? %>
+    <div class="nh-page-header__actions">
+      <% if local_assigns[:secondary_action].present? %>
+        <%= link_to secondary_action[:label], secondary_action[:path], class: "nh-button nh-button--secondary" %>
+      <% end %>
+      <% if local_assigns[:primary_action].present? %>
+        <% if primary_action[:method].present? %>
+          <%= button_to primary_action[:label], primary_action[:path], method: primary_action[:method], class: "nh-button nh-button--primary", form: { class: "nh-inline-form" } %>
+        <% else %>
+          <%= link_to primary_action[:label], primary_action[:path], class: "nh-button nh-button--primary" %>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</header>

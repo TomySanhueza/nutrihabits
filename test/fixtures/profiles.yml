@@ -17,3 +17,13 @@ foreign_profile:
   conditions: Hypertension
   lifestyle: Sedentary
   diagnosis: Needs structured plan
+
+planless_profile:
+  id: 303
+  patient_id: 204
+  weight: 68.0
+  height: 168.0
+  goals: Build a sustainable routine
+  conditions: None
+  lifestyle: Moderately active
+  diagnosis: Needs plan refresh

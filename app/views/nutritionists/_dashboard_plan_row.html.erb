@@ -1,0 +1,30 @@
+<article class="nh-dashboard__row nh-dashboard__row--plan">
+  <div>
+    <p class="nh-kicker">Paciente</p>
+    <h3 class="nh-identity__title">
+      <%= link_to "#{plan.patient.first_name} #{plan.patient.last_name}", patient_path(plan.patient), class: "nh-dashboard__row-link" %>
+    </h3>
+  </div>
+
+  <div>
+    <p class="nh-kicker">Objetivo</p>
+    <p class="nh-body-copy"><%= plan.objective.presence || "Sin objetivo definido" %></p>
+  </div>
+
+  <div>
+    <p class="nh-kicker">Vigencia</p>
+    <p class="nh-body-copy"><%= nutritionist_backoffice_date_range(plan.start_date, plan.end_date) %></p>
+  </div>
+
+  <div>
+    <p class="nh-kicker">Estado</p>
+    <span class="<%= nutritionist_backoffice_badge_class(nutritionist_dashboard_plan_tone(plan)) %>">
+      <%= nutritionist_dashboard_plan_label(plan) %>
+    </span>
+  </div>
+
+  <div class="nh-inline-actions">
+    <%= link_to "Ver detalle", patient_nutrition_plan_path(plan.patient, plan), class: "nh-button nh-button--primary nh-button--small" %>
+    <%= link_to "Editar", edit_patient_nutrition_plan_path(plan.patient, plan), class: "nh-button nh-button--secondary nh-button--small" %>
+  </div>
+</article>

@@ -2,14 +2,14 @@
 
 Complementa DELIVERY_TRACKER.md con porcentaje por sprint y estado actual de trabajo.
 
-**Última actualización:** 2026-03-10 (pre-pilot refactors DT-1/DT-2/DT-3)
+**Última actualización:** 2026-03-11 (Sprint 2 task 02 patient show history and weights)
 
 ---
 
 ## Estado Actual
 
 ### En progreso ahora:
-- Sprint 2 nutritionist UX/UI: dashboard, vista de paciente y radar integrado con datos reales
+- Sprint 2 nutritionist UX/UI: task 02 quedó en review con vista de paciente basada en datos reales; falta rerun DB-backed y la integración inline del radar
 
 ### Bloqueadores activos:
 - No hay bloqueadores de repo para Sprint 1: la migración 20251010, `db:prepare`, la suite focalizada del lado patient (`17 runs, 73 assertions, 0 failures`) y la regresión de controllers de Sprint 1 (`55 runs, 229 assertions, 0 failures`) fueron revalidadas en 2026-03-09 en un entorno con acceso a PostgreSQL
@@ -26,7 +26,7 @@ Complementa DELIVERY_TRACKER.md con porcentaje por sprint y estado actual de tra
 |--------|--------|-------------|-------|---|--------|
 | 0 | Base and Canon | 4 | 4 | 100% | ✅ done |
 | 1 | Security and Ownership | 6 | 6 | 100% | ✅ done |
-| 2 | Nutritionist UX/UI | 1 | 5 | 20% | 🔄 parcial |
+| 2 | Nutritionist UX/UI | 1 | 5 | 20% | 🔄 parcial (task 02 en review) |
 | 3 | Patient Access Flow | 1 | 6 | 17% | 🔄 parcial |
 | 4 | Patient App Hardening | 2 | 5 | 40% | 🔄 parcial |
 | 5 | Images and Meal Logs | 2 | 6 | 33% | 🔄 parcial |
@@ -66,7 +66,7 @@ Complementa DELIVERY_TRACKER.md con porcentaje por sprint y estado actual de tra
 - Dashboard de nutritionist
 - `NutritionistsController` con cobertura request-level para dashboard y patient radar scoped al nutritionist autenticado
 - Dashboard de paciente
-- Vista de paciente (show) con info básica
+- Vista de paciente (show) con datos reales de planes, pesos, controles y empty states; queda pendiente el rerun DB-backed de request/system
 - UI de meal_logs (lista y creación parcial)
 - UI de grocery lists (scaffold)
 - Vista patient_radar (existe pero no integrada en dashboard)
@@ -95,6 +95,6 @@ Complementa DELIVERY_TRACKER.md con porcentaje por sprint y estado actual de tra
 
 1. Continuar con dashboard y flujos de nutritionist sobre el schema ya alineado
 2. Integrar Patient Radar en dashboard nutritionist
-3. Completar la vista de paciente con historial de planes, pesos y accesos rápidos
+3. Revalidar con DB real y smoke visual la vista de paciente ya rehecha
 4. Configurar retry en MealLogAnalysisJob y validar en staging
 5. Añadir cobertura request-level a `WeightPatientsController` y `GroceryListsController`

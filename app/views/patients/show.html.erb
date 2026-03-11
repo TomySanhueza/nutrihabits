@@ -1,833 +1,360 @@
-<div class="patient-layout">
-  <!-- Left Sidebar -->
-  <aside class="left-sidebar">
-    <nav class="sidebar-nav">
-      <%= link_to nutritionist_dashboard_path, class: "nav-item" do %>
-        <span class="nav-icon">📊</span>
-        <span>Panel de Control</span>
-      <% end %>
-      <%= link_to patients_path, class: "nav-item active" do %>
-        <span class="nav-icon">👥</span>
-        <span>Pacientes</span>
-      <% end %>
-      <a href="#" class="nav-item">
-        <span class="nav-icon">🍎</span>
-        <span>Planes Nutricionales</span>
-      </a>
-      <a href="#" class="nav-item">
-        <span class="nav-icon">🤖</span>
-        <span>Copiloto IA</span>
-      </a>
-      <a href="#" class="nav-item">
-        <span class="nav-icon">⚙️</span>
-        <span>Configuraciones</span>
-      </a>
-    </nav>
-  </aside>
+<% primary_action = patient_primary_action(patient: @patient, profile: @profile, active_plan: @active_plan) %>
+<% access_action = patient_access_action(@patient) %>
 
-  <!-- Main Content -->
-  <main class="main-content ">
-    <!-- Patient Header -->
-    <div class="patient-header">
-      <div class="patient-info-main">
-        <h1 class="patient-name"><%= @patient.first_name %> <%= @patient.last_name %></h1>
-        <div class="patient-status-bar">
-          <span class="status-badge active">Plan Activo</span>
-          <span class="next-checkin">Acceso app: <%= @patient.onboarding_state&.humanize || "Draft" %></span>
+<div class="nh-backoffice nh-patient-show">
+  <%= render "shared/nutritionist_sidebar", active: :patients, patient: @patient %>
+
+  <main class="nh-backoffice__page">
+    <div class="nh-page">
+      <section class="nh-panel nh-patient-show__hero" id="summary">
+        <div class="nh-patient-show__hero-main">
+          <div class="nh-identity">
+            <div class="nh-avatar nh-patient-show__hero-avatar"><%= patient_initials(@patient) %></div>
+            <div>
+              <p class="nh-section__eyebrow">Ficha de paciente</p>
+              <h1 class="nh-page-header__title"><%= @patient.first_name %> <%= @patient.last_name %></h1>
+              <p class="nh-page-header__description">
+                <%= @patient.email %>
+                <% if @patient.phone.present? %>
+                  · <%= @patient.phone %>
+                <% end %>
+                <% if @patient.last_seen_at.present? %>
+                  · Última actividad app <%= time_ago_in_words(@patient.last_seen_at) %>
+                <% end %>
+              </p>
+            </div>
+          </div>
+
+          <div class="nh-pill-list">
+            <span class="<%= nutritionist_backoffice_badge_class(onboarding_state_badge_modifier(@patient.onboarding_state)) %>">
+              Acceso app: <%= onboarding_state_name(@patient.onboarding_state) %>
+            </span>
+            <span class="<%= nutritionist_backoffice_badge_class(plan_presence_badge_modifier(@active_plan)) %>">
+              <%= @active_plan.present? ? "Plan activo" : "Sin plan activo" %>
+            </span>
+            <span class="<%= nutritionist_backoffice_badge_class(@profile.present? ? 'success' : 'warning') %>">
+              <%= patient_profile_status(@profile) %>
+            </span>
+          </div>
         </div>
-      </div>
-      <div class="patient-actions">
-        <%= button_to "Invitar a la app", invite_patient_path(@patient), method: :post, class: "btn btn-outline" %>
-        <%= button_to "Generar Plan IA", patient_nutrition_plans_path(@patient), method: :post, class: "btn btn-primary" %>
-        <% if @patient.onboarding_state == "suspended" %>
-          <%= button_to "Reactivar", reactivate_access_patient_path(@patient), method: :post, class: "btn btn-outline" %>
-        <% else %>
-          <%= button_to "Suspender acceso", suspend_access_patient_path(@patient), method: :post, class: "btn btn-outline" %>
-        <% end %>
-      </div>
-    </div>
 
-    <% if @patient.profile.nil? %>
-        <%=  render "profiles/form" %>
-    <% end  %>
+        <div class="nh-inline-actions nh-patient-show__hero-actions">
+          <%= link_to primary_action[:label], primary_action[:path], class: "nh-button nh-button--primary" %>
+          <%= link_to "Ver planes", patient_nutrition_plans_path(@patient), class: "nh-button nh-button--secondary" %>
+          <%= link_to "Nuevo control", new_patient_patient_history_path(@patient), class: "nh-button nh-button--secondary" %>
+          <%= button_to access_action[:label], access_action[:path], method: access_action[:method], class: "nh-button nh-button--secondary", form: { class: "nh-inline-form" } %>
+        </div>
+      </section>
 
-    <div class="#{if @patient.nil? ? 'd-none' : ''}">
-    <!-- Navigation Tabs -->
-    <nav class="content-tabs">
-      <a href="#" class="tab-item active">Resumen</a>
-      <%= link_to "Planes Nutricionales", patient_nutrition_plans_path(@patient), class:"tab-item" %>   
-      <a href="#" class="tab-item">Historial del Paciente</a>
-      <a href="#" class="tab-item">Registro de Comidas</a>
-      <a href="#" class="tab-item">Controles Diarios</a>
-    </nav>
+      <nav class="nh-patient-show__subnav" aria-label="Secciones del paciente">
+        <%= link_to "Resumen", "#summary", class: "nh-button nh-button--ghost" %>
+        <%= link_to "Peso", "#weights", class: "nh-button nh-button--ghost" %>
+        <%= link_to "Planes", "#plans", class: "nh-button nh-button--ghost" %>
+        <%= link_to "Controles", "#controls", class: "nh-button nh-button--ghost" %>
+        <%= link_to "Perfil", "#profile", class: "nh-button nh-button--ghost" %>
+      </nav>
 
-    <!-- Stats Grid -->
-    <div class="patient-stats-grid">
-      <div class="stat-card">
-        <h3 class="stat-label">Peso</h3>
-        <div class="stat-value">
-          <% if @patient.weight_patients.empty?   %>
-            <%= @patient.profile&.weight %>
-          <% else %> 
-            <%= @patient.weight_patients.last %>
+      <section class="nh-stat-grid" aria-label="Resumen clínico">
+        <article class="nh-stat-card">
+          <p class="nh-stat-card__label">Peso actual</p>
+          <p class="nh-stat-card__value"><%= formatted_weight(@current_weight) %></p>
+          <p class="nh-stat-card__hint">
+            <% if @weight_entries.any? %>
+              Último registro: <%= l(@weight_entries.last[:date], format: :long) %>
+            <% elsif @profile&.weight.present? %>
+              Fallback desde perfil clínico
+            <% else %>
+              Aún sin mediciones
+            <% end %>
+          </p>
+        </article>
+        <article class="nh-stat-card">
+          <p class="nh-stat-card__label">Cambio reciente</p>
+          <p class="nh-stat-card__value nh-patient-show__trend nh-patient-show__trend--<%= weight_trend_modifier(@weight_change) %>"><%= formatted_weight_change(@weight_change) %></p>
+          <p class="nh-stat-card__hint"><%= weight_change_caption(@current_weight, @previous_weight) %></p>
+        </article>
+        <article class="nh-stat-card">
+          <p class="nh-stat-card__label">IMC</p>
+          <p class="nh-stat-card__value"><%= formatted_bmi(@bmi) %></p>
+          <p class="nh-stat-card__hint">
+            <% if @profile&.height.present? %>
+              Altura registrada: <%= formatted_quantity(@profile.height, unit: "cm") %>
+            <% else %>
+              Falta altura en el perfil
+            <% end %>
+          </p>
+        </article>
+        <article class="nh-stat-card">
+          <p class="nh-stat-card__label">Último control</p>
+          <p class="nh-stat-card__value">
+            <% if @recent_patient_histories.any? %>
+              <%= l(@recent_patient_histories.first.visit_date, format: :long) %>
+            <% else %>
+              Sin controles
+            <% end %>
+          </p>
+          <p class="nh-stat-card__hint">
+            <% if @latest_meal_log_at.present? %>
+              Última comida registrada: <%= l(@latest_meal_log_at, format: :short) %>
+            <% else %>
+              Sin comidas registradas
+            <% end %>
+          </p>
+        </article>
+      </section>
+
+      <section class="nh-grid nh-grid--two">
+        <article class="nh-panel" id="weights">
+          <div class="nh-section-header">
+            <div>
+              <p class="nh-section__eyebrow">Evolución</p>
+              <h2 class="nh-section__title">Peso</h2>
+            </div>
+            <% if @weight_entries.any? %>
+              <span class="nh-badge nh-badge--muted"><%= @weight_entries.size %> registro<%= "s" unless @weight_entries.size == 1 %></span>
+            <% end %>
+          </div>
+
+          <% if @weight_entries.size >= 2 %>
+            <% chart_points = weight_chart_points(@weight_entries, width: 640, height: 240, padding: 28) %>
+            <div class="nh-patient-show__chart-card">
+              <svg viewBox="0 0 640 240" class="nh-patient-show__chart" role="img" aria-label="Gráfico de evolución del peso">
+                <defs>
+                  <linearGradient id="weightAreaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#1f5a3c" stop-opacity="0.24"></stop>
+                    <stop offset="100%" stop-color="#1f5a3c" stop-opacity="0"></stop>
+                  </linearGradient>
+                </defs>
+
+                <path d="<%= weight_chart_area_path(chart_points, height: 240, padding: 28) %>" fill="url(#weightAreaGradient)"></path>
+                <path d="<%= weight_chart_line_path(chart_points) %>" fill="none" stroke="#1f5a3c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+
+                <% chart_points.each do |point| %>
+                  <circle cx="<%= point[:x] %>" cy="<%= point[:y] %>" r="4.5" fill="#16462e"></circle>
+                <% end %>
+              </svg>
+
+              <div class="nh-patient-show__chart-labels">
+                <span><%= l(@weight_entries.first[:date], format: :short) %></span>
+                <span><%= l(@weight_entries.last[:date], format: :short) %></span>
+              </div>
+            </div>
+          <% elsif @weight_entries.one? %>
+            <%= render "shared/nutritionist_empty_state",
+              title: "Solo hay un registro de peso.",
+              body: "Necesitas al menos dos puntos para ver tendencia. El último valor registrado es #{formatted_weight(@weight_entries.first[:weight])}." %>
+          <% else %>
+            <%= render "shared/nutritionist_empty_state",
+              title: "Aún no hay registros de peso.",
+              body: "La vista usará controles clínicos y registros del paciente cuando existan. Por ahora solo se muestra el resumen disponible." %>
           <% end %>
-          kg
-        </div>
-      </div>
-      <div class="stat-card">
-        <h3 class="stat-label">IMC</h3> 
-        <% cuadrado_altura = ((@patient.profile&.height) / 100) ** 2 if @patient.profile %>
-        <div class="stat-value"><%= (@patient.profile.weight / cuadrado_altura).round if @patient.profile %></div>
-      </div>
-      <div class="stat-card">
-        <h3 class="stat-label">Adherencia</h3>
-        <div class="stat-value stat-excellent">92%</div>
-      </div>
-      <div class="stat-card">
-        <h3 class="stat-label">Cambio de Peso</h3>
-        <div class="stat-value stat-positive">-1.8 kg</div>
-      </div>
-    </div>
 
-    <!-- Charts and Plan Section -->
-    <div class="content-grid">
-      <!-- Weight Evolution Chart -->
-      <div class="chart-card">
-        <h2 class="section-title">Evolución del Peso</h2>
-        <div class="chart-container">
-          <svg width="100%" height="200" viewBox="0 0 400 200">
-            <defs>
-              <linearGradient id="weightGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:0.3"/>
-                <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0"/>
-              </linearGradient>
-            </defs>
-            <path d="M50,150 Q100,120 150,130 Q200,110 250,100 Q300,80 350,70" 
-                  stroke="#8b5cf6" stroke-width="3" fill="none"/>
-            <path d="M50,150 Q100,120 150,130 Q200,110 250,100 Q300,80 350,70 L350,180 L50,180 Z" 
-                  fill="url(#weightGradient)"/>
-            <circle cx="350" cy="70" r="4" fill="#8b5cf6"/>
-          </svg>
-        </div>
-      </div>
+          <div class="nh-patient-show__subsection">
+            <div class="nh-section-header">
+              <h3 class="nh-section__title">Últimos registros</h3>
+            </div>
 
-      <!-- Current Plan -->
-      <div class="plan-card">
-        <h2 class="section-title">Plan Actual</h2>
-        <div class="plan-details">
-          <div class="plan-row">
-            <span class="plan-label">Objetivo:</span>
-            <span class="plan-value">Pérdida de Peso</span>
+            <% if @weight_entries.any? %>
+              <div class="nh-list">
+                <% @weight_entries.last(5).reverse_each do |entry| %>
+                  <article class="nh-list__item">
+                    <div>
+                      <p class="nh-list__title"><%= formatted_weight(entry[:weight]) %></p>
+                      <p class="nh-list__meta">
+                        <%= weight_entry_source_name(entry) %> · <%= l(entry[:date], format: :long) %>
+                      </p>
+                    </div>
+                    <% if entry[:nutrition_plan].present? %>
+                      <%= link_to "Ver plan", patient_nutrition_plan_path(@patient, entry[:nutrition_plan]), class: "nh-button nh-button--ghost" %>
+                    <% end %>
+                  </article>
+                <% end %>
+              </div>
+            <% else %>
+              <p class="nh-muted">Sin timeline de peso todavía.</p>
+            <% end %>
           </div>
-          <div class="plan-row">
-            <span class="plan-label">Fecha de Inicio:</span>
-            <span class="plan-value">01 Jul, 2024</span>
+        </article>
+
+        <article class="nh-panel">
+          <div class="nh-section-header">
+            <div>
+              <p class="nh-section__eyebrow">Actual</p>
+              <h2 class="nh-section__title">Plan vigente</h2>
+            </div>
+            <% if @active_plan.present? %>
+              <span class="<%= nutritionist_backoffice_badge_class(nutrition_plan_status_badge_modifier(@active_plan.status)) %>">
+                <%= nutrition_plan_status_name(@active_plan.status) %>
+              </span>
+            <% end %>
           </div>
-          <div class="plan-row">
-            <span class="plan-label">Fecha de Fin:</span>
-            <span class="plan-value">31 Jul, 2024</span>
+
+          <% if @active_plan.present? %>
+            <div class="nh-stack">
+              <div>
+                <p class="nh-list__title"><%= @active_plan.objective.presence || "Sin objetivo cargado" %></p>
+                <p class="nh-list__meta"><%= nutritionist_backoffice_date_range(@active_plan.start_date, @active_plan.end_date) %></p>
+              </div>
+
+              <dl class="nh-detail-grid">
+                <div>
+                  <dt>Calorías</dt>
+                  <dd><%= formatted_quantity(@active_plan.calories, unit: "kcal") %></dd>
+                </div>
+                <div>
+                  <dt>Proteína</dt>
+                  <dd><%= formatted_quantity(@active_plan.protein, unit: "g") %></dd>
+                </div>
+                <div>
+                  <dt>Carbohidratos</dt>
+                  <dd><%= formatted_quantity(@active_plan.carbs, unit: "g") %></dd>
+                </div>
+                <div>
+                  <dt>Grasas</dt>
+                  <dd><%= formatted_quantity(@active_plan.fat, unit: "g") %></dd>
+                </div>
+              </dl>
+
+              <div class="nh-inline-actions">
+                <%= link_to "Ver detalle", patient_nutrition_plan_path(@patient, @active_plan), class: "nh-button nh-button--primary" %>
+                <%= link_to "Editar plan", edit_patient_nutrition_plan_path(@patient, @active_plan), class: "nh-button nh-button--secondary" %>
+              </div>
+            </div>
+          <% else %>
+            <%= render "shared/nutritionist_empty_state",
+              title: "Sin plan activo",
+              body: "El paciente no tiene un plan vigente hoy. Puedes preparar uno nuevo o revisar el historial de planes anteriores.",
+              action: primary_action %>
+          <% end %>
+        </article>
+      </section>
+
+      <section class="nh-panel" id="plans">
+        <div class="nh-section-header">
+          <div>
+            <p class="nh-section__eyebrow">Historial</p>
+            <h2 class="nh-section__title">Planes del paciente</h2>
           </div>
-          <div class="plan-row">
-            <span class="plan-label">Estado:</span>
-            <span class="status-badge on-track">En Progreso</span>
-          </div>
+          <span class="nh-badge nh-badge--muted"><%= @nutrition_plans.size %> plan<%= "es" unless @nutrition_plans.size == 1 %></span>
         </div>
-        <% if @patient.nutrition_plans.any? %>
-          <%= link_to "Ver detalle", patient_nutrition_plan_path(@patient, @patient.nutrition_plans.last), class: "btn-view-detail" %>
+
+        <% if @nutrition_plans.any? %>
+          <div class="nh-list">
+            <% @nutrition_plans.each do |plan| %>
+              <article class="nh-list__item nh-patient-show__history-item">
+                <div>
+                  <p class="nh-list__title"><%= plan.objective.presence || "Plan sin objetivo" %></p>
+                  <p class="nh-list__meta"><%= nutritionist_backoffice_date_range(plan.start_date, plan.end_date) %></p>
+                  <p class="nh-small-copy"><%= nutrition_plan_macro_summary(plan) %></p>
+                </div>
+
+                <div class="nh-inline-actions">
+                  <% if @active_plan == plan %>
+                    <span class="nh-badge nh-badge--success">Vigente</span>
+                  <% end %>
+                  <span class="<%= nutritionist_backoffice_badge_class(nutrition_plan_status_badge_modifier(plan.status)) %>">
+                    <%= nutrition_plan_status_name(plan.status) %>
+                  </span>
+                  <%= link_to "Ver detalle", patient_nutrition_plan_path(@patient, plan), class: "nh-button nh-button--ghost" %>
+                  <%= link_to "Editar", edit_patient_nutrition_plan_path(@patient, plan), class: "nh-button nh-button--ghost" %>
+                </div>
+              </article>
+            <% end %>
+          </div>
+        <% else %>
+          <%= render "shared/nutritionist_empty_state",
+            title: "Sin historial de planes.",
+            body: "Cuando este paciente tenga planes nutricionales aparecerán aquí con su periodo y macros principales." %>
         <% end %>
-      </div>
+      </section>
 
-      <!-- Adherence Chart -->
-      <div class="chart-card adherence-chart">
-        <h2 class="section-title">Adherencia</h2>
-        <div class="bars-container">
-          <div class="adherence-bar" style="height: 40%"></div>
-          <div class="adherence-bar" style="height: 70%"></div>
-          <div class="adherence-bar active" style="height: 90%"></div>
-          <div class="adherence-bar active" style="height: 85%"></div>
-          <div class="adherence-bar active" style="height: 95%"></div>
-          <div class="adherence-bar" style="height: 60%"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Profile Information Section -->
-    <div class="profile-section">
-      <div class="profile-container-card">
-        <h2 class="profile-container-title">Perfil del Paciente</h2>
-
-        <div class="profile-item">
-          <div class="profile-item-header">
-            <span class="profile-item-icon">📏</span>
-            <h3 class="profile-item-label">Altura</h3>
+      <section class="nh-grid nh-grid--two" id="controls">
+        <article class="nh-panel">
+          <div class="nh-section-header">
+            <div>
+              <p class="nh-section__eyebrow">Clínico</p>
+              <h2 class="nh-section__title">Controles recientes</h2>
+            </div>
+            <%= link_to "Ver historial completo", patient_patient_histories_path(@patient), class: "nh-button nh-button--ghost" %>
           </div>
-          <p class="profile-item-value"><%= @patient.profile&.height %> m</p>
-        </div>
 
-        <div class="profile-divider"></div>
+          <% if @recent_patient_histories.any? %>
+            <div class="nh-list">
+              <% @recent_patient_histories.each do |history| %>
+                <article class="nh-list__item">
+                  <div>
+                    <p class="nh-list__title"><%= l(history.visit_date, format: :long) %></p>
+                    <p class="nh-list__meta">
+                      <%= history.weight.present? ? formatted_weight(history.weight) : "Sin peso registrado" %>
+                      <% if history.metrics.present? %>
+                        · <%= history.metrics %>
+                      <% end %>
+                    </p>
+                    <% if history.notes.present? %>
+                      <p class="nh-small-copy"><%= truncate(history.notes, length: 160) %></p>
+                    <% end %>
+                  </div>
 
-        <div class="profile-item">
-          <div class="profile-item-header">
-            <span class="profile-item-icon">🎯</span>
-            <h3 class="profile-item-label">Objetivos</h3>
+                  <div class="nh-inline-actions">
+                    <%= link_to "Ver control", patient_patient_history_path(@patient, history), class: "nh-button nh-button--ghost" %>
+                    <% if history.nutrition_plan.present? %>
+                      <%= link_to "Plan asociado", patient_nutrition_plan_path(@patient, history.nutrition_plan), class: "nh-button nh-button--ghost" %>
+                    <% end %>
+                  </div>
+                </article>
+              <% end %>
+            </div>
+          <% else %>
+            <%= render "shared/nutritionist_empty_state",
+              title: "Sin controles clínicos.",
+              body: "Todavía no hay visitas registradas para este paciente.",
+              action: { label: "Registrar primer control", path: new_patient_patient_history_path(@patient) } %>
+          <% end %>
+        </article>
+
+        <article class="nh-panel" id="profile">
+          <div class="nh-section-header">
+            <div>
+              <p class="nh-section__eyebrow">Perfil</p>
+              <h2 class="nh-section__title">Ficha del paciente</h2>
+            </div>
           </div>
-          <p class="profile-item-value"><%= @patient.profile&.goals %></p>
-        </div>
 
-        <div class="profile-divider"></div>
-
-        <div class="profile-item">
-          <div class="profile-item-header">
-            <span class="profile-item-icon">⚕️</span>
-            <h3 class="profile-item-label">Condiciones</h3>
-          </div>
-          <p class="profile-item-value"><%= @patient.profile&.conditions %></p>
-        </div>
-
-        <div class="profile-divider"></div>
-
-        <div class="profile-item">
-          <div class="profile-item-header">
-            <span class="profile-item-icon">🏃</span>
-            <h3 class="profile-item-label">Estilo de Vida</h3>
-          </div>
-          <p class="profile-item-value"><%= @patient.profile&.lifestyle %></p>
-        </div>
-
-        <div class="profile-divider"></div>
-
-        <div class="profile-item">
-          <div class="profile-item-header">
-            <span class="profile-item-icon">📋</span>
-            <h3 class="profile-item-label">Diagnóstico</h3>
-          </div>
-          <p class="profile-item-value"><%= @patient.profile&.diagnosis %></p>
-        </div>
-      </div>
-    </div>
+          <% if @profile.present? %>
+            <dl class="nh-detail-list">
+              <div>
+                <dt>Altura</dt>
+                <dd><%= formatted_quantity(@profile.height, unit: "cm") %></dd>
+              </div>
+              <div>
+                <dt>Peso base</dt>
+                <dd><%= formatted_weight(@profile.weight) %></dd>
+              </div>
+              <div>
+                <dt>Objetivos</dt>
+                <dd><%= @profile.goals.presence || "Sin objetivos registrados" %></dd>
+              </div>
+              <div>
+                <dt>Condiciones</dt>
+                <dd><%= @profile.conditions.presence || "Sin condiciones registradas" %></dd>
+              </div>
+              <div>
+                <dt>Estilo de vida</dt>
+                <dd><%= @profile.lifestyle.presence || "Sin información registrada" %></dd>
+              </div>
+              <div>
+                <dt>Diagnóstico</dt>
+                <dd><%= @profile.diagnosis.presence || "Sin diagnóstico registrado" %></dd>
+              </div>
+            </dl>
+          <% else %>
+            <%= render "shared/nutritionist_empty_state",
+              title: "Perfil pendiente",
+              body: "Este paciente todavía no tiene ficha clínica. Completa peso, altura y contexto antes de generar un plan.",
+              action: { label: "Completar perfil", path: new_patient_profile_path(@patient) } %>
+          <% end %>
+        </article>
+      </section>
     </div>
   </main>
-
-
-
-   
-  <!-- Right Sidebar -->
-  <aside class="right-sidebar">
-    <!-- Patient Alerts -->
-    <div class="sidebar-card">
-      <h3 class="card-title">Alertas del Paciente</h3>
-      
-      <div class="alert-item alert-danger">
-        <div class="alert-dot red"></div>
-        <div class="alert-content">
-          <span class="alert-title">Alto Consumo de Sodio</span>
-          <span class="alert-description">El registro de ayer muestra niveles altos de sodio</span>
-        </div>
-      </div>
-
-      <div class="alert-item alert-warning">
-        <div class="alert-dot yellow"></div>
-        <div class="alert-content">
-          <span class="alert-title">Comida Omitida</span>
-          <span class="alert-description">Ana se saltó el desayuno esta mañana</span>
-        </div>
-      </div>
-
-      <div class="alert-item alert-success">
-        <div class="alert-dot green"></div>
-        <div class="alert-content">
-          <span class="alert-title">Objetivo Logrado</span>
-          <span class="alert-description">Cumplió la meta semanal de consumo de agua</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- AI Copilot -->
-    <div class="sidebar-card">
-      <h3 class="card-title">
-        <span class="copilot-icon">🤖</span>
-        Copiloto IA
-      </h3>
-      
-      <div class="copilot-input-group">
-        <input type="text" class="copilot-input" placeholder="Pregunta sobre Ana...">
-        <button class="copilot-button">→</button>
-      </div>
-
-      <div class="quick-suggestions">
-        <div class="suggestion-item">Resumir progreso</div>
-        <div class="suggestion-item">Sugerir ajustes de comida</div>
-        <div class="suggestion-item">¿Alertas recientes?</div>
-      </div>
-    </div>
-  </aside>
 </div>
-
-
-<style>
-/* Patient Page Layout */
-.patient-layout {
-  display: flex;
-  min-height: 100vh;
-  background-color: #f8fafc;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-}
-
-/* Left Sidebar */
-.left-sidebar {
-  width: 240px;
-  background: white;
-  border-right: 1px solid #e5e7eb;
-  padding: 24px 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.sidebar-nav {
-  padding: 24px 24px 0 24px;
-  flex: 1;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  margin-bottom: 4px;
-  color: #6b7280;
-  text-decoration: none;
-  border-radius: 8px;
-  transition: all 0.15s ease;
-  font-weight: 500;
-}
-
-.nav-item:hover {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.nav-item.active {
-  background: #fdf2f8;
-  color: #ec4899;
-}
-
-.nav-icon {
-  font-size: 18px;
-  width: 20px;
-  text-align: center;
-}
-
-/* Main Content */
-.main-content {
-  flex: 1;
-  padding: 32px;
-  max-width: calc(100vw - 580px);
-}
-
-/* Patient Header */
-.patient-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 24px;
-}
-
-.patient-name {
-  font-size: 32px;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 8px 0;
-}
-
-.patient-status-bar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.status-badge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.status-badge.active {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.status-badge.on-track {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.next-checkin {
-  color: #6b7280;
-  font-size: 14px;
-}
-
-.patient-actions {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-weight: 500;
-  font-size: 14px;
-  text-decoration: none;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-outline {
-  background: white;
-  border: 1px solid #d1d5db;
-  color: #374151;
-}
-
-.btn-outline:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
-}
-
-.btn-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
-  background: white;
-  border: 1px solid #d1d5db;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.btn-icon:hover {
-  background: #f9fafb;
-}
-
-/* Content Tabs */
-.content-tabs {
-  display: flex;
-  gap: 32px;
-  margin-bottom: 32px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.tab-item {
-  padding: 12px 0;
-  color: #6b7280;
-  text-decoration: none;
-  font-weight: 500;
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s ease;
-}
-
-.tab-item:hover {
-  color: #374151;
-}
-
-.tab-item.active {
-  color: #8b5cf6;
-  border-bottom-color: #8b5cf6;
-}
-
-/* Stats Grid */
-.patient-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-  margin-bottom: 32px;
-}
-
-.stat-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 24px;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: #6b7280;
-  font-weight: 500;
-  margin: 0 0 12px 0;
-}
-
-.stat-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: #1f2937;
-  line-height: 1;
-}
-
-.stat-excellent {
-  color: #10b981;
-}
-
-.stat-positive {
-  color: #10b981;
-}
-
-/* Content Grid */
-.content-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 24px;
-}
-
-.chart-card, .plan-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 24px;
-}
-
-.chart-card.adherence-chart {
-  grid-column: span 1;
-}
-
-.section-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 20px 0;
-}
-
-/* Chart Container */
-.chart-container {
-  height: 200px;
-  position: relative;
-}
-
-/* Plan Details */
-.plan-details {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.plan-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.plan-label {
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.plan-value {
-  color: #1f2937;
-  font-weight: 500;
-}
-
-/* View Detail Button */
-.btn-view-detail {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 10px 20px;
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
-}
-
-.btn-view-detail:hover {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
-  color: white;
-}
-
-/* Adherence Bars */
-.bars-container {
-  display: flex;
-  align-items: end;
-  gap: 8px;
-  height: 120px;
-  padding: 20px 0;
-}
-
-.adherence-bar {
-  flex: 1;
-  background: #e5e7eb;
-  border-radius: 4px;
-  min-height: 20px;
-  transition: all 0.3s ease;
-}
-
-.adherence-bar.active {
-  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-}
-
-/* Profile Section */
-.profile-section {
-  margin-top: 32px;
-}
-
-.profile-container-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 28px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.profile-container-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 28px 0;
-  padding-bottom: 16px;
-  border-bottom: 2px solid #f3f4f6;
-}
-
-.profile-item {
-  padding: 16px 0;
-}
-
-.profile-item-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.profile-item-icon {
-  font-size: 24px;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
-  border-radius: 8px;
-  flex-shrink: 0;
-}
-
-.profile-item-label {
-  font-size: 15px;
-  font-weight: 600;
-  color: #374151;
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.profile-item-value {
-  font-size: 15px;
-  font-weight: 400;
-  color: #1f2937;
-  margin: 0;
-  line-height: 1.6;
-  padding-left: 52px;
-}
-
-.profile-divider {
-  height: 1px;
-  background: #f3f4f6;
-  margin: 0;
-}
-
-/* Right Sidebar */
-.right-sidebar {
-  width: 340px;
-  padding: 32px 24px 32px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.sidebar-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.card-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 20px 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Alerts */
-.alert-item {
-  display: flex;
-  gap: 12px;
-  padding: 16px;
-  border-radius: 8px;
-  margin-bottom: 12px;
-}
-
-.alert-item:last-child {
-  margin-bottom: 0;
-}
-
-.alert-danger {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-}
-
-.alert-warning {
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-}
-
-.alert-success {
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-}
-
-.alert-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-top: 6px;
-  flex-shrink: 0;
-}
-
-.alert-dot.red { background: #ef4444; }
-.alert-dot.yellow { background: #f59e0b; }
-.alert-dot.green { background: #10b981; }
-
-.alert-content {
-  display: flex;
-  flex-direction: column;
-}
-
-.alert-title {
-  font-weight: 600;
-  font-size: 14px;
-  color: #1f2937;
-  margin-bottom: 4px;
-}
-
-.alert-description {
-  font-size: 13px;
-  color: #6b7280;
-  line-height: 1.4;
-}
-
-/* AI Copilot */
-.copilot-icon {
-  font-size: 20px;
-}
-
-.copilot-input-group {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.copilot-input {
-  flex: 1;
-  padding: 12px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 14px;
-  outline: none;
-}
-
-.copilot-input:focus {
-  border-color: #8b5cf6;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
-}
-
-.copilot-button {
-  background: #8b5cf6;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 16px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.copilot-button:hover {
-  background: #7c3aed;
-}
-
-.quick-suggestions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.suggestion-item {
-  background: #f8fafc;
-  color: #8b5cf6;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  border: 1px solid #e5e7eb;
-  transition: all 0.15s ease;
-}
-
-.suggestion-item:hover {
-  background: #ede9fe;
-  border-color: #d8b4fe;
-}
-
-/* Responsive */
-@media (max-width: 1200px) {
-  .patient-stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .content-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 768px) {
-  .patient-layout {
-    flex-direction: column;
-  }
-  
-  .left-sidebar, .right-sidebar {
-    width: 100%;
-  }
-  
-  .main-content {
-    max-width: 100%;
-  }
-  
-  .patient-header {
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .patient-stats-grid {
-    grid-template-columns: 1fr;
-  }
-}
-</style>

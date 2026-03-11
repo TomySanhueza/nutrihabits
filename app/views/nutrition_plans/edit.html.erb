@@ -1,5 +1,16 @@
+<div class="nh-backoffice nh-nutrition-plan-edit">
+  <%= render "shared/nutritionist_sidebar", active: :plans, patient: @patient %>
 
+  <main class="nh-backoffice__page">
+    <div class="nh-page">
+      <%= render "shared/nutritionist_page_header",
+        eyebrow: "Editar plan",
+        title: @nutrition_plan.objective.presence || "Editar plan nutricional",
+        description: "#{@patient.first_name} #{@patient.last_name} · #{nutritionist_backoffice_date_range(@nutrition_plan.start_date, @nutrition_plan.end_date)}",
+        secondary_action: { label: "Volver al detalle", path: patient_nutrition_plan_path(@patient, @nutrition_plan) } %>
 
-<%= render 'form' %>
-
+      <%= render "form" %>
+    </div>
+  </main>
+</div>
 

@@ -1,0 +1,67 @@
+.nh-nutrition-plans-index .nh-table__subcopy,
+.nh-nutrition-plan-show .nh-table__subcopy {
+  max-width: 28rem;
+}
+
+.nh-plan-show__days,
+.nh-plan-show__meals {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.nh-plan-show__day,
+.nh-plan-fields__card,
+.nh-meal-fields__card {
+  padding: 1rem;
+  border: 1px solid #ece6db;
+  border-radius: 0.95rem;
+  background: #f8f5ef;
+}
+
+.nh-plan-show__day-header,
+.nh-plan-show__meal-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.nh-plan-show__meal {
+  padding: 0.95rem;
+  border-radius: 0.85rem;
+  border: 1px solid #e4ddd0;
+  background: #fffdfa;
+}
+
+.nh-plan-show__meal-macros {
+  margin-top: 0.75rem;
+}
+
+.nh-nutrition-plan-new__cta {
+  margin-top: 1rem;
+}
+
+.nh-nutrition-form__macro-grid {
+  align-items: start;
+}
+
+.nh-nutrition-form__empty {
+  margin-top: 1rem;
+}
+
+.nh-plan-fields__meals {
+  margin-top: 1rem;
+}
+
+.nh-meal-fields__macros {
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .nh-plan-show__day-header,
+  .nh-plan-show__meal-header {
+    flex-direction: column;
+  }
+}

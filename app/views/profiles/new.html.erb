@@ -1,1 +1,15 @@
-<%= render "form" %>
+<div class="nh-backoffice nh-profile-new">
+  <%= render "shared/nutritionist_sidebar", active: :patients, patient: @patient %>
+
+  <main class="nh-backoffice__page">
+    <div class="nh-page">
+      <%= render "shared/nutritionist_page_header",
+        eyebrow: "Perfil clínico",
+        title: "Completar perfil de #{@patient.first_name}",
+        description: "Registra medidas, objetivos y contexto clínico antes de preparar el plan nutricional.",
+        secondary_action: { label: "Volver al paciente", path: patient_path(@patient) } %>
+
+      <%= render "form" %>
+    </div>
+  </main>
+</div>
